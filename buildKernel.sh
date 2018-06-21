@@ -32,6 +32,13 @@ vbutil_kernel --pack vmlinux.kpart \
               --bootloader bootloader.bin
 cd ..
 
+#TODO: Should be able to just include this in /lib/firmware of the target os, and it should be loaded. 
+# or Should be able to include firmware in kernel through kernel config, external firmware.
+# Then the firmware doesn't have to be included in the target fs /lib/firmware
+
+# Either of these should fix the error about the kernel not being able to load the firmware,
+# as it is looking for the propriatary blob and stumbles upon this one in /lib/firmware right now
+
 # build AR9271 firmware
 [ ! -d open-ath9k-htc-firmware ] && git clone --depth 1 https://github.com/qca/open-ath9k-htc-firmware.git
 cd open-ath9k-htc-firmware
