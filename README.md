@@ -47,6 +47,8 @@ Check out my instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-fr
 Thanks to dimkr for his great devsus scripts, which debsus is based on
 https://github.com/dimkr/devsus
 
+Because of this started as a fork of devsus, much of this repos history can be found at https://github.com/SolidHal/devsus/tree/hybrid_debian
+
 Debsus is free and unencumbered software released under the terms of the GNU
 General Public License, version 2; see COPYING for the license text. For a list
 of its authors and contributors, see AUTHORS.
