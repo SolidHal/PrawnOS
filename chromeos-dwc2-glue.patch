@@ -1,0 +1,150 @@
+diff -rup linux-4.9.95-orig/arch/arm/boot/dts/rk3288.dtsi linux-4.9.95/arch/arm/boot/dts/rk3288.dtsi
+--- linux-4.9.95-orig/arch/arm/boot/dts/rk3288.dtsi	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/arch/arm/boot/dts/rk3288.dtsi	2018-04-21 17:56:26.360024274 +0300
+@@ -582,6 +582,9 @@
+ 		dr_mode = "host";
+ 		phys = <&usbphy2>;
+ 		phy-names = "usb2-phy";
++		resets = <&cru SRST_USBHOST1_PHY>;
++		reset-names = "phy-full-reset";
++		snps,need-phy-full-reset-on-wake;
+ 		status = "disabled";
+ 	};
+ 
+diff -rup linux-4.9.95-orig/arch/arm/boot/dts/rk3288-veyron.dtsi linux-4.9.95/arch/arm/boot/dts/rk3288-veyron.dtsi
+--- linux-4.9.95-orig/arch/arm/boot/dts/rk3288-veyron.dtsi	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/arch/arm/boot/dts/rk3288-veyron.dtsi	2018-04-21 17:47:25.796011427 +0300
+@@ -429,6 +429,7 @@
+ 
+ &usb_host1 {
+ 	status = "okay";
++	snps,need-phy-for-wake;
+ };
+ 
+ &usb_otg {
+@@ -437,6 +438,7 @@
+ 	assigned-clocks = <&cru SCLK_USBPHY480M_SRC>;
+ 	assigned-clock-parents = <&usbphy0>;
+ 	dr_mode = "host";
++	snps,need-phy-for-wake;
+ };
+ 
+ &vopb {
+diff -rup linux-4.9.95-orig/drivers/base/dd.c linux-4.9.95/drivers/base/dd.c
+--- linux-4.9.95-orig/drivers/base/dd.c	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/drivers/base/dd.c	2018-04-21 13:01:30.280037034 +0300
+@@ -523,6 +523,9 @@ int driver_probe_device(struct device_dr
+ 
+ bool driver_allows_async_probing(struct device_driver *drv)
+ {
++	if (drv->async_probe)
++		return true;
++
+ 	switch (drv->probe_type) {
+ 	case PROBE_PREFER_ASYNCHRONOUS:
+ 		return true;
+diff -rup linux-4.9.95-orig/drivers/usb/common/common.c linux-4.9.95/drivers/usb/common/common.c
+--- linux-4.9.95-orig/drivers/usb/common/common.c	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/drivers/usb/common/common.c	2018-04-21 13:36:51.184087441 +0300
+@@ -105,6 +105,30 @@ static const char *const usb_dr_modes[]
+ 	[USB_DR_MODE_OTG]		= "otg",
+ };
+ 
++/**
++ * of_usb_get_dr_mode - Get dual role mode for given device_node
++ * @np:	Pointer to the given device_node
++ *
++ * The function gets phy interface string from property 'dr_mode',
++ * and returns the correspondig enum usb_dr_mode
++ */
++enum usb_dr_mode of_usb_get_dr_mode(struct device_node *np)
++{
++	const char *dr_mode;
++	int err, i;
++
++	err = of_property_read_string(np, "dr_mode", &dr_mode);
++	if (err < 0)
++		return USB_DR_MODE_UNKNOWN;
++
++	for (i = 0; i < ARRAY_SIZE(usb_dr_modes); i++)
++		if (!strcmp(dr_mode, usb_dr_modes[i]))
++			return i;
++
++	return USB_DR_MODE_UNKNOWN;
++}
++EXPORT_SYMBOL_GPL(of_usb_get_dr_mode);
++
+ static enum usb_dr_mode usb_get_dr_mode_from_string(const char *str)
+ {
+ 	int ret;
+diff -rup linux-4.9.95-orig/drivers/usb/core/hub.c linux-4.9.95/drivers/usb/core/hub.c
+--- linux-4.9.95-orig/drivers/usb/core/hub.c	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/drivers/usb/core/hub.c	2018-04-21 17:58:20.456026986 +0300
+@@ -3063,13 +3063,14 @@ static int usb_disable_remote_wakeup(str
+ }
+ 
+ /* Count of wakeup-enabled devices at or below udev */
+-static unsigned wakeup_enabled_descendants(struct usb_device *udev)
++unsigned usb_wakeup_enabled_descendants(struct usb_device *udev)
+ {
+ 	struct usb_hub *hub = usb_hub_to_struct_hub(udev);
+ 
+ 	return udev->do_remote_wakeup +
+ 			(hub ? hub->wakeup_enabled_descendants : 0);
+ }
++EXPORT_SYMBOL_GPL(usb_wakeup_enabled_descendants);
+ 
+ /*
+  * usb_port_suspend - suspend a usb device's upstream port
+@@ -3178,7 +3179,7 @@ int usb_port_suspend(struct usb_device *
+ 	 * Therefore we will turn on the suspend feature if udev or any of its
+ 	 * descendants is enabled for remote wakeup.
+ 	 */
+-	else if (PMSG_IS_AUTO(msg) || wakeup_enabled_descendants(udev) > 0)
++	else if (PMSG_IS_AUTO(msg) || usb_wakeup_enabled_descendants(udev) > 0)
+ 		status = set_port_feature(hub->hdev, port1,
+ 				USB_PORT_FEAT_SUSPEND);
+ 	else {
+@@ -3581,7 +3582,7 @@ static int hub_suspend(struct usb_interf
+ 		}
+ 		if (udev)
+ 			hub->wakeup_enabled_descendants +=
+-					wakeup_enabled_descendants(udev);
++					usb_wakeup_enabled_descendants(udev);
+ 	}
+ 
+ 	if (hdev->do_remote_wakeup && hub->quirk_check_port_auto_suspend) {
+diff -rup linux-4.9.95-orig/include/linux/device.h linux-4.9.95/include/linux/device.h
+--- linux-4.9.95-orig/include/linux/device.h	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/include/linux/device.h	2018-04-21 13:06:59.172044851 +0300
+@@ -270,6 +270,7 @@ struct device_driver {
+ 
+ 	bool suppress_bind_attrs;	/* disables bind/unbind via sysfs */
+ 	enum probe_type probe_type;
++	bool async_probe;
+ 
+ 	const struct of_device_id	*of_match_table;
+ 	const struct acpi_device_id	*acpi_match_table;
+diff -rup linux-4.9.95-orig/include/linux/of.h linux-4.9.95/include/linux/of.h
+--- linux-4.9.95-orig/include/linux/of.h	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/include/linux/of.h	2018-04-21 18:03:18.492034069 +0300
+@@ -521,6 +521,8 @@ const char *of_prop_next_string(struct p
+ 
+ bool of_console_check(struct device_node *dn, char *name, int index);
+ 
++enum usb_dr_mode of_usb_get_dr_mode(struct device_node *np);
++
+ #else /* CONFIG_OF */
+ 
+ static inline void of_core_init(void)
+diff -rup linux-4.9.95-orig/include/linux/usb/hcd.h linux-4.9.95/include/linux/usb/hcd.h
+--- linux-4.9.95-orig/include/linux/usb/hcd.h	2018-04-20 09:21:08.000000000 +0300
++++ linux-4.9.95/include/linux/usb/hcd.h	2018-04-21 18:02:33.620033003 +0300
+@@ -640,6 +640,7 @@ extern wait_queue_head_t usb_kill_urb_qu
+ #define usb_endpoint_out(ep_dir)	(!((ep_dir) & USB_DIR_IN))
+ 
+ #ifdef CONFIG_PM
++extern unsigned usb_wakeup_enabled_descendants(struct usb_device *udev);
+ extern void usb_root_hub_lost_power(struct usb_device *rhdev);
+ extern int hcd_bus_suspend(struct usb_device *rhdev, pm_message_t msg);
+ extern int hcd_bus_resume(struct usb_device *rhdev, pm_message_t msg);
