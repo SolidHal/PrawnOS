@@ -3,7 +3,7 @@
 # Build fs, image
 
 
-KVER=4.9.30
+KVER=4.17.2
 
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)

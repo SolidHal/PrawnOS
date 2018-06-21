@@ -3,7 +3,7 @@
 #Build kenerl, wifi firmware
 
 
-KVER=4.9.30
+KVER=4.17.2
 
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
@@ -11,9 +11,9 @@ KVER=4.9.30
 cd linux-$KVER
 make clean
 make mrproper
-rm -rf drivers/usb/dwc2
-ln -s ../../../chromeos-3.14/drivers/usb/dwc2 drivers/usb/
-patch -p 1 < ../chromeos-dwc2-glue.patch
+# rm -rf drivers/usb/dwc2
+# ln -s ../../../chromeos-3.14/drivers/usb/dwc2 drivers/usb/
+# patch -p 1 < ../chromeos-dwc2-glue.patch
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
