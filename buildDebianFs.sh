@@ -3,7 +3,7 @@
 # Build fs, image
 
 
-KVER=4.9.30
+KVER=4.17.2
 
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
@@ -58,11 +58,17 @@ create_image debian-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 # INCLUDES=apt-utils,libc6,libdebconfclient0,awk,libz2-1.0,libblzma5,libselinux1,tar,libtinfo5,zlib1g,udev,kmod,net-tools,traceroute,iproute2,isc-dhcp-client,wpasupplicant,iw,alsa-utils,cgpt,vim-tiny,less,psmisc,netcat-openbsd,ca-certificates,bzip2,xz-utils,unscd,lightdm,lightdm-gtk-greeter,xfce4,xorg,ifupdown,nano,wicd,wicd-curses
 
 # install Debian on it
-qemu-debootstrap --arch=armhf --foreign stretch --variant minbase --include=systemd,systemd-sysv,dbus $outmnt http://deb.debian.org/debian
+#TODO: Try without the variant and include flags
+#TODO: Try without the --foreign flasg as the manpage for debootstrap
+#TODO: OR: --foreign
+# Do the initial unpack phase of bootstrapping only, for example if the target architecture does not match the host architecture. A copy of debootstrap sufficient for completing the bootstrap process will be installed as /debootstrap/debootstrap in the target filesystem. You can run it with the --second-stage option to complete the bootstrapping process.
+qemu-debootstrap --arch armhf --foreign stretch --variant minbase --include=systemd,systemd-sysv,dbus $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
 #echo -n debsus > $outmnt/etc/hostname
 #install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends
-cp -f /etc/resolv.conf $outmnt/etc/
+#cp -f /etc/resolv.conf $outmnt/etc/
+cp /etc/hosts $outmnt/etc/ #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+cp sources.list $outmount/etc/apt/sources.list
 chroot $outmnt apt update
 chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils unscd ifupdown nano apt-utils python python-urwid
 chroot $outmnt apt-get autoremove --purge
@@ -70,7 +76,8 @@ chroot $outmnt apt-get clean
 chroot $outmnt apt-get install -d -y wicd-daemon wicd wicd-curses
 #sed -i s/^[3-6]/\#\&/g $outmnt/etc/inittab
 #sed -i s/'enable-cache            hosts   no'/'enable-cache            hosts   yes'/ -i $outmnt/etc/nscd.conf
-rm -f $outmnt/etc/resolv.conf
+#rm -f $outmnt/etc/resolv.conf
+rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
