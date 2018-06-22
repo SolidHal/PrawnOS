@@ -26,7 +26,7 @@ These packages are required:
 	    u-boot-tools \
 		gcc make libc-dev wget g++ cmake \
 		binfmt-support qemu-user-static debootstrap \
-		lzip
+		lzip libssl-dev
 ```
 
 ### Building
