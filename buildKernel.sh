@@ -18,7 +18,7 @@ make mrproper
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
 cp ../config .config
-make -j `grep ^processor /proc/cpuinfo  | wc -l` olddefconfig CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
+make -j `grep ^processor /proc/cpuinfo  | wc -l` CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
 [ ! -h kernel.its ] && ln -s ../kernel.its .
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
