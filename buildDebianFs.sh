@@ -59,18 +59,19 @@ create_image debian-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
 #TODO: Try without the variant and include flags
-#TODO: Try without the --foreign flasg as the manpage for debootstrap
-#TODO: OR: --foreign
 # Do the initial unpack phase of bootstrapping only, for example if the target architecture does not match the host architecture. A copy of debootstrap sufficient for completing the bootstrap process will be installed as /debootstrap/debootstrap in the target filesystem. You can run it with the --second-stage option to complete the bootstrapping process.
-qemu-debootstrap --arch armhf --foreign stretch --variant minbase --include=systemd,systemd-sysv,dbus $outmnt http://deb.debian.org/debian
+export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
+qemu-debootstrap --arch armhf stretch --include locales $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
-#echo -n debsus > $outmnt/etc/hostname
-#install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends
+echo -n debsus > $outmnt/etc/hostname
+#install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends #This should fix the issue of crda being installed but unconfigured causing regulatory.db firmware loading errors in dmesg
 #cp -f /etc/resolv.conf $outmnt/etc/
 cp /etc/hosts $outmnt/etc/ #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp sources.list $outmount/etc/apt/sources.list
+cp /etc/locale.gen $outmnt/etc/
+chroot $outmnt locale-gen
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils unscd ifupdown nano apt-utils python python-urwid
+chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils unscd ifupdown nano apt-utils python python-urwid pciutils usbutils
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 chroot $outmnt apt-get install -d -y wicd-daemon wicd wicd-curses
@@ -84,7 +85,7 @@ rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDeb
 dd if=linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
-install -D -m 644 open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/htc_9271.fw
+install -D -m 644 open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
 # create a 16GB image
 create_image debian-stretch-c201-libre-16GB.img $indev 512 30785536 $inmnt

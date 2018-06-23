@@ -4,6 +4,7 @@ CONFIG_DRM_DW_HDMI_I2S_AUDIO vs CONFIG_DRM_DW_HDMI_AHB_AUDIO
 
  CONFIG_IIO_CROS_EC_SENSORS_CORE vs CONFIG_IIO_CROS_EC_ACCEL_LEGACY
 (probably the first??)
+tried the first, didn't change anything obvious. Further testing required. 
 
 Enable boot logo? Device Drivers->Graphics support->Bootup logo
 
