@@ -1,4 +1,4 @@
-# debsus
+# Librean
 
 A build system for making blobless debian and mainline kernel for the Asus c201 Chromebook
 
