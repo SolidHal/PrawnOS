@@ -8,8 +8,8 @@ KVER=4.17.2
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
 
-outdev=/dev/loop6
-indev=/dev/loop7
+outdev=/dev/loop4 #CHANGE BEFORE COMMIT
+indev=/dev/loop5 #CHANGE BACK BEFORE COMMIT
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is required to properly clean the loop devices and ensure a clean build 
@@ -61,24 +61,30 @@ create_image debian-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 #TODO: Try without the variant and include flags
 # Do the initial unpack phase of bootstrapping only, for example if the target architecture does not match the host architecture. A copy of debootstrap sufficient for completing the bootstrap process will be installed as /debootstrap/debootstrap in the target filesystem. You can run it with the --second-stage option to complete the bootstrapping process.
 export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
+export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
 echo -n debsus > $outmnt/etc/hostname
+cp -R os_configs/ $outmnt/os_configs/
+cp Install.sh $outmnt/Install.sh
+ls $outmnt/
+chmod +x $outmnt/os_configs/default.sh
+chmod +x $outmnt/Install.sh
 #install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends #This should fix the issue of crda being installed but unconfigured causing regulatory.db firmware loading errors in dmesg
 #cp -f /etc/resolv.conf $outmnt/etc/
 cp /etc/hosts $outmnt/etc/ #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp sources.list $outmount/etc/apt/sources.list
 cp /etc/locale.gen $outmnt/etc/
-chroot $outmnt locale-gen
+# chroot $outmnt locale-gen
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils unscd ifupdown nano apt-utils python python-urwid pciutils usbutils
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid pciutils usbutils
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
-chroot $outmnt apt-get install -d -y wicd-daemon wicd wicd-curses
-#sed -i s/^[3-6]/\#\&/g $outmnt/etc/inittab
+chroot $outmnt apt-get install -y -d locales task-xfce-desktop wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
 #sed -i s/'enable-cache            hosts   no'/'enable-cache            hosts   yes'/ -i $outmnt/etc/nscd.conf
 #rm -f $outmnt/etc/resolv.conf
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
@@ -87,10 +93,10 @@ make -C linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
-# create a 16GB image
-create_image debian-stretch-c201-libre-16GB.img $indev 512 30785536 $inmnt
+# create a 15GB image
+create_image debian-stretch-c201-libre-15GB.img $indev 512 30777343 $inmnt
 
-# copy the kernel and / of the 2GB image to the 16GB one
+# copy the kernel and / of the 2GB image to the 15GB one
 dd if=${outdev}p1 of=${indev}p1 conv=notrunc
 cp -a $outmnt/* $inmnt/
 
@@ -98,8 +104,8 @@ umount -l $inmnt
 rmdir $inmnt
 losetup -d $indev
 
-# move the 16GB image inside the 2GB one
-cp -f debian-stretch-c201-libre-16GB.img $outmnt/
+# move the 15GB image inside the 2GB one
+cp -f debian-stretch-c201-libre-15GB.img $outmnt/
 echo "DONE!"
 cleanup
 
