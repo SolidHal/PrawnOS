@@ -12,8 +12,8 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply all of the rockMyy patches that make sense
-# git apply ../patches/kernel/*
-# git apply ../patches/DTS/*
+git apply ../patches/kernel/*
+git apply ../patches/DTS/*
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile

@@ -58,17 +58,15 @@ create_image debian-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 # INCLUDES=apt-utils,libc6,libdebconfclient0,awk,libz2-1.0,libblzma5,libselinux1,tar,libtinfo5,zlib1g,udev,kmod,net-tools,traceroute,iproute2,isc-dhcp-client,wpasupplicant,iw,alsa-utils,cgpt,vim-tiny,less,psmisc,netcat-openbsd,ca-certificates,bzip2,xz-utils,unscd,lightdm,lightdm-gtk-greeter,xfce4,xorg,ifupdown,nano,wicd,wicd-curses
 
 # install Debian on it
-#TODO: Try without the variant and include flags
-# Do the initial unpack phase of bootstrapping only, for example if the target architecture does not match the host architecture. A copy of debootstrap sufficient for completing the bootstrap process will be installed as /debootstrap/debootstrap in the target filesystem. You can run it with the --second-stage option to complete the bootstrapping process.
 export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf stretch --include locales $outmnt http://deb.debian.org/debian
+qemu-debootstrap --arch armhf stretch --include locales,init $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
 echo -n debsus > $outmnt/etc/hostname
 cp -R os_configs/ $outmnt/os_configs/
 cp Install.sh $outmnt/Install.sh
 ls $outmnt/
-chmod +x $outmnt/os_configs/default.sh
+chmod +x $outmnt/os_configs/sound.sh
 chmod +x $outmnt/Install.sh
 #install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends #This should fix the issue of crda being installed but unconfigured causing regulatory.db firmware loading errors in dmesg
 #cp -f /etc/resolv.conf $outmnt/etc/
@@ -80,7 +78,7 @@ chroot $outmnt apt update
 chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid pciutils usbutils
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
-chroot $outmnt apt-get install -y -d locales task-xfce-desktop wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
+chroot $outmnt apt-get install -y -d acpi-support task-xfce-desktop wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
 #sed -i s/'enable-cache            hosts   no'/'enable-cache            hosts   yes'/ -i $outmnt/etc/nscd.conf
 #rm -f $outmnt/etc/resolv.conf
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
