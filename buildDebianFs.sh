@@ -8,8 +8,8 @@ KVER=4.17.2
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
 
-outdev=/dev/loop4 #CHANGE BEFORE COMMIT
-indev=/dev/loop5 #CHANGE BACK BEFORE COMMIT
+outdev=/dev/loop4 
+indev=/dev/loop5
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is required to properly clean the loop devices and ensure a clean build 
