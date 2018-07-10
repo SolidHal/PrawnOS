@@ -3,12 +3,12 @@
 # Build fs, image
 
 
-KVER=4.17.2
+KVER=4.17.5
 
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
 
-outdev=/dev/loop4 
+outdev=/dev/loop4
 indev=/dev/loop5
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
