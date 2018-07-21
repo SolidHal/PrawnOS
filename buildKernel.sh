@@ -3,7 +3,7 @@
 #Build kenerl, wifi firmware
 
 
-KVER=4.17.5
+KVER=4.17.8
 
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
@@ -12,10 +12,11 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb patch
-#git apply ../chromeos-dwc2-glue.patch 
+git apply ../chromeos-dwc2-glue.patch
+git apply ../rockchip-dwc2-usb-partial-power-down.patch
 #Apply all of the rockMyy patches that make sense
-# git apply ../patches/kernel/*
-# git apply ../patches/DTS/*
+git apply ../patches/kernel/*
+git apply ../patches/DTS/*
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile

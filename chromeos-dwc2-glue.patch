@@ -128,15 +128,15 @@ diff -rup linux-4.17.2-orig/include/linux/device.h linux-4.17.2/include/linux/de
 diff -rup linux-4.17.2-orig/include/linux/of.h linux-4.17.2/include/linux/of.h
 --- linux-4.17.2-orig/include/linux/of.h	2018-04-20 09:21:08.000000000 +0300
 +++ linux-4.17.2/include/linux/of.h	2018-04-21 18:03:18.492034069 +0300
-@@ -521,6 +521,8 @@ const char *of_prop_next_string(struct p
+@@ -543,6 +543,8 @@ const char *of_prop_next_string(struct p
  
  bool of_console_check(struct device_node *dn, char *name, int index);
  
 +enum usb_dr_mode of_usb_get_dr_mode(struct device_node *np);
 +
- #else /* CONFIG_OF */
+ extern int of_cpu_node_to_id(struct device_node *np);
  
- static inline void of_core_init(void)
+ #else /* CONFIG_OF */
 diff -rup linux-4.17.2-orig/include/linux/usb/hcd.h linux-4.17.2/include/linux/usb/hcd.h
 --- linux-4.17.2-orig/include/linux/usb/hcd.h	2018-04-20 09:21:08.000000000 +0300
 +++ linux-4.17.2/include/linux/usb/hcd.h	2018-04-21 18:02:33.620033003 +0300
