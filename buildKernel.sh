@@ -11,17 +11,17 @@ KVER=4.17.8
 cd linux-$KVER
 make clean
 make mrproper
-#Apply the usb patch
-git apply ../chromeos-dwc2-glue.patch
-git apply ../rockchip-dwc2-usb-partial-power-down.patch
+#Apply the usb patch, quietly so 
+# git apply ../chromeos-dwc2-glue.patch
+# git apply ../rockchip-dwc2-usb-partial-power-down.patch
 #Apply all of the rockMyy patches that make sense
-git apply ../patches/kernel/*
-git apply ../patches/DTS/*
+# git apply ../patches/kernel/*
+# git apply ../patches/DTS/*
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
 cp ../config .config
-make -j `grep ^processor /proc/cpuinfo  | wc -l` CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
+make -j `grep ^processor /proc/cpuinfo  | wc -l`  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
 [ ! -h kernel.its ] && ln -s ../kernel.its .
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
