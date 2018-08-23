@@ -30,7 +30,7 @@ trap cleanuptwice INT TERM EXIT
 
 #Mount the build filesystem image
 
-losetup -P $outdev debian-stretch-c201-libre-2GB*
+losetup -P $outdev librean-stretch-c201-libre-2GB*
 mount -o noatime ${outdev}p2 $outmnt
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
