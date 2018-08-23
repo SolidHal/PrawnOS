@@ -3,7 +3,7 @@
 #Setup locales
 apt install -y locales
 #Install xfce, wicd
-apt install -y task-xfce-desktop wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics acpi
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 cp -rf /os_configs/default.pa /etc/pulse/default.pa
 mkdir /etc/acpi
@@ -15,7 +15,7 @@ cp -rf /os_configs/50-synaptics.conf /etc/X11/xorg.conf.d/
 
 locale-gen
 
-echo "Username: "
+echo " Enter new username: "
 read username
 adduser $username
 usermod -a -G sudo,netdev $username

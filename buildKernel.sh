@@ -3,15 +3,16 @@
 #Build kenerl, wifi firmware
 
 
-KVER=4.17.8
+KVER=4.17.2
 
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
-[ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz
+[ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
 cd linux-$KVER
 make clean
 make mrproper
-#Apply the usb patch, quietly so 
+[ "$FRESH" = true ] && git apply ../patches-tested/*
+#Apply the usb patch, quietly so
 # git apply ../chromeos-dwc2-glue.patch
 # git apply ../rockchip-dwc2-usb-partial-power-down.patch
 #Apply all of the rockMyy patches that make sense

@@ -1,7 +1,7 @@
 #!/bin/sh -xe
 
 
-KVER=4.17.5
+KVER=4.17.2
 
 outmnt=$(mktemp -d -p `pwd`)
 outdev=/dev/loop7

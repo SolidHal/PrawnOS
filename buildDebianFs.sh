@@ -3,7 +3,7 @@
 # Build fs, image
 
 
-KVER=4.17.8
+KVER=4.17.2
 
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
@@ -53,7 +53,7 @@ create_image() {
 }
 
 # create a 2GB image with the Chrome OS partition layout
-create_image debian-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
+create_image librean-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # INCLUDES=apt-utils,libc6,libdebconfclient0,awk,libz2-1.0,libblzma5,libselinux1,tar,libtinfo5,zlib1g,udev,kmod,net-tools,traceroute,iproute2,isc-dhcp-client,wpasupplicant,iw,alsa-utils,cgpt,vim-tiny,less,psmisc,netcat-openbsd,ca-certificates,bzip2,xz-utils,unscd,lightdm,lightdm-gtk-greeter,xfce4,xorg,ifupdown,nano,wicd,wicd-curses
 
@@ -75,10 +75,10 @@ cp sources.list $outmount/etc/apt/sources.list
 cp /etc/locale.gen $outmnt/etc/
 # chroot $outmnt locale-gen
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid pciutils usbutils
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
-chroot $outmnt apt-get install -y -d acpi-support task-xfce-desktop wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
 #sed -i s/'enable-cache            hosts   no'/'enable-cache            hosts   yes'/ -i $outmnt/etc/nscd.conf
 #rm -f $outmnt/etc/resolv.conf
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -92,7 +92,7 @@ rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
 # create a 15GB image
-create_image debian-stretch-c201-libre-15GB.img $indev 512 30777343 $inmnt
+create_image librean-stretch-c201-libre-15GB.img $indev 512 30777343 $inmnt
 
 # copy the kernel and / of the 2GB image to the 15GB one
 dd if=${outdev}p1 of=${indev}p1 conv=notrunc
@@ -103,7 +103,7 @@ rmdir $inmnt
 losetup -d $indev
 
 # move the 15GB image inside the 2GB one
-cp -f debian-stretch-c201-libre-15GB.img $outmnt/
+cp -f Librean-stretch-c201-libre-15GB.img $outmnt/
 echo "DONE!"
 cleanup
 
