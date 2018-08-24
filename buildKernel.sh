@@ -4,6 +4,7 @@
 
 
 KVER=4.17.2
+TEST_PATCHES=false
 
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
@@ -11,13 +12,11 @@ KVER=4.17.2
 cd linux-$KVER
 make clean
 make mrproper
-[ "$FRESH" = true ] && git apply ../patches-tested/*
-#Apply the usb patch, quietly so
-# git apply ../chromeos-dwc2-glue.patch
-# git apply ../rockchip-dwc2-usb-partial-power-down.patch
+#Apply the usb and mmc patches if unapplied
+[ "$FRESH" = true ] && for i in ../patches-tested/*.patch; do patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense
-# git apply ../patches/kernel/*
-# git apply ../patches/DTS/*
+[ "$TEST_PATCHES" = true ] && for i in ../patches-untested/kernel/*.patch; do patch -p1 < $i; done
+[ "$TEST_PATCHES" = true ] && for i in ../patches-untested/DTS/*.patch; do patch -p1 < $i; done
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade
 sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile

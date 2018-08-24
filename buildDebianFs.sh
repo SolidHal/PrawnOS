@@ -103,7 +103,7 @@ rmdir $inmnt
 losetup -d $indev
 
 # move the 15GB image inside the 2GB one
-cp -f Librean-stretch-c201-libre-15GB.img $outmnt/
+cp -f librean-stretch-c201-libre-15GB.img $outmnt/
 echo "DONE!"
 cleanup
 
