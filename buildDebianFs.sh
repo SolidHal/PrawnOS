@@ -5,6 +5,13 @@
 
 KVER=4.17.2
 
+#Ensure Sudo
+if [[ $UID != 0 ]]; then
+    echo "Please run this script with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+
 outmnt=$(mktemp -d -p `pwd`)
 inmnt=$(mktemp -d -p `pwd`)
 
@@ -12,14 +19,18 @@ outdev=/dev/loop4
 indev=/dev/loop5
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
-#Without this, a reboot is required to properly clean the loop devices and ensure a clean build 
-cleanuptwice() {
-  cleanup
-  cleanup
-
-}
-
+#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build 
 cleanup() {
+  set +e
+
+  umount -l $inmnt > /dev/null 2>&1
+  rmdir $inmnt > /dev/null 2>&1
+  losetup -d $indev > /dev/null 2>&1
+
+  umount -l $outmnt > /dev/null 2>&1
+  rmdir $outmnt > /dev/null 2>&1
+  losetup -d $outdev > /dev/null 2>&1
+
   set +e
 
   umount -l $inmnt > /dev/null 2>&1
@@ -31,7 +42,7 @@ cleanup() {
   losetup -d $outdev > /dev/null 2>&1
 }
 
-trap cleanuptwice INT TERM EXIT
+trap cleanup INT TERM EXIT
 
 
 create_image() {
@@ -55,34 +66,43 @@ create_image() {
 # create a 2GB image with the Chrome OS partition layout
 create_image librean-stretch-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
-# INCLUDES=apt-utils,libc6,libdebconfclient0,awk,libz2-1.0,libblzma5,libselinux1,tar,libtinfo5,zlib1g,udev,kmod,net-tools,traceroute,iproute2,isc-dhcp-client,wpasupplicant,iw,alsa-utils,cgpt,vim-tiny,less,psmisc,netcat-openbsd,ca-certificates,bzip2,xz-utils,unscd,lightdm,lightdm-gtk-greeter,xfce4,xorg,ifupdown,nano,wicd,wicd-curses
-
 # install Debian on it
 export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
 export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales,init $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
-echo -n debsus > $outmnt/etc/hostname
+
+#Place the config files and installer script and give them the proper permissions
+echo -n librean > $outmnt/etc/hostname
 cp -R os_configs/ $outmnt/os_configs/
 cp Install.sh $outmnt/Install.sh
-ls $outmnt/
 chmod +x $outmnt/os_configs/sound.sh
 chmod +x $outmnt/Install.sh
+
 #install -D -m 644 80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends #This should fix the issue of crda being installed but unconfigured causing regulatory.db firmware loading errors in dmesg
-#cp -f /etc/resolv.conf $outmnt/etc/
-cp /etc/hosts $outmnt/etc/ #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+
+#Setup the chroot for apt 
+#This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+cp /etc/hosts $outmnt/etc/
 cp sources.list $outmount/etc/apt/sources.list
+
+#Setup the locale
 cp /etc/locale.gen $outmnt/etc/
-# chroot $outmnt locale-gen
+
+#Install the base packages
 chroot $outmnt apt update
 chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid
+
+#Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
-#sed -i s/'enable-cache            hosts   no'/'enable-cache            hosts   yes'/ -i $outmnt/etc/nscd.conf
-#rm -f $outmnt/etc/resolv.conf
-rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 
+#Download the packages to be installed by Install.sh: TODO: potentially dpkg-reconfigure locales?
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
+
+#Cleanup hosts
+rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+echo -n "127.0.0.1        librean" > $outmnt/etc/hosts
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
@@ -98,6 +118,7 @@ create_image librean-stretch-c201-libre-15GB.img $indev 512 30777343 $inmnt
 dd if=${outdev}p1 of=${indev}p1 conv=notrunc
 cp -a $outmnt/* $inmnt/
 
+#Cleanup the 15GB image
 umount -l $inmnt
 rmdir $inmnt
 losetup -d $indev
