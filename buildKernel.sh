@@ -14,6 +14,8 @@ make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
 [ "$FRESH" = true ] && for i in ../patches-tested/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in ../patches-tested/DTS/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in ../patches-tested/kernel/*.patch; do patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense
 [ "$TEST_PATCHES" = true ] && for i in ../patches-untested/kernel/*.patch; do patch -p1 < $i; done
 [ "$TEST_PATCHES" = true ] && for i in ../patches-untested/DTS/*.patch; do patch -p1 < $i; done
