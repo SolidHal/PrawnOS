@@ -6,6 +6,10 @@
 KVER=4.17.2
 TEST_PATCHES=false
 
+ROOT_DIR=`pwd`
+RESOURCES=$ROOT_DIR/resources/BuildResources
+
+cd build
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
 [ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
@@ -13,18 +17,18 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in ../patches-tested/*.patch; do patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in ../patches-tested/DTS/*.patch; do patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in ../patches-tested/kernel/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense
-[ "$TEST_PATCHES" = true ] && for i in ../patches-untested/kernel/*.patch; do patch -p1 < $i; done
-[ "$TEST_PATCHES" = true ] && for i in ../patches-untested/DTS/*.patch; do patch -p1 < $i; done
+[ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/kernel/*.patch; do patch -p1 < $i; done
+[ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/DTS/*.patch; do patch -p1 < $i; done
 # reset the minor version number, so out-of-tree drivers continue to work after
-# a kernel upgrade
-sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
-cp ../config .config
+# a kernel upgrade **TODO - is this needed?
+# sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
+cp $RESOURCES/config .config
 make -j `grep ^processor /proc/cpuinfo  | wc -l`  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
-[ ! -h kernel.its ] && ln -s ../kernel.its .
+[ ! -h kernel.its ] && ln -s $RESOURCES/kernel.its .
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 vbutil_kernel --pack vmlinux.kpart \
@@ -33,7 +37,7 @@ vbutil_kernel --pack vmlinux.kpart \
               --arch arm \
               --keyblock /usr/share/vboot/devkeys/kernel.keyblock \
               --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
-              --config ../cmdline \
+              --config $RESOURCES/cmdline \
               --bootloader bootloader.bin
 cd ..
 
@@ -44,3 +48,4 @@ cd open-ath9k-htc-firmware
 make toolchain
 make -C target_firmware
 cd ..
+cd $ROOT_DIR
