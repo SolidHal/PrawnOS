@@ -26,7 +26,7 @@ These packages are required:
 	        u-boot-tools \
 		gcc make libc-dev wget g++ cmake \
 		binfmt-support qemu-user-static debootstrap \
-		lzip libssl-dev libncurses-dev flex bison sudo patch
+		lzip libssl-dev libncurses-dev flex bison sudo patch bc
 ```
 
 ### Build
