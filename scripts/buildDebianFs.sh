@@ -13,6 +13,8 @@ then
     exit 1
 fi
 
+[ ! -d build ] && echo "No build folder found, is the kernel built?" && exit
+
 outmnt=$(mktemp -d -p `pwd`)
 
 outdev=/dev/loop4
