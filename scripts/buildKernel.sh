@@ -9,6 +9,8 @@ TEST_PATCHES=false
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
 
+
+[ ! -d build ] && mkdir build
 cd build
 # build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
