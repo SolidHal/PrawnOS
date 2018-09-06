@@ -30,6 +30,9 @@ These packages are required:
 ```
 
 ### Build
+
+Run 'BuildPrawnOS.sh' either with sudo or as root. Note that building the kernel as root is ill-advised
+but I haven't ran into any issues. 
 Currently split between 'buildKernel.sh' and 'buildDebianFs.sh'
 Run the kernel one then the fs one.
 

@@ -22,6 +22,7 @@ then
     e2fsck -p /dev/mmcblk2p2
     resize2fs /dev/mmcblk2p2
     echo Rebooting... Please remove the usb drive once shutdown is complete
+    reboot
 fi
 
 echo Exiting

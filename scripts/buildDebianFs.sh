@@ -73,8 +73,6 @@ cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
 chmod +x $outmnt/*.sh
 
-install -D -m 644 $build_resources/80disable-recommends $outmnt/etc/apt/apt.conf.d/80disable-recommends #This should fix the issue of crda being installed but unconfigured causing regulatory.db firmware loading errors in dmesg
-
 #Setup the chroot for apt 
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
