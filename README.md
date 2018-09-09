@@ -14,9 +14,14 @@ Currently PrawnOS supports lxqt, with plans to include xfce as an option in the 
 
 Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode.
 
+### Image Download
+
+If you don't want to or can't build the image, a download is available here https://archive.org/details/PrawnOSAlphaC201Libre2GBVERSION2
+
 ### Dependencies
 
 Building PrawnOS has been tested on Debian 9 Stretch (in a vm)
+This is the only build enviroment that is supported. 
 These packages are required:
 
 ```
