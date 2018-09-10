@@ -17,7 +17,7 @@ clean_ath:
 
 .PHONY: clean_img
 clean_img:
-	rm PrawnOS-*-c201-libre-*GB.img
+	rm -f PrawnOS-*-c201-libre-*GB.img
 
 .PHONY: clean_all
 clean_all:
