@@ -68,6 +68,9 @@ export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales,init $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
 
+#Copy in the gpg key
+cp $build_resources/debian-archive-keyring.gpg /usr/share/keyrings/debian-archive-keyring.gpg
+
 #Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS-Alpha > $outmnt/etc/hostname
 cp -R $install_resources/ $outmnt/InstallResources/
