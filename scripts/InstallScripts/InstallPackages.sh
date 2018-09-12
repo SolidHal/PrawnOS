@@ -3,7 +3,7 @@
 DIR=/InstallResources
 
 while true; do
-    read -p "install (X)fce4 or (L)xqt" XL
+    read -p "install (X)fce4 or (L)xqt: " XL
     case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
@@ -12,7 +12,7 @@ while true; do
 done
 
 locale-gen
-#Install lxqt, wicd
+#Install shared packages
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc
 apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 
