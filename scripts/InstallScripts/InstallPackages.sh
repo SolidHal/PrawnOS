@@ -1,10 +1,24 @@
-#!/bin/sh -xe
+#!/bin/bash -xe
 
 DIR=/InstallResources
 
+while true; do
+    read -p "install (X)fce4 or (L)xqt" XL
+    case $yn in
+        [Xx]* ) DE=xfce; break;;
+        [Ll]* ) DE=lxqt; break;;
+        * ) echo "Please answer (X)fce4 or (L)xqt";;
+    esac
+done
+
 locale-gen
 #Install lxqt, wicd
-apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc
+apt install -y wicd-daemon wicd wicd-curses wicd-gtk
+
+[ "$DE" = "xfce" ] && apt install -y xfce4 default-dbus-session-bus system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies
+[ "$DE" = "lxqt" ] && apt install -y lxqt
+
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 cp -rf $DIR/default.pa /etc/pulse/default.pa
 cp -rf $DIR/sound.sh /etc/acpi/sound.sh
@@ -12,6 +26,7 @@ cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
 cp -rf $DIR/50-synaptics.conf /etc/X11/xorg.conf.d/
 
+apt clean && apt autoremove --purge
 
 echo " Enter new username: "
 read username
