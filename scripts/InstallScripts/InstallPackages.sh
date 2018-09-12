@@ -4,7 +4,7 @@ DIR=/InstallResources
 
 while true; do
     read -p "install (X)fce4 or (L)xqt" XL
-    case $yn in
+    case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
         * ) echo "Please answer (X)fce4 or (L)xqt";;
@@ -16,7 +16,7 @@ locale-gen
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc
 apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 default-dbus-session-bus system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies
 [ "$DE" = "lxqt" ] && apt install -y lxqt
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
