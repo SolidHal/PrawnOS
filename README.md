@@ -14,9 +14,14 @@ Currently PrawnOS supports lxqt, with plans to include xfce as an option in the 
 
 Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode.
 
+### Image Download
+
+If you don't want to or can't build the image, a download is available here https://archive.org/details/PrawnOSAlphaC201Libre2GBVERSION2
+
 ### Dependencies
 
 Building PrawnOS has been tested on Debian 9 Stretch (in a vm)
+This is the only build enviroment that is supported. 
 These packages are required:
 
 ```
@@ -30,31 +35,55 @@ These packages are required:
 ```
 
 ### Build
+Clone this git repo. 
 
-Run 'BuildPrawnOS.sh' either with sudo or as root. Note that building the kernel as root is ill-advised
-but I haven't ran into any issues. 
-Currently split between 'buildKernel.sh' and 'buildDebianFs.sh'
-Run the kernel one then the fs one.
+Build the `PrawnOS-...-.img` by running `sudo make image`
+
+This has only been tested on a Debian stretch VM, and borrows some components from the host system to setup apt/debootstrap during the build process so I would recommend using a Debian Stretch VM to avoid any issues. 
 
 ### Install
-Write the 2GB image to a flash drive, which contains the full 15GB (acutally 14.7GB) to write to the internal storage. We can do this since the 15GB image is a sparse file. 
+Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive
 ```
-sudo dd if=PrawnOs-Alpha-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M
+sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M
 ```
-
 Now on the C201, login as root. The password is blank. 
-Write the 15GB image to the internal storage
-For me this was /dev/mmcblk2 but it may be /dev/mmcblk1 for you depending on what device it assigns to sdcards
-
-WIP
-
-Reboot. Run /Install.sh which will install lxqt, wicd, and some device configurations. This will reboot one last time when done.
+If you would like to install it to the internal emmc storage run:
+WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your chrome OS install or other linux install and all of the associated user data) MAke sure to back up any data you would like to keep before running this.  
 ```
-/Install.sh
+cd /
+./InstallToInternal.sh
 ```
-You should now be greeted by a login screen. 
+The device will then reboot, and should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
 
-If you just want a basic enviroment without xfce upu can skip running Install.sh but I recommend installing wicd-curses for wifi configuration. 
+Now login as root again and run:
+```
+cd /InstallResources
+./InstallPackages.sh
+```
+Which installs the lxqt desktop enviroment, wicd, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo priviledges.
+
+When finished, it will reboot once again placing you at a login screen. 
+
+If you just want a basic enviroment without xfce upu can skip running InstallPackages.sh but I recommend installing wicd-curses for wifi configuration. Since the package is doenloaded but not installed by the build process, you can do that by running:
+```
+apt install wicd-curses
+```
+
+Congratulations! YOur computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+
+### Make options, developer tools
+(ALl of these should be ran as root or with sudo to avoid issues) 
+The makefile automates many processes that make debuggung the kernel or the filesystem easier. 
+TO begin with:
+
+`make kernel_config` cross compiles `make menuconfig` Cross compiling is required for any of the linux kernel make options that edit the kernel config, as the linux kernel build system makes assumptions that change depending on what platform it is targeting. 
+
+`make kernel` builds just the kernel
+
+`make filesystem` builds the filesystem and kernel into a PrawnOS.img
+
+`make kernel_inject` Injects a newly built kernel into a previously build PrawnOS.img located in the root of the checkout
+
 
 ### GPU Support
 
@@ -82,3 +111,4 @@ Because of this started as a fork of devsus, much of this repos history can be f
 PrawnOS is free and unencumbered software released under the terms of the GNU
 General Public License, version 2; see COPYING for the license text. For a list
 of its authors and contributors, see AUTHORS.
+
