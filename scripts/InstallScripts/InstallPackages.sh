@@ -3,7 +3,7 @@
 DIR=/InstallResources
 
 while true; do
-    read -p "install (X)fce4 or (L)xqt: " XL
+    read -p "install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
     case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
@@ -13,14 +13,28 @@ done
 
 locale-gen
 #Install shared packages
-apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools
 apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
 [ "$DE" = "lxqt" ] && apt install -y lxqt
 
 #Install packages not in an apt repo
 [ "$DE" = "xfce" ] && dpkg -i $DIR/xfce-themes/*
+#Copy in xfce4 default settings
+[ "$DE" = "xfce" ] && rm /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml && rm /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
+#Copy in lightdm/light greeter settings
+[ "$DE" = "xfce" ] && rm /etc/lightdm/lightdm-gtk-greeter.conf
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/lightdm/* /etc/lightdm/
+#Copy in wallpapers
+[ "$DE" = "xfce" ] && rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+#Load in Plank settings
+[ "$DE" = "xfce" ] && cat $DIR/xfce-config/plank/plank.dconf | dconf load /net/launchpad/plank/docks/
+
+
+
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 cp -rf $DIR/default.pa /etc/pulse/default.pa
