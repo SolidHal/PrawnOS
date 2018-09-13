@@ -64,12 +64,11 @@ create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
 export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
+export LANGUAGE="en_US.UTF-8"
+export LANG="en_US.UTF-8"
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf stretch --include locales,init $outmnt http://deb.debian.org/debian
+qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
-
-#Copy in the gpg key
-cp $build_resources/debian-archive-keyring.gpg /usr/share/keyrings/debian-archive-keyring.gpg
 
 #Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS-Alpha > $outmnt/etc/hostname
@@ -108,6 +107,9 @@ make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
-echo "DONE!"
-cleanup
 
+umount -l $outmnt > /dev/null 2>&1
+rmdir $outmnt > /dev/null 2>&1
+losetup -d $outdev > /dev/null 2>&1
+echo "DONE!"
+trap - INT TERM EXIT
