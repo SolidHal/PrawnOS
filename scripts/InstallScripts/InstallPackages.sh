@@ -30,10 +30,10 @@ apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 [ "$DE" = "xfce" ] && cp $DIR/xfce-config/lightdm/* /etc/lightdm/
 #Copy in wallpapers
 [ "$DE" = "xfce" ] && rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
-#Load in Plank settings
-[ "$DE" = "xfce" ] && cat $DIR/xfce-config/plank/plank.dconf | dconf load /net/launchpad/plank/docks/
 
-
+#Make plank autostart
+[ "$DE" = "xfce" ] && mkdir -p /etc/xdg/autostart/
+[ "$DE" = "xfce" ] && cp $DIR/plank/plank.desktop /etc/xdg/autostart/
 
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
@@ -49,6 +49,12 @@ echo " Enter new username: "
 read username
 adduser $username
 usermod -a -G sudo,netdev $username
+
+
+#install plank launchers
+[ "$DE" = "xfce" ] && mkdir -p /home/$username/.config/plank/dock1/launchers/
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank-launchers/* /home/$username/.config/plank/dock1/launchers/
+
 
 
 reboot
