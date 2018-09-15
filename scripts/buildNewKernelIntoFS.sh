@@ -33,11 +33,14 @@ mount -o noatime ${outdev}p2 $outmnt
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
-dd if=$resources/blank_kernel of=${outdev}p1 conv=notrunc
+dd if=$build_resources/blank_kernel of=${outdev}p1 conv=notrunc
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
+umount -l $outmnt > /dev/null 2>&1
+rmdir $outmnt > /dev/null 2>&1
+losetup -d $outdev > /dev/null 2>&1
 echo "DONE!"
-cleanup
+trap - INT TERM EXIT

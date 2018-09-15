@@ -33,7 +33,7 @@ apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 
 #Make plank autostart
 [ "$DE" = "xfce" ] && mkdir -p /etc/xdg/autostart/
-[ "$DE" = "xfce" ] && cp $DIR/plank/plank.desktop /etc/xdg/autostart/
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
 
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
