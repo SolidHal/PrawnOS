@@ -19,7 +19,7 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/*.patch; do patch -p1 < $i; done
+# [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/*.patch; do patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense

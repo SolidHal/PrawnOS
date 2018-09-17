@@ -22,17 +22,14 @@ apt install -y wicd-daemon wicd wicd-curses wicd-gtk
 #Install packages not in an apt repo
 [ "$DE" = "xfce" ] && dpkg -i $DIR/xfce-themes/*
 #Copy in xfce4 default settings
-[ "$DE" = "xfce" ] && rm /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml && rm /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
+[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
 #Copy in lightdm/light greeter settings
-[ "$DE" = "xfce" ] && rm /etc/lightdm/lightdm-gtk-greeter.conf
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/lightdm/* /etc/lightdm/
+[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 #Copy in wallpapers
 [ "$DE" = "xfce" ] && rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
 
 #Make plank autostart
-[ "$DE" = "xfce" ] && mkdir -p /etc/xdg/autostart/
 [ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
 
 
