@@ -3,7 +3,6 @@
 #Build kenerl, wifi firmware
 
 
-KVER=4.17.2
 TEST_PATCHES=false
 
 ROOT_DIR=`pwd`
@@ -12,19 +11,19 @@ RESOURCES=$ROOT_DIR/resources/BuildResources
 
 [ ! -d build ] && mkdir build
 cd build
-# build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
-[ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
-[ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
-cd linux-$KVER
-make clean
-make mrproper
-#Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/*.patch; do patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
-#Apply all of the rockMyy patches that make sense
-[ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/kernel/*.patch; do patch -p1 < $i; done
-[ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/DTS/*.patch; do patch -p1 < $i; done
+
+# build the Chrome OS kernel, with ath9k_htc and without many useless drivers
+[ ! -d chromeos-3.14 ] && git clone --depth 1 -b chromeos-3.14 https://chromium.googlesource.com/chromiumos/third_party/kernel chromeos-3.14
+[ ! -f deblob-3.14 ] && wget http://linux-libre.fsfla.org/pub/linux-libre/releases/LATEST-3.14.N/deblob-3.14
+[ ! -f deblob-check ] && wget http://linux-libre.fsfla.org/pub/linux-libre/releases/LATEST-3.14.N/deblob-check
+cd chromeos-3.14
+# deblob as much as possible - the diff against vanilla 3.14.x is big but
+# blob-free ath9k_htc should be only driver that requests firmware
+AWK=gawk sh ../deblob-3.14 --force
+export WIFIVERSION=-3.8
+./chromeos/scripts/prepareconfig chromiumos-rockchip
+cp $RESOURCES/config .config
+
 # reset the minor version number, so out-of-tree drivers continue to work after
 # a kernel upgrade **TODO - is this needed?
 # sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
@@ -51,3 +50,4 @@ make toolchain
 make -C target_firmware
 cd ..
 cd $ROOT_DIR
+

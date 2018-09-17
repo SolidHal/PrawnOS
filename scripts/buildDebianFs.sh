@@ -63,9 +63,9 @@ create_image() {
 create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
-export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
-export LANGUAGE="en_US.UTF-8"
-export LANG="en_US.UTF-8"
+# export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
+# export LANGUAGE="en_US.UTF-8"
+# export LANG="en_US.UTF-8"
 export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
@@ -102,8 +102,8 @@ echo -n "127.0.0.1        PrawnOS-Alpha" > $outmnt/etc/hosts
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
-dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
-make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
+dd if=build/chromeos-3.14/vmlinux.kpart of=${outdev}p1 conv=notrunc
+make -C build/chromeos-3.14 ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
@@ -113,3 +113,4 @@ rmdir $outmnt > /dev/null 2>&1
 losetup -d $outdev > /dev/null 2>&1
 echo "DONE!"
 trap - INT TERM EXIT
+
