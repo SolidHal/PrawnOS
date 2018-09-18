@@ -49,8 +49,8 @@ usermod -a -G sudo,netdev $username
 
 
 #install plank launchers
-[ "$DE" = "xfce" ] && mkdir -p /home/$username/.config/plank/dock1/launchers/
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank-launchers/* /home/$username/.config/plank/dock1/launchers/
+#[ "$DE" = "xfce" ] && mkdir -p /home/$username/.config/plank/dock1/launchers/
+#[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank-launchers/* /home/$username/.config/plank/dock1/launchers/
 
 
 
