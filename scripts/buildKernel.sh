@@ -12,22 +12,19 @@ RESOURCES=$ROOT_DIR/resources/BuildResources
 
 [ ! -d build ] && mkdir build
 cd build
-# build Linux-libre, with ath9k_htc, dwc2 from Chrome OS and without many useless drivers
+# build Linux-libre, with ath9k_htc
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
 [ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
 cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
-# [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/*.patch; do patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/kernel/*.patch; do patch -p1 < $i; done
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/DTS/*.patch; do patch -p1 < $i; done
-# reset the minor version number, so out-of-tree drivers continue to work after
-# a kernel upgrade **TODO - is this needed?
-# sed s/'SUBLEVEL = .*'/'SUBLEVEL = 0'/ -i Makefile
+
 cp $RESOURCES/config .config
 make -j `grep ^processor /proc/cpuinfo  | wc -l`  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
 [ ! -h kernel.its ] && ln -s $RESOURCES/kernel.its .

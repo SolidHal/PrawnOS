@@ -1,10 +1,14 @@
 FROM: Solidhal <hal@halemmerich.com>
 
-This patch reverse commit 2b721118b7821107757eb1d37af4b60e877b27e7, as can bee seen here: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2b721118b7821107757eb1d37af4b60e877b27e7
+This patch reverses commit 2b721118b7821107757eb1d37af4b60e877b27e7, as can bee seen here:
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2b721118b7821107757eb1d37af4b60e877b27e7
 
 This commit caused issues on veyron speedy with ath9k and dwc2 drivers. Any ath9k device (ar9271) 
-would intermittently work, most of the time ending in errors as can bee seen here: https://github.com/SolidHal/PrawnOS/issues/38
-This commit fixes that issue. 
+would intermittently work, most of the time ending in errors as can bee seen here:
+https://github.com/SolidHal/PrawnOS/issues/38
+This commit fixes that issue.
+This is only a temporary work around while a permenant fix is found, as this commit seems to only cause issues
+with dwc2
 
 diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath/ath9k/hif_usb.c
 --- b/drivers/net/wireless/ath/ath9k/hif_usb.c

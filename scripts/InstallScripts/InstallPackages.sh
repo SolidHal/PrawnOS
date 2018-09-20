@@ -13,8 +13,8 @@ done
 
 locale-gen
 #Install shared packages
-apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools
-apt install -y wicd-daemon wicd wicd-curses wicd-gtk
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools sudo
+apt install -y network-manager-gnome network-manager-openvpn
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
 [ "$DE" = "lxqt" ] && apt install -y lxqt
@@ -48,7 +48,7 @@ adduser $username
 usermod -a -G sudo,netdev $username
 
 
-#install plank launchers
+#install plank launchers #TODO: Disabled as doing it this way causes xconf or xfce4-session to not start??
 #[ "$DE" = "xfce" ] && mkdir -p /home/$username/.config/plank/dock1/launchers/
 #[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank-launchers/* /home/$username/.config/plank/dock1/launchers/
 

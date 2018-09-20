@@ -63,9 +63,7 @@ create_image() {
 create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
-# export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
-# export LANGUAGE="en_US.UTF-8"
-# export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
 export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
@@ -87,14 +85,14 @@ cp /etc/locale.gen $outmnt/etc/
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils python python-urwid
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
-#Download the packages to be installed by Install.sh: TODO: potentially dpkg-reconfigure locales?
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt wicd-daemon wicd wicd-curses wicd-gtk xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank
+#Download the packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank network-manager-gnome network-manager-openvpn
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -107,6 +105,8 @@ make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 
+#Install the regulatory.db files
+install -m 644 $build_resources/regdb/wireless-regdb-2018.09.07/regulatory.db* $outmnt/lib/firmware/
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
