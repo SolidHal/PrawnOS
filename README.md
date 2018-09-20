@@ -12,11 +12,11 @@ Currently PrawnOS supports lxqt, with plans to include xfce as an option in the 
 
 ### why
 
-Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode.
+Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode.
 
 ### Image Download
 
-If you don't want to or can't build the image, a download is available here https://archive.org/details/PrawnOSAlphaC201Libre2GBVERSION2
+If you don't want to or can't build the image, a download will be made available before next week 
 
 ### Dependencies
 
@@ -53,6 +53,8 @@ WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your chrome OS install or o
 cd /
 ./InstallToInternal.sh
 ```
+**This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy. They don't seem to effect anything longterm.
+
 The device will then reboot, and should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
 
 Now login as root again and run:
@@ -64,12 +66,19 @@ Which installs the lxqt desktop enviroment, wicd, sound, trackpad, and Xorg conf
 
 When finished, it will reboot once again placing you at a login screen. 
 
-If you just want a basic enviroment without xfce upu can skip running InstallPackages.sh but I recommend installing wicd-curses for wifi configuration. Since the package is doenloaded but not installed by the build process, you can do that by running:
+If you just want a basic enviroment without xfce or lxqt can skip running InstallPackages.sh. You can connect to wifi using wpa_supplicant by running the following commands:
 ```
-apt install wicd-curses
+wpa_passphrase <Network_name> <network_password> > wpa.conf
+wpa_supplicant -D wext -i wlan0 -c wpa.conf
 ```
+Now switch to another tty by pressing ctrl+alt+f2
+Login as root, and run
+```
+dhclient
+```
+When that finishes, you should have access to the internet. 
 
-Congratulations! YOur computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
 
 ### Make options, developer tools
 (ALl of these should be ran as root or with sudo to avoid issues) 
