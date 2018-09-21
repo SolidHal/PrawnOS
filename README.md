@@ -62,7 +62,7 @@ Now login as root again and run:
 cd /InstallResources
 ./InstallPackages.sh
 ```
-Which installs the lxqt desktop enviroment, wicd, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo priviledges.
+Which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo priviledges.
 
 When finished, it will reboot once again placing you at a login screen. 
 
@@ -103,8 +103,9 @@ https://rosenzweig.io/blog/gpu-feed.xml
 
 ### Build the wifi dongle into the laptop
 
+Sick of having a wsb dongle on the outside of your machine for wi-fi? Want to be able to use two usb devices at once without a hub? 
 Check out the instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
-
+Waringing: decent soldering skills required
 
 ### Troubleshooting
 
