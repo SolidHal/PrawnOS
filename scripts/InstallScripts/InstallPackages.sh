@@ -13,27 +13,47 @@ done
 
 locale-gen
 #Install shared packages
-apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools sudo
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools sudo dtrx
 apt install -y network-manager-gnome network-manager-openvpn
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
 [ "$DE" = "lxqt" ] && apt install -y lxqt
 
-#Install packages not in an apt repo
-[ "$DE" = "xfce" ] && dpkg -i $DIR/xfce-themes/*
-#Copy in xfce4 default settings
-[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
-[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
-#Copy in lightdm/light greeter settings
-[ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
-#Copy in wallpapers
-[ "$DE" = "xfce" ] && rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
-#Add libinput-gestures config and autostart
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
+if [ "$DE" = "xfce" ]
+then
+  #Install packages not in an apt repo
+  dpkg -i $DIR/xfce-themes/*
 
-#Make plank autostart
-[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
+  #Copy in xfce4 default settings
+  cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+  cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
+  
+  #Copy in lightdm/light greeter settings
+  cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
+  
+  #Copy in wallpapers
+  rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+
+  #Install libinput-gestures and xfdashboard "packages"
+  cd $DIR/packages/
+  dtrx libinput-gestures.tar.gz
+  cd libinput-gestures
+  make install
+  cd ..
+
+  dtrx xfdashboard-prawnOS.tar.gz
+  cd xfdashboard-master
+  make install
+  cd ..
+
+  #Add libinput-gestures config and autostart
+  cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
+  cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
+
+  #Make plank autostart
+  cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
+
+fi
 
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings

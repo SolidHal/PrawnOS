@@ -1,0 +1,21 @@
+[net/launchpad/plank/docks/dock1]
+icon-size=48
+show-dock-item=false
+position='bottom'
+dock-items=['xfcalendar.dockitem', 'vlc.dockitem', 'ristretto.dockitem', 'xfce4-terminal.dockitem', 'mousepad.dockitem', 'Thunar.dockitem']
+unhide-delay=0
+items-alignment='center'
+theme='Transparent'
+hide-mode='intelligent'
+pinned-only=true
+auto-pinning=true
+alignment='center'
+zoom-percent=150
+hide-delay=0
+zoom-enabled=false
+monitor=''
+lock-items=false
+tooltips-enabled=true
+pressure-reveal=false
+offset=0
+current-workspace-only=false

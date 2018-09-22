@@ -92,25 +92,15 @@ chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank network-manager-gnome network-manager-openvpn
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank network-manager-gnome network-manager-openvpn dtrx
 
-#Download and build libinput-gestures
-chroot $outmnt apt install libinput-tools xdotool
-chroot $outmnt cd /root/
-chroot $outmnt git clone http://github.com/bulletmark/libinput-gestures
-chroot $outmnt cd libinput-gestures
-chroot $outmnt make install
+#Download support for libinput-gestures
+chroot $outmnt apt install -y libinput-tools xdotool build-essential
+#Package is copied into /InstallResources/packages
 
-#Download and build xfdesktop
-#chroot $outmnt apt-get install xfce4-dev-tools build-essential glib2.0 libglib2.0-dev xorg-dev libwnck-3-dev libclutter-1.0-dev libgarcon-1-0-dev libxfconf-0-dev libxfce4util-dev libxfce4ui-2-dev libxcomposite-dev libxdamage-dev libxinerama-dev
-#chroot $outmnt cd /root/
-#chroot $outmnt git clone https://github.com/gmc-holle/xfdashboard
-#chroot $outmnt cd xfdashboard
-#chroot $outmnt git checkout a7851d82ec89b3cd49952c6022813bbe6b8b0bc9
-#One of these three
-#chroot $outmnt ./autogen.sh --disable-xcomposite --disable-xdamage --disable-xinerama
-#chroot $outmnt ./autogen.sh --disable-xcomposite 
-#chroot $outmnt ./autogen.sh --disable-xinerama
+#Download support for  xfdashboard
+chroot $outmnt apt-get install -y xfce4-dev-tools build-essential glib2.0 libglib2.0-dev xorg-dev libwnck-3-dev libclutter-1.0-dev libgarcon-1-0-dev libxfconf-0-dev libxfce4util-dev libxfce4ui-2-dev libxcomposite-dev libxdamage-dev libxinerama-dev
+#Package is copied into /InstallResources/packages
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
