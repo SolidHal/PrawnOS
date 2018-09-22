@@ -48,6 +48,9 @@ then
   #Make plank autostart
   cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
 
+  #install plank launcher
+  mkdir -p /etc/skel/.config/plank/dock1/launchers/
+  cp $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 fi
 
 
@@ -66,9 +69,6 @@ adduser $username
 usermod -a -G sudo,netdev,input $username
 
 
-#install plank launchers #TODO: Disabled as doing it this way causes xconf or xfce4-session to not start??
-#[ "$DE" = "xfce" ] && mkdir -p /home/$username/.config/plank/dock1/launchers/
-#[ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank-launchers/* /home/$username/.config/plank/dock1/launchers/
 
 
 
