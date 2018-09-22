@@ -28,6 +28,9 @@ apt install -y network-manager-gnome network-manager-openvpn
 [ "$DE" = "xfce" ] && cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 #Copy in wallpapers
 [ "$DE" = "xfce" ] && rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+#Add libinput-gestures config and autostart
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
+[ "$DE" = "xfce" ] && cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
 
 #Make plank autostart
 [ "$DE" = "xfce" ] && cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
@@ -45,7 +48,7 @@ apt clean && apt autoremove --purge
 echo " Enter new username: "
 read username
 adduser $username
-usermod -a -G sudo,netdev $username
+usermod -a -G sudo,netdev,input $username
 
 
 #install plank launchers #TODO: Disabled as doing it this way causes xconf or xfce4-session to not start??
