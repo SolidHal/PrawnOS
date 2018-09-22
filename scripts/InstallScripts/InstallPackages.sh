@@ -50,7 +50,7 @@ then
 
   #install plank launcher
   mkdir -p /etc/skel/.config/plank/dock1/launchers/
-  cp $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
+  cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 fi
 
 
