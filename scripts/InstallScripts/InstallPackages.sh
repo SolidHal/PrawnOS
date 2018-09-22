@@ -41,11 +41,6 @@ then
   make install
   cd ..
 
-  dtrx xfdashboard-0.6.1-stable-prawnOS.tar.gz
-  cd xfdashboard-0.6.1
-  make install
-  cd ..
-
   #Add libinput-gestures config and autostart
   cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
   cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
