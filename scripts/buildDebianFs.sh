@@ -98,10 +98,6 @@ chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg libr
 chroot $outmnt apt install -y libinput-tools xdotool build-essential
 #Package is copied into /InstallResources/packages
 
-#Download support for  xfdashboard
-chroot $outmnt apt-get install -y xfce4-dev-tools build-essential glib2.0 libglib2.0-dev xorg-dev libwnck-3-dev libclutter-1.0-dev libgarcon-1-0-dev libxfconf-0-dev libxfce4util-dev libxfce4ui-2-dev libxcomposite-dev libxdamage-dev libxinerama-dev
-#Package is copied into /InstallResources/packages
-
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 echo -n "127.0.0.1        PrawnOS-Alpha" > $outmnt/etc/hosts
