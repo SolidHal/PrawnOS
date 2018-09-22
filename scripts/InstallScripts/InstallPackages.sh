@@ -41,8 +41,8 @@ then
   make install
   cd ..
 
-  dtrx xfdashboard-prawnOS.tar.gz
-  cd xfdashboard-master
+  dtrx xfdashboard-0.6.1-stable-prawnOS.tar.gz
+  cd xfdashboard-0.6.1
   make install
   cd ..
 
