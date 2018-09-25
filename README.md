@@ -16,7 +16,7 @@ Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian with 
 
 ### Image Download
 
-If you don't want to or can't build the image, a download will be made available before next week 
+If you don't want to or can't build the image, you can find downloads under <releases> https://github.com/SolidHal/PrawnOS/releases
 
 ### Dependencies
 
