@@ -2,17 +2,18 @@
 
 A build system for making blobless debian and mainline kernel for the Asus c201 Chromebook
 
-
-Build a mainline kernel and Debian filesystem with:
+Build Debian filesystem with:
 No blobs, anywhere. 
-Support for Aetheros AR271 usb wifi dongles through the open source firmware
-Minimal toolset intended as a based, including tools to setup a wifi connection
-Sources from only main, not contrib or non-free which keeps Debian libre
-Currently PrawnOS supports lxqt, with plans to include xfce as an option in the future
+Sources from only main, not contrib or non-free which keeps Debian libre.
+Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment. 
+
+Build a deblobbed mainline kernel with:
+Patches for reliable usb.
+Patches to support the custom GPT partition table required to boot. 
 
 ### why
 
-Combined with libreboot, an AR271 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode.
+Combined with libreboot, an AR9271 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
 ### Image Download
 
