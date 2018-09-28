@@ -9,7 +9,9 @@ Build Debian filesystem with:
 
 Build a deblobbed mainline kernel with:
 * Patches for reliable usb.
-* Patches to support the custom GPT partition table required to boot. 
+* Patches to support the custom GPT partition table required to boot.
+* Support for Atheros AR9271 and AR7010 WiFi dongles
+* Support for CSR8150 bluetooth dongles
 
 ### why
 
