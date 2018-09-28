@@ -3,12 +3,17 @@
 A build system for making blobless debian and mainline kernel for the Asus c201 Chromebook
 
 Build Debian filesystem with:
+
 No blobs, anywhere. 
+
 Sources from only main, not contrib or non-free which keeps Debian libre.
+
 Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment. 
 
 Build a deblobbed mainline kernel with:
+
 Patches for reliable usb.
+
 Patches to support the custom GPT partition table required to boot. 
 
 ### why
