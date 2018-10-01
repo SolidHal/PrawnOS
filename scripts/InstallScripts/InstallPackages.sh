@@ -51,6 +51,14 @@ then
   #install plank launcher
   mkdir -p /etc/skel/.config/plank/dock1/launchers/
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
+
+  #Install xmodmap map, autostart
+  cp -rf $DIR/xfce-config/xmodmap/* /etc/skel
+
+  #Install brightness controls
+  cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
+  mkdir -p /etc/udev/rules.d/
+  cp $DIR/xfce-config/brightness/backlight.rules /etc/udev/rules.d/
 fi
 
 
@@ -66,7 +74,7 @@ apt clean && apt autoremove --purge
 echo " Enter new username: "
 read username
 adduser $username
-usermod -a -G sudo,netdev,input $username
+usermod -a -G sudo,netdev,input,video $username
 
 
 

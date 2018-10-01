@@ -1,0 +1,30 @@
+! Search mapped to mode switch (basically the fn key)
+! Referred to as ms later on 
+keycode 133 = Mode_switch NoSymbol Mode_switch
+
+! Re-add some keyboard functionality
+
+! Map insert to ms+period
+keycode  60 = period greater Insert Insert
+
+! Map page up to ms + up
+keycode 111 = Up NoSymbol Prior
+! Map page down to ms + down
+keycode 116 = Down NoSymbol Next
+! Map Home to ms+left
+keycode 113 = Left NoSymbol Home
+! Map End to ms+right
+keycode 114 = Right NoSymbol End
+
+! Map delete to ms+Backspace
+keycode 22 = BackSpace BackSpace Delete Delete
+
+! Now map the special functions
+! Brightness keys
+keycode 72 = XF86MonBrightnessDown XF86MonBrightnessDown F6 F6 F6 F6 XF86Switch_VT_6
+keycode 73 = XF86MonBrightnessUp XF86MonBrightnessUp F7 F7 F7 F7 XF86Switch_VT_7
+
+!Volume keys
+keycode 74 = XF86AudioMute XF86AudioMute F8 F8 F8 F8 XF86Switch_VT_8
+keycode 75 = XF86AudioLowerVolume XF86AudioLowerVolume F9 F9 F9 F9 XF86Switch_VT_9
+keycode 76 = XF86AudioRaiseVolume XF86AudioRaiseVolume F10 F10 F10 F10 XF86Switch_VT_10
