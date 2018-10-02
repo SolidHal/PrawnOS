@@ -83,6 +83,10 @@ When that finishes, you should have access to the internet.
 
 Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
 
+### Documentation
+Some useful things can be found in ``DOCUMENTATION.md`
+
+
 ### Make options, developer tools
 (ALl of these should be ran as root or with sudo to avoid issues) 
 The makefile automates many processes that make debuggung the kernel or the filesystem easier. 
