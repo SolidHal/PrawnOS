@@ -143,9 +143,9 @@
       <property name="&lt;Primary&gt;&lt;Alt&gt;Down" type="empty"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Right" type="empty"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Left" type="empty"/>
-      <property name="&lt;Primary&gt;Left" type="string" value="tile_left_key"/>
+      <property name="&lt;Primary&gt;Up" type="string" value="maximize_window_key"/>
       <property name="&lt;Primary&gt;Right" type="string" value="tile_right_key"/>
-      <property name="&lt;Primary&gt;Shift_R" type="string" value="maximize_window_key"/>
+      <property name="&lt;Primary&gt;Left" type="string" value="tile_left_key"/>
     </property>
   </property>
   <property name="providers" type="empty"/>
