@@ -1,0 +1,733 @@
+From aeb42ff3a2d04e19ff87b1e537e0d84d63132c11 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Wed, 22 Aug 2018 18:36:05 +0000
+Subject: [PATCH] RK3288 HDMI clock hacks combined
+
+This is only for my patching convenience, contains these:
+
+clk: rockchip: improve rk3288 pll rates for better hdmi output
+dt-bindings: clock: rk3288-cru: Add property to dedicate NPLL for VOPx
+drivers: clk-rk3288: support for dedicating NPLL to a VOP
+dt-bindings: display/rockchip: dw_hdmi: Add property for HDMI frequency list
+drm: dw_hdmi-rockchip: better clock selection logic and dts-based rate list
+dts: rk3288: support for dedicating npll to a vop
+dts: rk3288-veyron-chromebook: dedicate npll to VOP0/HDMI + HDMI rates
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ .../bindings/clock/rockchip,rk3288-cru.txt    |   3 +
+ .../display/rockchip/dw_hdmi-rockchip.txt     |   1 +
+ .../boot/dts/rk3288-veyron-chromebook.dtsi    |  67 +++++
+ arch/arm/boot/dts/rk3288.dtsi                 |   6 +-
+ drivers/clk/rockchip/clk-rk3288.c             |  98 +++++--
+ drivers/clk/rockchip/clk.h                    |   3 +
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c   | 269 ++++++++++++------
+ 7 files changed, 335 insertions(+), 112 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt b/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
+index 8cb47c39ba53..20724584e0a4 100644
+--- a/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
++++ b/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
+@@ -16,6 +16,9 @@ Optional Properties:
+ 
+ - rockchip,grf: phandle to the syscon managing the "general register files"
+   If missing pll rates are not changeable, due to the missing pll lock status.
++- rockchip,npll-for-vop: u32 0 or 1, dedicates NPLL to a VOP output unit for
++  more frequency flexibility for the selected VOP output at a cost of
++  flexibility for other devices. Disabled if not present or -1.
+ 
+ Each clock is assigned an identifier and client nodes can use this identifier
+ to specify the clock which they consume. All available clocks are defined as
+diff --git a/Documentation/devicetree/bindings/display/rockchip/dw_hdmi-rockchip.txt b/Documentation/devicetree/bindings/display/rockchip/dw_hdmi-rockchip.txt
+index adc94fc3c9f8..edeacbbc4f26 100644
+--- a/Documentation/devicetree/bindings/display/rockchip/dw_hdmi-rockchip.txt
++++ b/Documentation/devicetree/bindings/display/rockchip/dw_hdmi-rockchip.txt
+@@ -34,6 +34,7 @@ Optional properties
+ - clock-names: May contain "cec" as defined in dw_hdmi.txt.
+ - clock-names: May contain "grf", power for grf io.
+ - clock-names: May contain "vpll", external clock for some hdmi phy.
++- rockchip,hdmi-rates-hz: List of allowed HDMI frequencies in Hz.
+ 
+ Example:
+ 
+diff --git a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+index b16d570ff029..70ed0b2a9549 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+@@ -163,6 +163,25 @@
+ 	};
+ };
+ 
++&cru {
++	/* Dedicate NPLL for VOP0 / VOP_BIG for HDMI. */
++	rockchip,npll-for-vop = <0>;
++	/* The first assigned clocks are DCLK_VOP0 and DCLK_VOP1 */
++	assigned-clock-parents = <&cru PLL_NPLL>, <&cru PLL_GPLL>;
++};
++
++/* Delete the nodes that allow non-desirable VOP - connector links. That
++ * is the eDP cannot use vopb and HDMI cannot use vopl. */
++
++/delete-node/ &edp_in_vopb;
++/delete-node/ &vopb_out_edp;
++/delete-node/ &hdmi_in_vopl;
++/delete-node/ &vopl_out_hdmi;
++
++/* Delete the 500 Mhz GPU opp since that cannot be easily made
++ * without NPLL. */
++/delete-node/ &{/gpu-opp-table/opp@500000000};
++
+ &edp {
+ 	status = "okay";
+ 
+@@ -186,6 +205,54 @@
+ 	status = "okay";
+ };
+ 
++&hdmi {
++	/* These depend on NPLL being dedicated to HDMI use. */
++	rockchip,hdmi-rates-hz = <
++		25176471	/* for 25.175 MHz, 0.006% off */
++		25200000
++		27000000
++		28320000
++		30240000
++		31500000
++		32000000
++		33750000
++		36000000
++		40000000
++		49500000
++		50000000
++		54000000
++		57290323	/* for 57.284 MHz, .011 % off */
++		65000000
++		68250000
++		71000000
++		72000000
++		73250000
++		74250000
++		74437500	/* for 74.44 MHz, .003% off */
++		75000000
++		78750000
++		78800000
++		79500000
++		83500000
++		85500000
++		88750000
++		97750000
++		101000000
++		106500000
++		108000000
++		115500000
++		118666667	/* for 118.68 MHz, .011% off */
++		119000000
++		121714286	/* for 121.75 MHz, .029% off */
++		135000000
++		136800000	/* for 136.75 MHz, .037% off */
++		146250000
++		148500000
++		154000000
++		162000000 >;
++};
++
++
+ &gpio_keys {
+ 	pinctrl-0 = <&pwr_key_l &ap_lid_int_l>;
+ 	lid {
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index d7e49d29ace5..2106ddfdaf06 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -840,12 +840,14 @@
+ 		rockchip,grf = <&grf>;
+ 		#clock-cells = <1>;
+ 		#reset-cells = <1>;
+-		assigned-clocks = <&cru PLL_GPLL>, <&cru PLL_CPLL>,
++		assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>,
++				  <&cru PLL_GPLL>, <&cru PLL_CPLL>,
+ 				  <&cru PLL_NPLL>, <&cru ACLK_CPU>,
+ 				  <&cru HCLK_CPU>, <&cru PCLK_CPU>,
+ 				  <&cru ACLK_PERI>, <&cru HCLK_PERI>,
+ 				  <&cru PCLK_PERI>;
+-		assigned-clock-rates = <594000000>, <400000000>,
++		assigned-clock-rates = <0>, <0>,
++				       <594000000>, <400000000>,
+ 				       <500000000>, <300000000>,
+ 				       <150000000>, <75000000>,
+ 				       <300000000>, <150000000>,
+diff --git a/drivers/clk/rockchip/clk-rk3288.c b/drivers/clk/rockchip/clk-rk3288.c
+index 450de24a1b42..7adf85e43078 100644
+--- a/drivers/clk/rockchip/clk-rk3288.c
++++ b/drivers/clk/rockchip/clk-rk3288.c
+@@ -83,22 +83,43 @@ static struct rockchip_pll_rate_table rk3288_pll_rates[] = {
+ 	RK3066_PLL_RATE( 768000000, 1, 64, 2),
+ 	RK3066_PLL_RATE( 742500000, 8, 495, 2),
+ 	RK3066_PLL_RATE( 696000000, 1, 58, 2),
++	RK3066_PLL_RATE_NB(621000000, 1, 207, 8, 1),
+ 	RK3066_PLL_RATE( 600000000, 1, 50, 2),
+ 	RK3066_PLL_RATE_NB(594000000, 1, 198, 8, 1),
+ 	RK3066_PLL_RATE( 552000000, 1, 46, 2),
+ 	RK3066_PLL_RATE( 504000000, 1, 84, 4),
+ 	RK3066_PLL_RATE( 500000000, 3, 125, 2),
+ 	RK3066_PLL_RATE( 456000000, 1, 76, 4),
++	RK3066_PLL_RATE( 428000000, 1, 107, 6),
+ 	RK3066_PLL_RATE( 408000000, 1, 68, 4),
+ 	RK3066_PLL_RATE( 400000000, 3, 100, 2),
++	RK3066_PLL_RATE_NB( 394000000, 1, 197, 12, 1),
+ 	RK3066_PLL_RATE( 384000000, 2, 128, 4),
+ 	RK3066_PLL_RATE( 360000000, 1, 60, 4),
++	RK3066_PLL_RATE_NB( 356000000, 1, 178, 12, 1),
++	RK3066_PLL_RATE_NB( 324000000, 1, 189, 14, 1),
+ 	RK3066_PLL_RATE( 312000000, 1, 52, 4),
+-	RK3066_PLL_RATE( 300000000, 1, 50, 4),
+-	RK3066_PLL_RATE( 297000000, 2, 198, 8),
++	RK3066_PLL_RATE_NB( 308000000, 1, 154, 12, 1),
++	RK3066_PLL_RATE_NB( 303000000, 1, 202, 16, 1),
++	RK3066_PLL_RATE( 300000000, 1, 75, 6),
++	RK3066_PLL_RATE_NB( 297750000, 2, 397, 16, 1),
++	RK3066_PLL_RATE_NB( 293250000, 2, 391, 16, 1),
++	RK3066_PLL_RATE_NB( 292500000, 1, 195, 16, 1),
++	RK3066_PLL_RATE( 273600000, 1, 114, 10),
++	RK3066_PLL_RATE_NB( 273000000, 1, 182, 16, 1),
++	RK3066_PLL_RATE_NB( 270000000, 1, 180, 16, 1),
++	RK3066_PLL_RATE_NB( 266250000, 2, 355, 16, 1),
++	RK3066_PLL_RATE_NB( 256500000, 1, 171, 16, 1),
+ 	RK3066_PLL_RATE( 252000000, 1, 84, 8),
+-	RK3066_PLL_RATE( 216000000, 1, 72, 8),
+-	RK3066_PLL_RATE( 148500000, 2, 99, 8),
++	RK3066_PLL_RATE_NB( 250500000, 1, 167, 16, 1),
++	RK3066_PLL_RATE_NB( 243428571, 1, 142, 14, 1),
++	RK3066_PLL_RATE( 238000000, 1, 119, 12),
++	RK3066_PLL_RATE_NB( 219750000, 2, 293, 16, 1),
++	RK3066_PLL_RATE_NB( 216000000, 1, 144, 16, 1),
++	RK3066_PLL_RATE_NB( 213000000, 1, 142, 16, 1),
++	RK3066_PLL_RATE( 195428571, 1, 114, 14),
++	RK3066_PLL_RATE( 160000000, 1, 80, 12),
++	RK3066_PLL_RATE( 157500000, 1, 105, 16),
+ 	RK3066_PLL_RATE( 126000000, 1, 84, 16),
+ 	RK3066_PLL_RATE(  48000000, 1, 64, 32),
+ 	{ /* sentinel */ },
+@@ -177,10 +198,14 @@ PNAME(mux_ddrphy_p)		= { "dpll_ddr", "gpll_ddr" };
+ PNAME(mux_aclk_cpu_src_p)	= { "cpll_aclk_cpu", "gpll_aclk_cpu" };
+ 
+ PNAME(mux_pll_src_cpll_gpll_p)		= { "cpll", "gpll" };
+-PNAME(mux_pll_src_npll_cpll_gpll_p)	= { "npll", "cpll", "gpll" };
+-PNAME(mux_pll_src_cpll_gpll_npll_p)	= { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_npll_cpll_gpll_p)	= { "npll", "cpll", "gpll" };
++
++PNAME_ED(mux_pll_src_cgn_pll_nonvop_p)	= { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_cgn_pll_vop0_p) = { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_cgn_pll_vop1_p) = { "cpll", "gpll", "npll" };
++
+ PNAME(mux_pll_src_cpll_gpll_usb480m_p)	= { "cpll", "gpll", "usbphy480m_src" };
+-PNAME(mux_pll_src_cpll_gll_usb_npll_p)	= { "cpll", "gpll", "usbphy480m_src", "npll" };
++PNAME_ED(mux_pll_src_cpll_gll_usb_npll_p) = { "cpll", "gpll", "usbphy480m_src", "npll" };
+ 
+ PNAME(mux_mmc_src_p)	= { "cpll", "gpll", "xin24m", "xin24m" };
+ PNAME(mux_i2s_pre_p)	= { "i2s_src", "i2s_frac", "ext_i2s", "xin12m" };
+@@ -426,24 +451,24 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 			RK3288_CLKSEL_CON(30), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 4, GFLAGS),
+ 
+-	COMPOSITE(DCLK_VOP0, "dclk_vop0", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(DCLK_VOP0, "dclk_vop0", mux_pll_src_cgn_pll_vop0_p, 0,
+ 			RK3288_CLKSEL_CON(27), 0, 2, MFLAGS, 8, 8, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 1, GFLAGS),
+-	COMPOSITE(DCLK_VOP1, "dclk_vop1", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(DCLK_VOP1, "dclk_vop1", mux_pll_src_cgn_pll_vop1_p, 0,
+ 			RK3288_CLKSEL_CON(29), 6, 2, MFLAGS, 8, 8, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 3, GFLAGS),
+ 
+ 	COMPOSITE_NODIV(SCLK_EDP_24M, "sclk_edp_24m", mux_edp_24m_p, 0,
+ 			RK3288_CLKSEL_CON(28), 15, 1, MFLAGS,
+ 			RK3288_CLKGATE_CON(3), 12, GFLAGS),
+-	COMPOSITE(SCLK_EDP, "sclk_edp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_EDP, "sclk_edp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(28), 6, 2, MFLAGS, 0, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 13, GFLAGS),
+ 
+-	COMPOSITE(SCLK_ISP, "sclk_isp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_ISP, "sclk_isp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(6), 6, 2, MFLAGS, 0, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 14, GFLAGS),
+-	COMPOSITE(SCLK_ISP_JPE, "sclk_isp_jpe", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_ISP_JPE, "sclk_isp_jpe", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(6), 14, 2, MFLAGS, 8, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 15, GFLAGS),
+ 
+@@ -452,16 +477,16 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 	GATE(SCLK_HDMI_CEC, "sclk_hdmi_cec", "xin32k", 0,
+ 			RK3288_CLKGATE_CON(5), 11, GFLAGS),
+ 
+-	COMPOSITE(ACLK_HEVC, "aclk_hevc", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(ACLK_HEVC, "aclk_hevc", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(39), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 13, GFLAGS),
+ 	DIV(HCLK_HEVC, "hclk_hevc", "aclk_hevc", 0,
+ 			RK3288_CLKSEL_CON(40), 12, 2, DFLAGS),
+ 
+-	COMPOSITE(SCLK_HEVC_CABAC, "sclk_hevc_cabac", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_HEVC_CABAC, "sclk_hevc_cabac", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(42), 6, 2, MFLAGS, 0, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 14, GFLAGS),
+-	COMPOSITE(SCLK_HEVC_CORE, "sclk_hevc_core", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_HEVC_CORE, "sclk_hevc_core", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(42), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 15, GFLAGS),
+ 
+@@ -535,7 +560,7 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 	COMPOSITE(0, "sclk_tspout", mux_tspout_p, 0,
+ 			RK3288_CLKSEL_CON(35), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(4), 11, GFLAGS),
+-	COMPOSITE(0, "sclk_tsp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(0, "sclk_tsp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(35), 6, 2, MFLAGS, 0, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(4), 10, GFLAGS),
+ 
+@@ -895,6 +920,7 @@ static void __init rk3288_clk_init(struct device_node *np)
+ {
+ 	struct rockchip_clk_provider *ctx;
+ 	struct clk *clk;
++	s32 npll_vop = -1;
+ 
+ 	rk3288_cru_base = of_iomap(np, 0);
+ 	if (!rk3288_cru_base) {
+@@ -902,6 +928,46 @@ static void __init rk3288_clk_init(struct device_node *np)
+ 		return;
+ 	}
+ 
++	if (!of_property_read_s32(np, "rockchip,npll-for-vop", &npll_vop)) {
++		if ((npll_vop < -1) || (npll_vop > 1)) {
++			pr_warn("%s: invalid VOP to dedicate NPLL to: %d\n",
++				__func__, npll_vop);
++		} else if (npll_vop >= 0) {
++			unsigned int vop_clk_id;
++			const char ** npll_names;
++			const char ** non_npll_names;
++			int i;
++
++			/* Firstly, not-VOP needs to not use npll */
++			mux_pll_src_npll_cpll_gpll_p[0] = "dummy_npll";
++			mux_pll_src_cgn_pll_nonvop_p[2] = "dummy_npll";
++			mux_pll_src_cpll_gll_usb_npll_p[3] = "dummy_npll";
++
++			/* Then the npll VOP needs to only use npll, and the other one not use npll. */
++			if (npll_vop) {
++				vop_clk_id = DCLK_VOP1;
++				npll_names = mux_pll_src_cgn_pll_vop1_p;
++				non_npll_names = mux_pll_src_cgn_pll_vop0_p;
++			} else {
++				vop_clk_id = DCLK_VOP0;
++				npll_names = mux_pll_src_cgn_pll_vop0_p;
++				non_npll_names = mux_pll_src_cgn_pll_vop1_p;
++			}
++			npll_names[0] = "dummy_cpll";
++			npll_names[1] = "dummy_gpll";
++			non_npll_names[2] = "dummy_npll";
++
++			/* Lastly the npll-dedicated-VOP needs to be able to control npll. */
++			for (i = 0; i < ARRAY_SIZE(rk3288_clk_branches); i++) {
++				if (rk3288_clk_branches[i].id == vop_clk_id) {
++					rk3288_clk_branches[i].flags |= CLK_SET_RATE_PARENT;
++					break;
++				}
++			}
++			pr_debug("%s: npll dedicated for VOP %d\n", __func__, npll_vop);
++		}
++	}
++
+ 	ctx = rockchip_clk_init(np, rk3288_cru_base, CLK_NR_CLKS);
+ 	if (IS_ERR(ctx)) {
+ 		pr_err("%s: rockchip clk init failed\n", __func__);
+diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
+index ef601dded32c..8e2f70d62f03 100644
+--- a/drivers/clk/rockchip/clk.h
++++ b/drivers/clk/rockchip/clk.h
+@@ -343,6 +343,9 @@ struct clk *rockchip_clk_register_muxgrf(const char *name,
+ 
+ #define PNAME(x) static const char *const x[] __initconst
+ 
++/* For when you want to be able to modify the pointers. */
++#define PNAME_ED(x) static const char * x[] __initdata
++
+ enum rockchip_clk_branch_type {
+ 	branch_composite,
+ 	branch_mux,
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 11309a2a4e43..740b0aeea796 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -49,122 +49,141 @@ struct rockchip_hdmi {
+ 	struct clk *vpll_clk;
+ 	struct clk *grf_clk;
+ 	struct dw_hdmi *hdmi;
++	u32* rates;
++	u32 rates_cnt;
+ };
+ 
++#define CLK_SLOP(clk)		((clk) / 1000)
++#define CLK_PLUS_SLOP(clk)	((clk) + CLK_SLOP(clk))
++
+ #define to_rockchip_hdmi(x)	container_of(x, struct rockchip_hdmi, x)
+ 
++/* These were the rates allowed by the driver before rates list in device tree,
++ * so keep them around as a fallback */
++static const u32 dw_hdmi_fallback_rates[] = {
++	27000000,
++	36000000,
++	40000000,
++	54000000,
++	65000000,
++	66000000,
++	74250000,
++	83500000,
++	106500000,
++	108000000,
++	146250000,
++	148500000
++};
++
+ static const struct dw_hdmi_mpll_config rockchip_mpll_cfg[] = {
+ 	{
+-		27000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++		30666000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40f3, 0x0000 },
++		},
++	},  {
++		36800000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		36000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		46000000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		40000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		61333000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		54000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		73600000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		65000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		92000000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		66000000, {
+-			{ 0x013e, 0x0003},
+-			{ 0x217e, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		122666000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		74250000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		147200000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		83500000, {
+-			{ 0x0072, 0x0001},
++	},  {
++		184000000, {
++			{ 0x0051, 0x0002 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		108000000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		226666000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		106500000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		272000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		146250000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		340000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		148500000, {
+-			{ 0x0051, 0x0003},
+-			{ 0x214c, 0x0003},
+-			{ 0x4064, 0x0003}
++	},  {
++		600000000, {
++			{ 0x1a40, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
++	},  {
+ 		~0UL, {
+-			{ 0x00a0, 0x000a },
+-			{ 0x2001, 0x000f },
+-			{ 0x4002, 0x000f },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
+ 		},
+ 	}
+ };
+ 
+ static const struct dw_hdmi_curr_ctrl rockchip_cur_ctr[] = {
+-	/*      pixelclk    bpp8    bpp10   bpp12 */
++	/*      pixelclk     bpp8    bpp10   bpp12 */
+ 	{
+-		40000000,  { 0x0018, 0x0018, 0x0018 },
+-	}, {
+-		65000000,  { 0x0028, 0x0028, 0x0028 },
+-	}, {
+-		66000000,  { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		74250000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		83500000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		146250000, { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		148500000, { 0x0000, 0x0038, 0x0038 },
+-	}, {
+-		~0UL,      { 0x0000, 0x0000, 0x0000},
+-	}
++		600000000, { 0x0000, 0x0000, 0x0000 },
++	},  {
++		~0UL,      { 0x0000, 0x0000, 0x0000 },
++	},
+ };
+ 
+ static const struct dw_hdmi_phy_config rockchip_phy_config[] = {
+ 	/*pixelclk   symbol   term   vlev*/
+-	{ 74250000,  0x8009, 0x0004, 0x0272},
+-	{ 148500000, 0x802b, 0x0004, 0x028d},
+-	{ 297000000, 0x8039, 0x0005, 0x028d},
+-	{ ~0UL,	     0x0000, 0x0000, 0x0000}
++	{ CLK_PLUS_SLOP(74250000),  0x8009, 0x0004, 0x0272},
++	{ CLK_PLUS_SLOP(165000000), 0x802b, 0x0004, 0x0209},
++	{ CLK_PLUS_SLOP(297000000), 0x8039, 0x0005, 0x028d},
++	{ ~0UL,	                    0x0000, 0x0000, 0x0000}
+ };
+ 
+ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
+ {
+ 	struct device_node *np = hdmi->dev->of_node;
++	int rates_cnt;
+ 
+ 	hdmi->regmap = syscon_regmap_lookup_by_phandle(np, "rockchip,grf");
+ 	if (IS_ERR(hdmi->regmap)) {
+@@ -192,26 +211,55 @@ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
+ 		return PTR_ERR(hdmi->grf_clk);
+ 	}
+ 
++	if ((rates_cnt = of_property_count_u32_elems(np, "rockchip,hdmi-rates-hz")) > 0) {
++		int rv;
++		u32 *rates = devm_kmalloc_array(hdmi->dev, rates_cnt, sizeof(u32), GFP_KERNEL);
++		if (!rates)
++			return -ENOMEM;
++		rv = of_property_read_u32_array(np, "rockchip,hdmi-rates-hz", rates, rates_cnt);
++		if (rv)
++			return rv;
++		hdmi->rates = rates;
++		hdmi->rates_cnt = rates_cnt;
++	} else {
++		rates_cnt = ARRAY_SIZE(dw_hdmi_fallback_rates);
++		hdmi->rates = devm_kmalloc_array(hdmi->dev, rates_cnt, sizeof(u32), GFP_KERNEL);
++		if (!hdmi->rates)
++			return -ENOMEM;
++		memcpy(hdmi->rates, dw_hdmi_fallback_rates, rates_cnt * sizeof(u32));
++		hdmi->rates_cnt = rates_cnt;
++	}
++
++
+ 	return 0;
+ }
+ 
+ static enum drm_mode_status
+-dw_hdmi_rockchip_mode_valid(struct drm_connector *connector,
++dw_hdmi_rockchip_encoder_mode_valid(struct drm_encoder *encoder,
+ 			    const struct drm_display_mode *mode)
+ {
+-	const struct dw_hdmi_mpll_config *mpll_cfg = rockchip_mpll_cfg;
++	struct rockchip_hdmi *hdmi = to_rockchip_hdmi(encoder);
+ 	int pclk = mode->clock * 1000;
+-	bool valid = false;
++	int num_rates = hdmi->rates_cnt;
+ 	int i;
+ 
+-	for (i = 0; mpll_cfg[i].mpixelclock != (~0UL); i++) {
+-		if (pclk == mpll_cfg[i].mpixelclock) {
+-			valid = true;
+-			break;
+-		}
++	/*
++	 * Pixel clocks we support are always < 2GHz and so fit in an
++	 * int.  We should make sure source rate does too so we don't get
++	 * overflow when we multiply by 1000.
++	 */
++	if (mode->clock > INT_MAX / 1000)
++		return MODE_BAD;
++
++	for (i = 0; i < num_rates; i++) {
++		int slop = CLK_SLOP(pclk);
++
++		if ((pclk >= hdmi->rates[i] - slop) &&
++		    (pclk <= hdmi->rates[i] + slop))
++			return MODE_OK;
+ 	}
+ 
+-	return (valid) ? MODE_OK : MODE_BAD;
++	return MODE_BAD;
+ }
+ 
+ static const struct drm_encoder_funcs dw_hdmi_rockchip_encoder_funcs = {
+@@ -227,7 +275,39 @@ dw_hdmi_rockchip_encoder_mode_fixup(struct drm_encoder *encoder,
+ 				    const struct drm_display_mode *mode,
+ 				    struct drm_display_mode *adj_mode)
+ {
+-	return true;
++	struct rockchip_hdmi *hdmi = to_rockchip_hdmi(encoder);
++	int pclk = adj_mode->clock * 1000;
++	int best_diff = INT_MAX;
++	int best_clock = 0;
++	int slop;
++	int i;
++
++	/* Pick the best clock */
++	for (i = 0; i < hdmi->rates_cnt; i++) {
++		int diff = hdmi->rates[i] - pclk;
++
++		if (diff < 0)
++			diff = -diff;
++		if (diff < best_diff) {
++			best_diff = diff;
++			best_clock = hdmi->rates[i];
++
++			/* Bail early if we're exact */
++			if (best_diff == 0)
++				return true;
++		}
++	}
++
++	/* Double check that it's OK */
++	slop = CLK_SLOP(pclk);
++	if ((pclk >= best_clock - slop) && (pclk <= best_clock + slop)) {
++		adj_mode->clock = DIV_ROUND_UP(best_clock, 1000);
++		return true;
++	}
++
++	/* Shoudn't be here; we should have said rate wasn't valid */
++	dev_warn(hdmi->dev, "tried to set invalid rate %d\n", adj_mode->clock);
++	return false;
+ }
+ 
+ static void dw_hdmi_rockchip_encoder_mode_set(struct drm_encoder *encoder,
+@@ -280,6 +360,7 @@ dw_hdmi_rockchip_encoder_atomic_check(struct drm_encoder *encoder,
+ }
+ 
+ static const struct drm_encoder_helper_funcs dw_hdmi_rockchip_encoder_helper_funcs = {
++	.mode_valid = dw_hdmi_rockchip_encoder_mode_valid,
+ 	.mode_fixup = dw_hdmi_rockchip_encoder_mode_fixup,
+ 	.mode_set   = dw_hdmi_rockchip_encoder_mode_set,
+ 	.enable     = dw_hdmi_rockchip_encoder_enable,
+@@ -294,7 +375,6 @@ static struct rockchip_hdmi_chip_data rk3288_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3288_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg   = rockchip_mpll_cfg,
+ 	.cur_ctr    = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -308,7 +388,6 @@ static struct rockchip_hdmi_chip_data rk3399_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3399_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg   = rockchip_mpll_cfg,
+ 	.cur_ctr    = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -387,6 +466,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+ 	 */
+ 	if (IS_ERR(hdmi->hdmi)) {
+ 		ret = PTR_ERR(hdmi->hdmi);
++		devm_kfree(hdmi->dev, hdmi->rates);
+ 		drm_encoder_cleanup(encoder);
+ 		clk_disable_unprepare(hdmi->vpll_clk);
+ 	}
+@@ -399,6 +479,7 @@ static void dw_hdmi_rockchip_unbind(struct device *dev, struct device *master,
+ {
+ 	struct rockchip_hdmi *hdmi = dev_get_drvdata(dev);
+ 
++	devm_kfree(hdmi->dev, hdmi->rates);
+ 	dw_hdmi_unbind(hdmi->hdmi);
+ 	clk_disable_unprepare(hdmi->vpll_clk);
+ }
+-- 
+2.18.0
+

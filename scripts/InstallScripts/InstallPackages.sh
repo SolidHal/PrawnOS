@@ -53,7 +53,8 @@ then
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
   #Install xmodmap map, autostart
-  cp -rf $DIR/xfce-config/xmodmap/* /etc/skel
+  cp -rf $DIR/xfce-config/xmodmap/.Xmodmap /etc/skel/
+  cp -rf $DIR/xfce-config/xmodmap/.xinitrc /etc/skel/
 
   #Install brightness controls
   cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/

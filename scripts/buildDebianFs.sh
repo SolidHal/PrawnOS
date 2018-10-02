@@ -63,10 +63,10 @@ create_image() {
 create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
-export LC_ALL="en_US.UTF-8" #Change this as necessary if not US
 export DEBIAN_FRONTEND=noninteractive
 qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://deb.debian.org/debian
 chroot $outmnt passwd -d root
+
 
 #Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS-Alpha > $outmnt/etc/hostname
@@ -81,7 +81,8 @@ cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmount/etc/apt/sources.list
 
 #Setup the locale
-cp /etc/locale.gen $outmnt/etc/
+chroot $outmnt echo en_US.UTF-8 UTF-8 > /etc/locale.gen
+chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update

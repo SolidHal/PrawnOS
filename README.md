@@ -51,7 +51,7 @@ sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M
 ```
 Now on the C201, login as root. The password is blank. 
 If you would like to install it to the internal emmc storage run:
-WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your chrome OS install or other linux install and all of the associated user data) MAke sure to back up any data you would like to keep before running this.  
+WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your chrome OS install or other linux install and all of the associated user data) Make sure to back up any data you would like to keep before running this.  
 ```
 cd /
 ./InstallToInternal.sh
