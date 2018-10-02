@@ -57,7 +57,7 @@ then
   cp -rf $DIR/xfce-config/xmodmap/.xinitrc /etc/skel/
 
   #Install inputrc
-  cp -rf $DIR/xfce-config/xmodmap/.xinputrc /etc/skel/
+  cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
 
   #Install brightness controls
   cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
