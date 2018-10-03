@@ -78,7 +78,7 @@ chmod +x $outmnt/*.sh
 #Setup the chroot for apt 
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
-cp $build_resources/sources.list $outmount/etc/apt/sources.list
+cp $build_resources/sources.list $outmnt/etc/apt/sources.list
 
 #Setup the locale
 chroot $outmnt echo en_US.UTF-8 UTF-8 > /etc/locale.gen
