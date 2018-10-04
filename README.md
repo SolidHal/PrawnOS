@@ -77,7 +77,7 @@ wpa_supplicant -D wext -i wlan0 -c wpa.conf
 Now switch to another tty by pressing ctrl+alt+f2
 Login as root, and run
 ```
-dhclient
+dhclient wlan0
 ```
 When that finishes, you should have access to the internet. 
 
