@@ -75,12 +75,25 @@ cp -rf $DIR/50-synaptics.conf /etc/X11/xorg.conf.d/
 
 apt clean && apt autoremove --purge
 
-echo " Enter new username: "
-read username
-adduser $username
+dmesg -D
+
+#Force a safe username
+while true; do
+    while true; do
+        echo " Enter new username: "
+        read username
+        #ensure no whitespace
+        case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
+     done
+adduser $username --gecos ""
+retVal=$?
+if [ $retVal == 0 ]; then
+    break
+fi
+done
 usermod -a -G sudo,netdev,input,video $username
 
-
+dmesg -E
 
 
 
