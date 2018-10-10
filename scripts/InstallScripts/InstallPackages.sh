@@ -95,19 +95,21 @@ dmesg -D
 
 #Force a safe username
 while true; do
+    echo " Enter new username: "
+    read username
+    #ensure no whitespace
+    case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
+done
+until adduser $username --gecos ""
+do
     while true; do
         echo " Enter new username: "
         read username
         #ensure no whitespace
         case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
-        case $username in "") echo Username cannot be blank;; break;; esac
-     done
-adduser $username --gecos ""
-retVal=$?
-if [ $retVal == 0 ]; then
-    break
-fi
+    done
 done
+
 usermod -a -G sudo,netdev,input,video $username
 
 dmesg -E
