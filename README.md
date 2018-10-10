@@ -53,7 +53,15 @@ sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M; sync
 
 ### Installing
 
-There are two ways to use PrawnOS. The first option is to boot from the external usb or sd device you wrote the image to. [create an anchor](### insall-To-USB-drive-or-SD-card)
+There are two ways to use PrawnOS. 
+
+The first option is to boot from the external usb or sd device you wrote the image to. 
+[create an anchor](### insall-To-USB-drive-or-SD-card)
+* Booting from an external device allows you to try PrawnOS without removing ChromeOS or whatever linux you are running on your internal storage (emmc), but it is a much slower experience as the c201 only has usb 2.0. 
+
+The second and, recommended, option is to install it on your internal storage (emmc)
+[create an anchor](### install-to-internal-drive-(emmc))
+* This is faster, and frees up a usb port. 
 
 ### Install To USB drive or SD card
 Now on the C201, press `control+u` at boot to boot from the usb drive. 
