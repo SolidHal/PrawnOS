@@ -13,6 +13,8 @@ Build a deblobbed mainline kernel with:
 * Support for Atheros AR9271 and AR7010 WiFi dongles
 * Support for CSR8150 bluetooth dongles
 
+Don't want to use one of the two usb ports of for the WIFI dongle? [check out this](#build-the-wifi-dongle-into-the-laptop)
+
 ### why
 
 Combined with libreboot, an AR9271 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
@@ -77,8 +79,8 @@ Make sure its the only storage device plugged in, and run this script to expand 
 cd /InstallResources/
 ./InstallToUSB
 ```
-congratulations: you are done! But you probably already knew that. Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
-If you want a hint on how to connect to wifi, check out [this down below](#connecting-to-wifi-in-a-basic-environment)
+Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
+If you want a quick guide on how to connect to wifi, check out [this down below](#connecting-to-wifi-in-a-basic-environment)
 
 #### For everyone else, two scripts need to be ran. 
 
@@ -115,7 +117,7 @@ If you would like to install it to the internal emmc storage run:
 cd /
 ./InstallToInternal.sh
 ```
-**This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything longterm.
+_This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything longterm._
 
 The device will then reboot. If you are running the stock coreboot, you will have to press `control+d` or wait 30 seconds past the beep to boot to the internal storage.
 
@@ -150,11 +152,11 @@ When that finishes, you should have access to the internet.
 
 
 ### Documentation
-Some useful things can be found in ``DOCUMENTATION.md`
+Some useful things can be found in `DOCUMENTATION.md`
 
 
 ### Make options, developer tools
-(ALl of these should be ran as root or with sudo to avoid issues) 
+(All of these should be ran as root or with sudo to avoid issues) 
 The makefile automates many processes that make debuggung the kernel or the filesystem easier. 
 TO begin with:
 
@@ -176,9 +178,9 @@ https://rosenzweig.io/blog/gpu-feed.xml
 
 ### Build the wifi dongle into the laptop
 
-Sick of having a wsb dongle on the outside of your machine for wi-fi? Want to be able to use two usb devices at once without a hub? 
+Sick of having a usb dongle on the outside of your machine for wi-fi? Want to be able to use two usb devices at once without a hub? 
 Check out the instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
-Waringing: decent soldering skills required
+Warning: decent soldering skills required
 
 ### Troubleshooting
 
