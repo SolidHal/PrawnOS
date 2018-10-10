@@ -44,31 +44,90 @@ Build the `PrawnOS-...-.img` by running `sudo make image`
 
 This has only been tested on a Debian stretch VM, and borrows some components from the host system to setup apt/debootstrap during the build process so I would recommend using a Debian Stretch VM to avoid any issues. 
 
-### Install
-Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive
+### Write to a flash drive or sd card
+Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or sd card device. If you're not familiar with dd, check out Debians
+ how to page https://www.debian.org/CD/faq/#write-usb
 ```
-sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M
+sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M; sync
 ```
-Now on the C201, login as root. The password is blank. 
-If you would like to install it to the internal emmc storage run:
+
+### Installing
+
+There are two ways to use PrawnOS. The first option is to boot from the external usb or sd device you wrote the image to. [create an anchor](### insall-To-USB-drive-or-SD-card)
+
+### Install To USB drive or SD card
+Now on the C201, press `control+u` at boot to boot from the usb drive. 
+
+If you are running stock coreboot and haven't flashed libreboot, you will first have to enable developer mode and enable usb booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+
+
+When it boots, login as root. The password is blank. 
+
+#### If you simply want a basic linux environment with not desktop environment or window manager:
+Make sure its the only storage device plugged in, and run this script to expand the partition and filesystem to the full usb drive
+```
+cd /InstallResources/
+./InstallToUSB
+```
+congratulations: you are done! But you probably already knew that. Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
+If you want a hint on how to connect to wifi, check out [create an anchor](####connecting-to-wifi-in-a-basic-enviroment)
+
+#### For everyone else, two scripts need to be ran. 
+
+The first expands the partition and filesystem to use the entire drive.
+Make sure you only have one usb or sd storage device plugged into the machine.
+Run:
+```
+cd /InstallResources/
+./InstallToUSB
+```
+Then run this script which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
+
+If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.  
+When finished, it will reboot once again placing you at a login screen. 
+```
+./InstallPackages.sh
+```
+This will take a while; usb 2.0 is slow.
+Welcome to PrawnOS. If you like it, I would suggest installing it to your internal storage (emmc).
+
+
+### Install to Internal drive (emmc)
+Now on the C201, press `control+u` at boot to boot from the usb drive. 
+
+
+If you are running stock coreboot and haven't flashed libreboot, you will first have to enable developer mode and enable usb booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+
+At the prompt, login as root. The password is blank. 
+
 WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your chrome OS install or other linux install and all of the associated user data) Make sure to back up any data you would like to keep before running this.  
+
+If you would like to install it to the internal emmc storage run:
 ```
 cd /
 ./InstallToInternal.sh
 ```
-**This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy. They don't seem to effect anything longterm.
+**This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything longterm.
 
-The device will then reboot, and should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
+The device will then reboot. If you are running the stock coreboot, you will have to press `control+d` or wait 30 seconds past the beep to boot to the internal storage.
+
+If you are running libreboot, it should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
 
 Now login as root again and run:
 ```
 cd /InstallResources
 ./InstallPackages.sh
 ```
-Which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo priviledges.
+Which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
+
+
+If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.
 
 When finished, it will reboot once again placing you at a login screen. 
 
+Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+
+#### Connecting to Wifi in a basic environment
 If you just want a basic enviroment without xfce or lxqt can skip running InstallPackages.sh. You can connect to wifi using wpa_supplicant by running the following commands:
 ```
 wpa_passphrase <Network_name> <network_password> > wpa.conf
@@ -81,7 +140,6 @@ dhclient wlan0
 ```
 When that finishes, you should have access to the internet. 
 
-Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
 
 ### Documentation
 Some useful things can be found in ``DOCUMENTATION.md`
