@@ -1,4 +1,4 @@
 SolidHal     (hal@halemmerich.com)
 With spcial thanks to:
 Dima Krasner (dima@dimakrasner.com) 
-- The core of filesystem and kernel building for the c201 is based on his work with devsus
+- The core concepts of filesystem and kernel building for the c201 are based on his work with devsus

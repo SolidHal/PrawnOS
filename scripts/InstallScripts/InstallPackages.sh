@@ -30,7 +30,7 @@ done
 locale-gen
 #Install shared packages
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools sudo dtrx emacs25
-apt install -y network-manager-gnome network-manager-openvpn
+apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
 [ "$DE" = "lxqt" ] && apt install -y lxqt
