@@ -17,7 +17,7 @@ Don't want to use one of the two usb ports of for the WIFI dongle? [check out th
 
 ### why
 
-Combined with libreboot, an AR9271 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
+Combined with libreboot, an AR9271 or AR7010 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
 ### Image Download
 
