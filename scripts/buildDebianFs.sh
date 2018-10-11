@@ -3,6 +3,22 @@
 # Build fs, image
 
 
+# This file is part of PrawnOS (http://www.prawnos.com)
+# Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
+
+# PrawnOS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+
+# PrawnOS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
+
+
 KVER=4.17.2
 
 #Ensure Sudo
@@ -78,7 +94,7 @@ chmod +x $outmnt/*.sh
 #Setup the chroot for apt 
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
-cp $build_resources/sources.list $outmount/etc/apt/sources.list
+cp $build_resources/sources.list $outmnt/etc/apt/sources.list
 
 #Setup the locale
 chroot $outmnt echo en_US.UTF-8 UTF-8 > /etc/locale.gen
@@ -86,14 +102,14 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank network-manager-gnome network-manager-openvpn dtrx
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt xserver-xorg-input-synaptics crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-tools plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25
 
 #Download support for libinput-gestures
 chroot $outmnt apt install -y libinput-tools xdotool build-essential

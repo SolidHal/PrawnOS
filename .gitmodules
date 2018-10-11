@@ -1,3 +1,0 @@
-[submodule "chromeos-3.14"]
-	path = chromeos-3.14
-	url = https://chromium.googlesource.com/chromiumos/third_party/kernel
