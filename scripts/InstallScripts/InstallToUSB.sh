@@ -15,3 +15,5 @@ sgdisk -c 2:Root /dev/sda
 partprobe /dev/sda
 #Force the filesystem to fill the new partition
 resize2fs -f /dev/sda2
+#Reboot to ensure everything resized properly
+reboot
