@@ -74,7 +74,7 @@ If you are running stock coreboot and haven't flashed libreboot, you will first 
 When it boots, login as root. The password is blank. 
 
 #### If you simply want a basic linux environment with not desktop environment or window manager:
-Make sure its the only storage device plugged in, and run this script to expand the partition and filesystem to the full usb drive
+Make sure its the only storage device plugged in, and run this script to expand the partition and filesystem to the full usb drive. This will reboot when complete, so you'll have to press `control+u` again to boot to the external media. 
 ```
 cd /InstallResources/
 ./InstallToUSB
@@ -86,11 +86,13 @@ If you want a quick guide on how to connect to wifi, check out [this down below]
 
 The first expands the partition and filesystem to use the entire drive.
 Make sure you only have one usb or sd storage device plugged into the machine.
+This will reboot when complete, so you'll have to press `control+u` again to boot to the external media. 
 Run:
 ```
 cd /InstallResources/
 ./InstallToUSB
 ```
+You can verify it worked by running `df -h` after the reboot. The original `/dev/root/` filesystem was only ~2GB
 Then run this script which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
 
 If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.  
