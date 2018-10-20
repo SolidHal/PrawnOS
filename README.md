@@ -199,3 +199,7 @@ PrawnOS is free and unencumbered software released under the terms of the GNU
 General Public License, version 2; see COPYING for the license text. For a list
 of its authors and contributors, see AUTHORS.
 
+
+
+[![Github All Releases](https://img.shields.io/github/downloads/SolidHal/PrawnOS/total.svg)]() [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org)
+
