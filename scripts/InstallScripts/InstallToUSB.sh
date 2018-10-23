@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Install PrawnOS to an external device, the first usb by default
-apt install -y gdisk parted
+
 #Make the boot partition fille the whole drive
 #Delete the partition
 sgdisk -d 2 /dev/sda
