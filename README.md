@@ -77,7 +77,7 @@ When it boots, login as root. The password is blank.
 Make sure its the only storage device plugged in, and run this script to expand the partition and filesystem to the full usb drive
 ```
 cd /InstallResources/
-./InstallToUSB
+./ExpandExternalInstall.sh
 ```
 Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 If you want a quick guide on how to connect to wifi, check out [this down below](#connecting-to-wifi-in-a-basic-environment)
@@ -89,7 +89,7 @@ Make sure you only have one usb or sd storage device plugged into the machine.
 Run:
 ```
 cd /InstallResources/
-./InstallToUSB
+./ExpandExternalInstall.sh
 ```
 Then run this script which installs the either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
 

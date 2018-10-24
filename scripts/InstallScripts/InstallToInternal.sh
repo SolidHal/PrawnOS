@@ -25,18 +25,11 @@ read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when
 echo 
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    echo Writing partitions
-    #Wipe the partition tables
-    sgdisk -o -Z /dev/mmcblk2
-    # Make new partition table
-    sgdisk -g /dev/mmcblk2
-    #Get the last usable sector, cant just take last sector as we depend on the secondary gpt
-    LUS="$(sgdisk -p /dev/mmcblk2 | grep -o 'last usable sector is.*' | awk '{print $5}')"
-    #Now use that to find how bit the filesystem partition can be
-    MAX_SIZE="$(expr $LUS -20480 - 65536)"
-    # Make new entries
-    cgpt add -i 1 -b 20480 -s 65536 -t kernel -l KERNEL -S 1 -T 5 -P 10 /dev/mmcblk2
-    cgpt add -i 2 -b 86016 -s $MAX_SIZE -t data -l Root /dev/mmcblk2
+    #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
+    dmesg -D
+    echo Writing partition map
+    sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+    dmesg -E
     echo Writing kernel partition
     dd if=/dev/sda1 of=/dev/mmcblk2p1
     echo Writing Filesystem, this will take about 4 minutes...
