@@ -29,7 +29,7 @@ done
 
 locale-gen
 #Install shared packages
-apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils xserver-xorg-input-synaptics mousepad vlc dconf-tools sudo dtrx emacs25
+apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-tools sudo dtrx emacs25
 apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
@@ -87,7 +87,7 @@ cp -rf $DIR/default.pa /etc/pulse/default.pa
 cp -rf $DIR/sound.sh /etc/acpi/sound.sh
 cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
-cp -rf $DIR/50-synaptics.conf /etc/X11/xorg.conf.d/
+cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 apt clean && apt autoremove --purge
 
