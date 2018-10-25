@@ -25,8 +25,11 @@ read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when
 echo 
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
+    #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
+    dmesg -D
     echo Writing partition map
     sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+    dmesg -E
     echo Writing kernel partition
     dd if=/dev/sda1 of=/dev/mmcblk2p1
     echo Writing Filesystem, this will take about 4 minutes...

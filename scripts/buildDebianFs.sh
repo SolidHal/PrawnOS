@@ -80,7 +80,7 @@ create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://deb.debian.org/debian
+qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://ftp.us.debian.org/debian
 chroot $outmnt passwd -d root
 
 
@@ -102,7 +102,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
