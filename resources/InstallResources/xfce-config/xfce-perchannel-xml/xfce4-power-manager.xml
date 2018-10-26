@@ -16,9 +16,9 @@
     <property name="inactivity-on-battery" type="empty"/>
     <property name="brightness-level-on-ac" type="empty"/>
     <property name="inactivity-sleep-mode-on-battery" type="uint" value="1"/>
-    <property name="lid-action-on-battery" type="uint" value="1"/>
+    <property name="lid-action-on-battery" type="uint" value="0"/>
     <property name="logind-handle-lid-switch" type="bool" value="true"/>
-    <property name="lid-action-on-ac" type="uint" value="1"/>
+    <property name="lid-action-on-ac" type="uint" value="0"/>
     <property name="lock-screen-suspend-hibernate" type="bool" value="false"/>
   </property>
 </channel>
