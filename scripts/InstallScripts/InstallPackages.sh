@@ -19,11 +19,12 @@
 DIR=/InstallResources
 
 while true; do
-    read -p "install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
-    case $XL in
+    read -p "install (M)ATE, (X)fce4, or (L)xqt, if unsure choose (M)ATE: " XLM
+    case $XLM in
+        [Mm]* ) DE=MATE; break;;
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
-        * ) echo "Please answer (X)fce4 or (L)xqt";;
+        * ) echo "Please answer (M)ATE, (X)fce4, or (L)xqt";;
     esac
 done
 
@@ -32,11 +33,20 @@ locale-gen
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-tools sudo dtrx emacs25
 apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
 [ "$DE" = "lxqt" ] && apt install -y lxqt
+
+if [ "$DE" = "MATE" ]
+then
+    apt install -y mate-desktop-enviroment system-config-printer numix-gtk-theme plank
+    #Copy in wallpapers
+    rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+    #Copy in lightdm/light greeter settings
+    cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
+fi
 
 if [ "$DE" = "xfce" ]
 then
+  apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
 
