@@ -32,7 +32,7 @@ locale-gen
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-tools sudo dtrx emacs25
 apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice firefox-esr
 [ "$DE" = "lxqt" ] && apt install -y lxqt
 
 if [ "$DE" = "xfce" ]
@@ -67,6 +67,15 @@ then
   #install plank launcher
   mkdir -p /etc/skel/.config/plank/dock1/launchers/
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
+
+  #install firefox-esr default settings
+  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+
+  #Install the source code pro font for spacemacs
+  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
+  cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
+  fc-cache
 
   #Install xmodmap map, autostart
   cp -rf $DIR/xfce-config/xmodmap/.Xmodmap /etc/skel/
