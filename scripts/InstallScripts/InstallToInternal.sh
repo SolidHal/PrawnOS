@@ -33,10 +33,12 @@ then
     echo Writing kernel partition
     dd if=/dev/sda1 of=/dev/mmcblk2p1
     echo Writing Filesystem, this will take about 4 minutes...
-    dd if=/dev/sda2 of=/dev/mmcblk2p2 bs=50M
-    echo Expanding Filesystem
+    mkfs.ext4 -F -b 1024 -m 0 -O ^has_journal /dev/mmcblk2p2
+    mkdir -p /mnt/mmc/
+    rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
+    umount /dev/mmcblk2
+    echo Running fsck
     e2fsck -p -f /dev/mmcblk2p2
-    resize2fs /dev/mmcblk2p2
     echo Rebooting... Please remove the usb drive once shutdown is complete
     reboot
 fi
