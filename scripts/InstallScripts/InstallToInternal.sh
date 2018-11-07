@@ -37,7 +37,7 @@ then
     mkdir -p /mnt/mmc/
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
     #Install a base fstab
-    echo "/dev/mmcblk2p2 / ext4 defaults 0 1" > /mnt/mmc/etc/fstab
+    echo "/dev/mmcblk2p2 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     umount /dev/mmcblk2
     echo Running fsck
     e2fsck -p -f /dev/mmcblk2p2
