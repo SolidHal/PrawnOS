@@ -35,6 +35,7 @@ then
     echo Writing Filesystem, this will take about 4 minutes...
     mkfs.ext4 -F -b 1024 -m 0 -O ^has_journal /dev/mmcblk2p2
     mkdir -p /mnt/mmc/
+    mount /dev/mmcblk2p2 /mnt/mmc
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
     #Install a base fstab
     echo "/dev/mmcblk2p2 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
