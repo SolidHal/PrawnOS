@@ -100,6 +100,10 @@ cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 apt clean && apt autoremove --purge
 
+#enable periodic TRIM
+cp /usr/share/doc/util-linux/examples/fstrim.{service,timer} /etc/systemd/system
+systemctl enable fstrim.timer
+
 dmesg -D
 
 #Force a safe username
