@@ -1,7 +1,7 @@
 SolidHal     (hal@halemmerich.com)
 
 Contributors:
-JermeyRand (jeremyrand@airmail.cc)
+JeremyRand (jeremyrand@airmail.cc)
 - Improvement to include the proper dconf packages instead of the transitional dummy package
 
 With spcial thanks to:
