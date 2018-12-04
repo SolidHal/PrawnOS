@@ -1,4 +1,9 @@
 SolidHal     (hal@halemmerich.com)
+
+Contributors:
+JermeyRand (jeremyrand@airmail.cc)
+- Improvement to include the proper dconf packages instead of the transitional dummy package
+
 With spcial thanks to:
 Dima Krasner (dima@dimakrasner.com) 
 - The core concepts of filesystem and kernel building for the c201 are based on his work with devsus
