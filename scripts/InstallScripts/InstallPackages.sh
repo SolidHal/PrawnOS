@@ -101,7 +101,7 @@ cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 apt clean && apt autoremove --purge
 
 #enable periodic TRIM
-cp /usr/share/doc/util-linux/examples/fstrim.{service,timer} /etc/systemd/system
+cp /usr/share/doc/util-linux/examples/fstrim.{service,timer} /etc/systemd/system || cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
 systemctl enable fstrim.timer
 
 dmesg -D
