@@ -95,6 +95,8 @@ chmod +x $outmnt/*.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
+#setup apt pinning
+cp $build_resources/apt-preferences $outmnt/etc/apt/preferences
 
 #Setup the locale
 chroot $outmnt echo en_US.UTF-8 UTF-8 > /etc/locale.gen
@@ -102,7 +104,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
@@ -110,6 +112,9 @@ chroot $outmnt apt-get clean
 
 #Download the packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice firefox-esr sudo pavucontrol-qt
+
+#Grab firefox from buster, since stretch is broken
+chroot $outmnt apt -t testing install -y -d firefox-esr
 
 #Download support for libinput-gestures
 chroot $outmnt apt install -y libinput-tools xdotool build-essential
