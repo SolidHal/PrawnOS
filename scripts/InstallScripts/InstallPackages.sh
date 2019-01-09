@@ -109,6 +109,10 @@ systemctl enable fstrim.timer
 
 dmesg -D
 
+#Have the user set a root password
+echo " Enter a password for the root user"
+passwd
+
 #Force a safe username
 while true; do
     echo " Enter new username: "
