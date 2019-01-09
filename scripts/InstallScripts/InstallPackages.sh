@@ -32,6 +32,9 @@ locale-gen
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs25
 apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
+#install firefox from buster
+apt -t testing install -y firefox-esr
+
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice firefox-esr
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
