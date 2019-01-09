@@ -19,7 +19,7 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
-KVER=4.17.2
+KVER=4.17.19
 TEST_PATCHES=false
 
 ROOT_DIR=`pwd`
