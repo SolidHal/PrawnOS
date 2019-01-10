@@ -27,15 +27,17 @@ while true; do
     esac
 done
 
-locale-gen
 #Install shared packages
 apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs25
 apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
-#install firefox from buster
+# #install chromium from sid
+# apt -t unstable install -y chromium
+
+# #install firefox from buster
 apt -t testing install -y firefox-esr
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice firefox-esr
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
 if [ "$DE" = "xfce" ]
@@ -111,7 +113,11 @@ dmesg -D
 
 #Have the user set a root password
 echo " Enter a password for the root user"
-passwd
+until passwd
+do
+    echo " Enter a password for the root user"
+    passwd
+done
 
 #Force a safe username
 while true; do

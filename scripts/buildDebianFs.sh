@@ -58,7 +58,7 @@ trap cleanup INT TERM EXIT
 
 
 create_image() {
-  # it's a sparse file - that's how we fit a 16GB image inside a 2GB one
+  # it's a sparse file - that's how we fit a 16GB image inside a 3GB one
   dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
   parted --script $1 mklabel gpt
   cgpt create $1
@@ -75,7 +75,7 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# create a 2GB image with the Chrome OS partition layout
+# create a 3GB image with the Chrome OS partition layout
 create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
 # install Debian on it
@@ -99,7 +99,7 @@ cp $build_resources/sources.list $outmnt/etc/apt/sources.list
 cp $build_resources/apt-preferences $outmnt/etc/apt/preferences
 
 #Setup the locale
-chroot $outmnt echo en_US.UTF-8 UTF-8 > /etc/locale.gen
+cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
 
 #Install the base packages
@@ -110,15 +110,19 @@ chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping tra
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
-#Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice firefox-esr sudo pavucontrol-qt
-
-#Grab firefox from buster, since stretch is broken
-chroot $outmnt apt -t testing install -y -d firefox-esr
-
 #Download support for libinput-gestures
 chroot $outmnt apt install -y libinput-tools xdotool build-essential
 #Package is copied into /InstallResources/packages
+
+#Download the packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt
+
+# #grab chromium from sid, since stretch and buster are broken
+# chroot $outmnt apt-get -t unstable install -d -y chromium
+
+# #grab firefox from buster, since stretch is broken
+chroot $outmnt apt-get -t testing install -d -y firefox-esr
+
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -131,9 +135,6 @@ make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 rm -f $outmnt/lib/modules/3.14.0/{build,source}
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
 install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_7010.fw $outmnt/lib/firmware/ath9k_htc/htc_7010-1.4.0.fw
-
-#Install the regulatory.db files
-install -m 644 $build_resources/regdb/wireless-regdb-2018.09.07/regulatory.db* $outmnt/lib/firmware/
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1

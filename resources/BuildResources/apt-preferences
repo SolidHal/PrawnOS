@@ -5,3 +5,7 @@ Pin-Priority: 700
 Package: *
 Pin: release a=testing
 Pin-Priority: 650
+
+Package: *
+Pin: release a=unstable
+Pin-Priority: 600
