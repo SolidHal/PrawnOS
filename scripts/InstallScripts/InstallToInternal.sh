@@ -28,7 +28,29 @@ then
     #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
     dmesg -D
     echo Writing partition map
-    sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+    DISK_SZ="$(blockdev --getsz /dev/mmcblk2)"
+    echo Total disk size is: $DISK_SZ
+    if [ $DISK_SZ = 30785536 ]
+    then
+        echo Detected Emmc Type 1
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+
+    elif [ $DISK_SZ = 30777344 ]
+    then
+        echo Detected Emmc Type 2
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+    else
+        echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
+        echo Try a fallback value? This will allow installation to continue, at the cost of a very small amoutnt of disk space. This may not work.
+        read -p "[Y/n]" -n 1 -r
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+            echo Trying Emmc Type 2
+            sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+        else
+            exit
+        fi
+    fi
     dmesg -E
     echo Writing kernel partition
     dd if=/dev/sda1 of=/dev/mmcblk2p1
