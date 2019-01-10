@@ -3,6 +3,7 @@ SolidHal     (hal@halemmerich.com)
 Contributors:
 JeremyRand (jeremyrand@airmail.cc)
 - Improvement to include the proper dconf packages instead of the transitional dummy package
+- Improvements to support building off of buster instead of stretch
 
 With spcial thanks to:
 Dima Krasner (dima@dimakrasner.com) 
