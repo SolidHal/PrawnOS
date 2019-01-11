@@ -33,7 +33,7 @@ fi
 
 outmnt=$(mktemp -d -p `pwd`)
 
-outdev=/dev/loop4
+outdev=/dev/loop5
 
 install_resources=resources/InstallResources
 build_resources=resources/BuildResources
