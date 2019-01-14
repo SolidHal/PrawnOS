@@ -1,6 +1,12 @@
-# PrawnOS
+<p align="center">
+<img src="/resources/BuildResources/logo/newPrawn_transparent_high_compression.png" alt="PrawnOS" data-canonical-src="/resources/BuildResources/logo/newPrawn_transparent_high_compression.png" width="200" height="200" /></p>
 
-A build system for making blobless debian and mainline kernel for the Asus c201 Chromebook
+<h1 align="center">
+PrawnOS
+</h1>
+
+
+#### A build system for making blobless debian and mainline kernel for the Asus c201 Chromebook
 
 Build Debian filesystem with:
 * No blobs, anywhere. 
@@ -15,9 +21,9 @@ Build a deblobbed mainline kernel with:
 
 Don't want to use one of the two usb ports of for the WIFI dongle? [check out this](#build-the-wifi-dongle-into-the-laptop)
 
-### why
+### Why
 
-Combined with libreboot, an AR9271 or AR7010 wifi dongle, and a libre OS (like Debian with the main repos, the one built by this) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
+Combined with libreboot, an AR9271 or AR7010 wifi dongle, and a libre OS (like Debian with the main repos, the one built by PrawnOS) the asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
 ### Image Download
 
@@ -159,7 +165,7 @@ Some useful things can be found in `DOCUMENTATION.md`
 
 ### Make options, developer tools
 (All of these should be ran as root or with sudo to avoid issues) 
-The makefile automates many processes that make debuggung the kernel or the filesystem easier. 
+The makefile automates many processes that make debugging the kernel or the filesystem easier. 
 TO begin with:
 
 `make kernel_config` cross compiles `make menuconfig` Cross compiling is required for any of the linux kernel make options that edit the kernel config, as the linux kernel build system makes assumptions that change depending on what platform it is targeting. 
