@@ -78,9 +78,15 @@ create_image() {
 # create a 3GB image with the Chrome OS partition layout
 create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
 
+# use default debootstrap mirror if none is specified
+if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
+then
+    PRAWNOS_DEBOOTSTRAP_MIRROR=http://ftp.us.debian.org/debian
+fi
+
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt http://ftp.us.debian.org/debian
+qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
 chroot $outmnt passwd -d root
 
 
