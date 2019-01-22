@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=4.17.2
+KVER=4.17.9
 
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
