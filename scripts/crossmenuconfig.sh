@@ -28,6 +28,11 @@ cd build
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
 [ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz
 cd linux-$KVER
+make clean
+make mrproper
+#Apply the usb and mmc patches if unapplied
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
 cp $RESOURCES/config .config
 make menuconfig ARCH=arm CROSS_COMPILE=arm-none-eabi- .config
 cp .config $RESOURCES/config
