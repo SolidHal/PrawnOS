@@ -149,7 +149,7 @@ Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/tr
 If you just want a basic enviroment without xfce or lxqt can skip running InstallPackages.sh. You can connect to wifi using wpa_supplicant by running the following commands:
 ```
 wpa_passphrase <Network_name> <network_password> > wpa.conf
-wpa_supplicant -D wext -i wlan0 -c wpa.conf
+wpa_supplicant -D nl80211 -i wlan0 -c wpa.conf
 ```
 Now switch to another tty by pressing ctrl+alt+f2
 Login as root, and run
