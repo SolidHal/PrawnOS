@@ -15,8 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=4.17.2
+if [ -z "$1" ]
+then
+    echo "No kernel version supplied"
+    exit 1
+fi
+KVER=$1
 
+if [ -z "$2" ]
+then
+    echo "No image filesystem image supplied"
+    exit 1
+fi
 outmnt=$(mktemp -d -p `pwd`)
 outdev=/dev/loop7
 
@@ -42,7 +52,7 @@ trap cleanup INT TERM EXIT
 
 #Mount the build filesystem image
 
-losetup -P $outdev PrawnOS-*-c201-libre-2GB*
+losetup -P $outdev $2
 mount -o noatime ${outdev}p2 $outmnt
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271

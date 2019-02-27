@@ -18,8 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-
-KVER=4.17.19
+if [ -z "$1" ]
+then
+    echo "No kernel version supplied"
+    exit 1
+fi
+KVER=$1
 TEST_PATCHES=false
 
 ROOT_DIR=`pwd`

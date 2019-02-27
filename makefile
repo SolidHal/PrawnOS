@@ -13,12 +13,29 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+KVER=4.17.19
+OUTNAME=PrawnOS-Alpha-c201-libre-2GB.img
+BASE=$(OUTNAME)-BASE
+
+
+#Usage:
+#run make image
+#this will generate two images named OUTNAME and OUTNAME-BASE
+#-BASE is only the filesystem with no kernel.
+
+
+#if you make any changes to the kernel or kernel config with make kernel_config
+#run kernel_inject
+
+
+
 .PHONY: clean
 clean:
 	@echo "Enter one of:"
 	@echo "	clean_kernel - which deletes the untar'd kernel folder from build"
 	@echo "	clean_ath - which deletes the untar'd ath9k driver folder from build"
-	@echo "	clean_img - which deletes the built PrawnOS images, this is ran when make image is ran"
+	@echo "	clean_img - which deletes the built PrawnOS image, this is ran when make image is ran"
+	@echo " clean_fs - which deletes the built PrawnOS base image"
 	@echo "	clean_all - which does all of the above"
 	@echo "	in most cases none of these need to be used manually as most cleanup steps are handled automatically"
 
@@ -32,33 +49,48 @@ clean_ath:
 
 .PHONY: clean_img
 clean_img:
-	rm -f PrawnOS-*-c201-libre-*GB.img
+	rm -f $(OUTNAME)
+
+.PHONY: clean_fs
+clean_fs:
+	rm -r $(BASE)
 
 .PHONY: clean_all
 clean_all:
 	make clean_kernel
 	make clean_ath
 	make clean_img
+	make clean_fs
 
 
 .PHONY: kernel
 kernel:
-	scripts/buildKernel.sh
+	scripts/buildKernel.sh $(KVER)
 
+#makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
-	make clean_img
-	scripts/buildDebianFs.sh
+	[ -f $(BASE) ] || scripts/buildFilesystem.sh $(KVER)
 
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	scripts/buildNewKernelIntoFS.sh
+	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+
+.PHONY: injected_image
+injected_image: #makes a copy of the base image with a new injected kernel
+	make kernel
+	cp PrawnOS-Alpha-c201-libre-2GB.img-BASE PrawnOS-Alpha-c201-libre-2GB.img
+	make kernel_inject
 
 .PHONY: image
 image:
 	make clean_img
-	scripts/buildKernel.sh
-	scripts/buildDebianFs.sh
+	make kernel
+	make filesystem
+#Make a new copy of the filesystem image
+	cp $(BASE) $(OUTNAME)
+	make kernel_inject
+
 
 .PHONY: live_image
 live_image:
@@ -66,4 +98,8 @@ live_image:
 
 .PHONY: kernel_config
 kernel_config:
-	scripts/crossmenuconfig.sh
+	scripts/crossmenuconfig.sh $(KVER)
+
+.PHONY: patch_kernel
+patch_kernel:
+	scripts/patchKernel.sh

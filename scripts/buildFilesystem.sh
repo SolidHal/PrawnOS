@@ -19,7 +19,6 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
-KVER=4.17.19
 
 #Ensure Sudo
 if [ ! $UID = "0" ]
@@ -29,11 +28,18 @@ then
     exit 1
 fi
 
+if [ -z "$1" ]
+then
+    echo "No kernel version supplied"
+    exit 1
+fi
+KVER=$1
+
 [ ! -d build ] && echo "No build folder found, is the kernel built?" && exit
 
 outmnt=$(mktemp -d -p `pwd`)
 
-outdev=/dev/loop4
+outdev=/dev/loop5
 
 install_resources=resources/InstallResources
 build_resources=resources/BuildResources
@@ -76,7 +82,7 @@ create_image() {
 }
 
 # create a 3GB image with the Chrome OS partition layout
-create_image PrawnOS-Alpha-c201-libre-2GB.img $outdev 50M 40 $outmnt
+create_image PrawnOS-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -96,6 +102,11 @@ cp -R $install_resources/ $outmnt/InstallResources/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
 chmod +x $outmnt/*.sh
+
+
+#Copy in the test script
+cp scripts/InstallScripts/wifi-test.sh $outmnt/wifi-test.sh
+chmod +x $outmnt/wifi-test.sh
 
 #Setup the chroot for apt 
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -133,14 +144,6 @@ chroot $outmnt apt-get -t testing install -d -y firefox-esr
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 echo -n "127.0.0.1        PrawnOS-Alpha" > $outmnt/etc/hosts
-
-# put the kernel in the kernel partition, modules in /lib/modules and AR9271
-# firmware in /lib/firmware
-dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
-make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
-rm -f $outmnt/lib/modules/3.14.0/{build,source}
-install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
-install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_7010.fw $outmnt/lib/firmware/ath9k_htc/htc_7010-1.4.0.fw
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
