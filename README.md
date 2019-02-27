@@ -149,7 +149,7 @@ Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/tr
 If you just want a basic enviroment without xfce or lxqt can skip running InstallPackages.sh. You can connect to wifi using wpa_supplicant by running the following commands:
 ```
 wpa_passphrase <Network_name> <network_password> > wpa.conf
-wpa_supplicant -D nl80211 -i wlan0 -c wpa.conf
+wpa_supplicant -i wlan0 -c wpa.conf
 ```
 Now switch to another tty by pressing ctrl+alt+f2
 Login as root, and run
@@ -172,9 +172,9 @@ TO begin with:
 
 `make kernel` builds just the kernel
 
-`make filesystem` builds the filesystem and kernel into a PrawnOS.img
+`make filesystem` builds the -BASE filesystem image with no kernel
 
-`make kernel_inject` Injects a newly built kernel into a previously build PrawnOS.img located in the root of the checkout
+`make kernel_inject` Injects a newly built kernel into a previously build PrawnOS.img located in the root of the checkout. Usually, this will be a copy of the -BASE image made by make filesystem
 
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
@@ -198,10 +198,10 @@ The pulse audio mixer will only run if you are logged in as a non-root account. 
 
 ### Credits and Legal Information
 
-Thanks to dimkr for his great devsus scripts, from which PrawnOS took much inspiration
+Thanks to dimkr for his great devsus scripts for the chromeos 3.14 kernel, from which PrawnOS took much inspiration
 https://github.com/dimkr/devsus
 
-Because of this started as a fork of devsus, much of this repos history can be found at https://github.com/SolidHal/devsus/tree/hybrid_debian
+Because of this started as a fork of devsus-3.14, much of this repos history can be found at https://github.com/SolidHal/devsus/tree/hybrid_debian
 
 PrawnOS is free and unencumbered software released under the terms of the GNU
 General Public License, version 2; see COPYING for the license text. For a list
