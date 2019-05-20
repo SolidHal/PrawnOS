@@ -3,11 +3,3 @@
 Package: *
 Pin: release a=stretch-backports
 Pin-Priority: 450
-
-Package: *
-Pin: release a=testing
-Pin-Priority: 400
-
-Package: *
-Pin: release a=unstable
-Pin-Priority: 350
