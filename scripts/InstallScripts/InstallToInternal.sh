@@ -21,14 +21,6 @@
 
 RESOURCES=/InstallResources
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
 BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
 
 
