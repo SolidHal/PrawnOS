@@ -1,0 +1,36 @@
+From: Douglas Anderson <dianders@chromium.org>
+Date: Tue, 07 May 2019 13:49:58 -0700 (PDT)
+
+When calculating the MMC phase we can just use clk_hw_get_rate()
+instead of clk_get_rate().  This avoids recalculating the rate.
+
+Suggested-by: Stephen Boyd <sboyd@kernel.org>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+
+ drivers/clk/rockchip/clk-mmc-phase.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
+index 026a26bb702d..07526f64dbfd 100644
+--- a/drivers/clk/rockchip/clk-mmc-phase.c
++++ b/drivers/clk/rockchip/clk-mmc-phase.c
+@@ -55,7 +55,7 @@ static unsigned long rockchip_mmc_recalc(struct clk_hw *hw,
+ static int rockchip_mmc_get_phase(struct clk_hw *hw)
+ {
+ 	struct rockchip_mmc_clock *mmc_clock = to_mmc_clock(hw);
+-	unsigned long rate = clk_get_rate(hw->clk);
++	unsigned long rate = clk_hw_get_rate(hw);
+ 	u32 raw_value;
+ 	u16 degrees;
+ 	u32 delay_num = 0;
+@@ -86,7 +86,7 @@ static int rockchip_mmc_get_phase(struct clk_hw *hw)
+ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+ {
+ 	struct rockchip_mmc_clock *mmc_clock = to_mmc_clock(hw);
+-	unsigned long rate = clk_get_rate(hw->clk);
++	unsigned long rate = clk_hw_get_rate(hw);
+ 	u8 nineties, remainder;
+ 	u8 delay_num;
+ 	u32 raw_value;
+
