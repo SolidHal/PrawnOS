@@ -20,6 +20,17 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 RESOURCES=/InstallResources
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
+
 
 read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when finished, do you want to continue? [Y/n]" -n 1 -r
 echo 
@@ -53,7 +64,7 @@ then
     fi
     dmesg -E
     echo Writing kernel partition
-    dd if=/dev/sda1 of=/dev/mmcblk2p1
+    dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
     echo Writing Filesystem, this will take about 4 minutes...
     mkfs.ext4 -F -b 1024 -m 0 -O ^has_journal /dev/mmcblk2p2
     mkdir -p /mnt/mmc/
