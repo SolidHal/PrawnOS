@@ -51,10 +51,11 @@ then
   #Copy in xfce4 default settings
   cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
   cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
-  
+
   #Copy in lightdm/light greeter settings
+  cp -f $DIR/icons/icon-small-noback.png /etc/lightdm/
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
-  
+
   #Copy in wallpapers
   rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
 

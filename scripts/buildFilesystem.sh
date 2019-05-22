@@ -81,7 +81,7 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# create a 3GB image with the Chrome OS partition layout
+# create a 2GB image with the Chrome OS partition layout
 create_image PrawnOS-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
 
 # use default debootstrap mirror if none is specified
@@ -99,6 +99,8 @@ chroot $outmnt passwd -d root
 #Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS-Alpha > $outmnt/etc/hostname
 cp -R $install_resources/ $outmnt/InstallResources/
+# and the icons for the lockscreen and app menu
+cp  $build_resources/logo/icons/ $outmnt/InstallResources/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
 chmod +x $outmnt/*.sh

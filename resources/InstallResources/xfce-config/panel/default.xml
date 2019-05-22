@@ -26,6 +26,7 @@
     <property name="plugin-1" type="string" value="applicationsmenu">
       <property name="show-menu-icons" type="bool" value="true"/>
       <property name="show-button-title" type="bool" value="true"/>
+      <property name="button-icon" type="string" value="/etc/lightdm/icon.png"/>
     </property>
     <property name="plugin-2" type="string" value="actions"/>
     <property name="plugin-15" type="string" value="separator">
