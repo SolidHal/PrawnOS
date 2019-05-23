@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 
 # This file is part of PrawnOS (http://www.prawnos.com)
@@ -18,8 +18,11 @@
 
 DIR=/InstallResources
 
+cat $DIR/icons/ascii-icon.txt
+echo ""
+
 while true; do
-    read -p "install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
+    read -p "Install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
     case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
@@ -53,7 +56,7 @@ then
   cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
 
   #Copy in lightdm/light greeter settings
-  cp -f $DIR/icons/icon-small-noback.png /etc/lightdm/icon.png
+  cp -f $DIR/icons/icon-small.png /etc/lightdm/icon.png
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
   #Copy in wallpapers
