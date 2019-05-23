@@ -58,11 +58,12 @@ then
     echo Writing kernel partition
     dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
     echo Writing Filesystem, this will take about 4 minutes...
-    mkfs.ext4 -F -b 1024 -m 0 -O ^has_journal /dev/mmcblk2p2
+    mkfs.ext4 -F -b 1024 /dev/mmcblk2p2
     mkdir -p /mnt/mmc/
     mount /dev/mmcblk2p2 /mnt/mmc
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
-    #Install a base fstab
+    #Remove the live-fstab and install a base fstab
+    rm /mnt/mmc/etc/fstab
     echo "/dev/mmcblk2p2 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     umount /dev/mmcblk2p2
     echo Running fsck

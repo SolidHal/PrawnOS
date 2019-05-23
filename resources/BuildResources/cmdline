@@ -1,1 +1,1 @@
-console=tty1 init=/sbin/init root=PARTUUID=%U/PARTNROFF=1 rootfstype=ext4 rootwait rw net.ifnames=0
+console=tty1 init=/sbin/init root=PARTUUID=%U/PARTNROFF=1 rootfstype=ext4 rootwait ro net.ifnames=0

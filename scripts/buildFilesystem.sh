@@ -75,7 +75,7 @@ create_image() {
   cgpt add -i 2 -t data -b $start -s $size -l Root $1
   # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 -O ^has_journal ${2}p2 $(($size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($size / 2))
 
   # mount the / partition
   mount -o noatime ${2}p2 $5
@@ -124,6 +124,10 @@ chroot $outmnt locale-gen
 #Install the base packages
 chroot $outmnt apt update
 chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync
+
+#add the live-boot fstab
+cp -f $build_resources/external_fstab $outmnt/etc/fstab
+chmod 644 /etc/fstab
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
