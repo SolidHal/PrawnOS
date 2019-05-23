@@ -100,7 +100,9 @@ chroot $outmnt passwd -d root
 echo -n PrawnOS-Alpha > $outmnt/etc/hostname
 cp -R $install_resources/ $outmnt/InstallResources/
 # and the icons for the lockscreen and app menu
-cp -R $build_resources/logo/icons/ $outmnt/InstallResources/
+mkdir $outmnt/InstallResources/icons/
+cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
+cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
 chmod +x $outmnt/*.sh

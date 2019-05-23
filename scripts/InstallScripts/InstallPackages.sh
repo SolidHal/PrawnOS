@@ -57,6 +57,7 @@ then
 
   #Copy in lightdm/light greeter settings
   cp -f $DIR/icons/icon-small.png /etc/lightdm/icon.png
+  chmod 644 /etc/lightdm/icon.png
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
   #Copy in wallpapers
@@ -118,17 +119,25 @@ systemctl enable fstrim.timer
 
 dmesg -D
 
+echo ""
+echo ""
+echo ""
+
+cat $DIR/icons/ascii-icon.txt
+echo ""
+echo "*************Welcome To PrawnOS*************"
+echo ""
 #Have the user set a root password
-echo " Enter a password for the root user"
+echo "-----Enter a password for the root user-----"
 until passwd
 do
-    echo " Enter a password for the root user"
+    echo "-----Enter a password for the root user-----"
     passwd
 done
 
 #Force a safe username
 while true; do
-    echo " Enter new username: "
+    echo "-----Enter new username:-----"
     read username
     #ensure no whitespace
     case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
@@ -136,7 +145,7 @@ done
 until adduser $username --gecos ""
 do
     while true; do
-        echo " Enter new username: "
+        echo "-----Enter new username:-----"
         read username
         #ensure no whitespace
         case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
