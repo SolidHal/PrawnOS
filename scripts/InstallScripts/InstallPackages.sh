@@ -53,7 +53,7 @@ then
   cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
 
   #Copy in lightdm/light greeter settings
-  cp -f $DIR/icons/icon-small-noback.png /etc/lightdm/
+  cp -f $DIR/icons/icon-small-noback.png /etc/lightdm/icon.png
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
   #Copy in wallpapers
