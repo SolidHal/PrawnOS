@@ -81,14 +81,14 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# create a 2GB image with the Chrome OS partition layout
-create_image PrawnOS-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
-
 # use stretch if no suite is specified
 if [ "$PRAWNOS_SUITE" = "" ]
 then
     PRAWNOS_SUITE=stretch
 fi
+
+# create a 2GB image with the Chrome OS partition layout
+create_image PrawnOS-${PRAWNOS_SUITE}-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
