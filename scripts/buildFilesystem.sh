@@ -125,6 +125,9 @@ cp $build_resources/sources.list $outmnt/etc/apt/sources.list
 sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
 if [ "$PRAWNOS_SUITE" != "sid" ]
 then
+    # sid doesn't have updates or security; they're present for all other suites
+    cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
+    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
     # sid doesn't have backports; it's present for all other suites
     cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
     sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
