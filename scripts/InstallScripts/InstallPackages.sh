@@ -40,8 +40,8 @@ DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-mana
 # #install chromium from sid
 # apt -t unstable install -y chromium
 
-# #install firefox from buster
-DEBIAN_FRONTEND=noninteractive apt -t testing install -y firefox-esr
+# #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
+DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
