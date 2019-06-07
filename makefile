@@ -15,7 +15,7 @@
 
 KVER=4.17.19
 ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=stretch
+PRAWNOS_SUITE=buster
 endif
 OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-Alpha-c201-libre-2GB.img
 BASE=$(OUTNAME)-BASE

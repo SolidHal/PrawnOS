@@ -81,10 +81,10 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# use stretch if no suite is specified
+# use buster if no suite is specified
 if [ "$PRAWNOS_SUITE" = "" ]
 then
-    PRAWNOS_SUITE=stretch
+    PRAWNOS_SUITE=buster
 fi
 
 # create a 2GB image with the Chrome OS partition layout
