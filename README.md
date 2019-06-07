@@ -56,7 +56,7 @@ This has only been tested on a Debian stretch VM, and borrows some components fr
 Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or sd card device. If you're not familiar with dd, check out Debians
  how to page https://www.debian.org/CD/faq/#write-usb
 ```
-sudo dd if=PrawnOs-*-c201-libre-2GB.img of=/dev/$USB_DEVICE bs=50M; sync
+sudo dd if=PrawnOs-*-c201-libre-2GB*.img of=/dev/$USB_DEVICE bs=50M; sync
 ```
 
 ### Installing
