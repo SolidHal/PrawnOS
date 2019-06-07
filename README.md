@@ -179,6 +179,8 @@ TO begin with:
 `make kernel_inject` Injects a newly built kernel into a previously build PrawnOS.img located in the root of the checkout. Usually, this will be a copy of the -BASE image made by make filesystem. Only use this if you already have a built kernel and filesystem -BASE image. 
 
 
+You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `stretch`.  For example, to use Debian Buster, you can build with `sudo PRAWNOS_SUITE=buster make image`.  Note that only `stretch` and `buster` have been tested.
+
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
 

@@ -14,7 +14,10 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 KVER=4.17.19
-OUTNAME=PrawnOS-Alpha-c201-libre-2GB.img
+ifeq ($(PRAWNOS_SUITE),)
+PRAWNOS_SUITE=stretch
+endif
+OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-Alpha-c201-libre-2GB.img
 BASE=$(OUTNAME)-BASE
 
 
@@ -79,7 +82,7 @@ kernel_inject: #Targets an already built .img and swaps the old kernel with the 
 .PHONY: injected_image
 injected_image: #makes a copy of the base image with a new injected kernel
 	make kernel
-	cp PrawnOS-Alpha-c201-libre-2GB.img-BASE PrawnOS-Alpha-c201-libre-2GB.img
+	cp $(BASE) $(OUTNAME)
 	make kernel_inject
 
 .PHONY: image

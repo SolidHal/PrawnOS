@@ -81,8 +81,14 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
+# use stretch if no suite is specified
+if [ "$PRAWNOS_SUITE" = "" ]
+then
+    PRAWNOS_SUITE=stretch
+fi
+
 # create a 2GB image with the Chrome OS partition layout
-create_image PrawnOS-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
+create_image PrawnOS-${PRAWNOS_SUITE}-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -92,7 +98,7 @@ fi
 
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf stretch --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
+qemu-debootstrap --arch armhf $PRAWNOS_SUITE --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
 chroot $outmnt passwd -d root
 
 
@@ -116,8 +122,34 @@ chmod +x $outmnt/wifi-test.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
-#setup apt pinning
-cp $build_resources/apt-preferences $outmnt/etc/apt/preferences
+sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+if [ "$PRAWNOS_SUITE" != "sid" ]
+then
+    # sid doesn't have updates or security; they're present for all other suites
+    cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
+    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+    # sid doesn't have backports; it's present for all other suites
+    cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
+    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
+    #setup apt pinning
+    cp $build_resources/backports.pref $outmnt/etc/apt/preferences.d/
+    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
+fi
+if [ "$PRAWNOS_SUITE" = "stretch" ]
+then
+    # Install buster as an additional source if the suite is less than buster
+    cp $build_resources/buster.list $outmnt/etc/apt/sources.list.d/
+    #setup apt pinning
+    cp $build_resources/buster.pref $outmnt/etc/apt/preferences.d/
+fi
+if [ "$PRAWNOS_SUITE" = "stretch" ] || [ "$PRAWNOS_SUITE" = "buster" ]
+then
+    # Install sid as an additional source if the suite is less than bullseye.
+    # This should be replaced with bullseye after bullseye branches from sid.
+    cp $build_resources/sid.list $outmnt/etc/apt/sources.list.d/
+    #setup apt pinning
+    cp $build_resources/sid.pref $outmnt/etc/apt/preferences.d/
+fi
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
@@ -143,11 +175,23 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt
 
 
+if [ "$PRAWNOS_SUITE" = "stretch" ]
+then
+    CHROMIUM_SUITE=buster
+else
+    CHROMIUM_SUITE=$PRAWNOS_SUITE
+fi
 # grab chromium as well, since sound is still broken in firefox for some media
-chroot $outmnt apt-get -t testing install -d -y chromium
+chroot $outmnt apt-get -t $CHROMIUM_SUITE install -d -y chromium
 
-# #grab firefox from buster, since stretch is broken
-chroot $outmnt apt-get -t testing install -d -y firefox-esr
+if [ "$PRAWNOS_SUITE" = "stretch" ]
+then
+    FIREFOX_SUITE=buster
+else
+    FIREFOX_SUITE=$PRAWNOS_SUITE
+fi
+# #grab firefox from buster or higher, since stretch is broken
+chroot $outmnt apt-get -t $FIREFOX_SUITE install -d -y firefox-esr
 
 
 #Cleanup hosts

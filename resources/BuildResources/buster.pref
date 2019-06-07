@@ -1,0 +1,5 @@
+#Stable (stretch) defaults to 500, and higher priorities are used over lower
+
+Package: *
+Pin: release a=buster
+Pin-Priority: 400

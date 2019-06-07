@@ -1,0 +1,3 @@
+#Add buster to grab a functional firefox release
+# /etc/apt/preferences prevents this from updating the whole system
+deb http://deb.debian.org/debian/ buster main
