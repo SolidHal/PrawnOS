@@ -111,6 +111,9 @@ cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
 cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
+# remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
+apt remove -y light-locker
+
 apt clean && apt autoremove --purge
 
 #enable periodic TRIM
