@@ -1,0 +1,87 @@
+[1/2] ARM: errata: Workaround errata A12 857271 / A17 857272
+
+This adds support for working around errata A12 857271 / A17 857272.
+These errata were causing hangs on rk3288-based Chromebooks and it was
+confirmed that this workaround fixed the problems.  In the Chrome OS
+3.14 kernel [1] this erratum was known as ERRATA_FOOBAR due to lack of
+an official number from ARM (though the workaround of setting chicken
+bit 10 came from ARM).  In the meantime ARM came up with official
+errata numbers but never published the workaround upstream.
+
+Let's actually get the workaround landed.
+
+[1] https://crrev.com/c/342753
+
+Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+
+ arch/arm/Kconfig      | 19 +++++++++++++++++++
+ arch/arm/mm/proc-v7.S | 10 ++++++++++
+ 2 files changed, 29 insertions(+)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index b509cd338219..4376fe74f95e 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1172,6 +1172,15 @@  config ARM_ERRATA_825619
+ 	  DMB NSHST or DMB ISHST instruction followed by a mix of Cacheable
+ 	  and Device/Strongly-Ordered loads and stores might cause deadlock
+ 
++config ARM_ERRATA_857271
++	bool "ARM errata: A12: CPU might deadlock under some very rare internal conditions"
++	depends on CPU_V7
++	help
++	  This option enables the workaround for the 857271 Cortex-A12
++	  (all revs) erratum. Under very rare timing conditions, the CPU might
++	  hang. The workaround is expected to have a negligible performance
++	  impact.
++
+ config ARM_ERRATA_852421
+ 	bool "ARM errata: A17: DMB ST might fail to create order between stores"
+ 	depends on CPU_V7
+@@ -1193,6 +1202,16 @@  config ARM_ERRATA_852423
+ 	  config option from the A12 erratum due to the way errata are checked
+ 	  for and handled.
+ 
++config ARM_ERRATA_857272
++	bool "ARM errata: A17: CPU might deadlock under some very rare internal conditions"
++	depends on CPU_V7
++	help
++	  This option enables the workaround for the 857272 Cortex-A17 erratum.
++	  This erratum is not known to be fixed in any A17 revision.
++	  This is identical to Cortex-A12 erratum 857271.  It is a separate
++	  config option from the A12 erratum due to the way errata are checked
++	  for and handled.
++
+ endmenu
+ 
+ source "arch/arm/common/Kconfig"
+diff --git a/arch/arm/mm/proc-v7.S b/arch/arm/mm/proc-v7.S
+index 339eb17c9808..cd2accbab844 100644
+--- a/arch/arm/mm/proc-v7.S
++++ b/arch/arm/mm/proc-v7.S
+@@ -391,6 +391,11 @@  __ca12_errata:
+ 	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
+ 	orr	r10, r10, #1 << 24		@ set bit #24
+ 	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
++#endif
++#ifdef CONFIG_ARM_ERRATA_857271
++	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
++	orr	r10, r10, #1 << 10		@ set bit #10
++	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
+ #endif
+ 	b	__errata_finish
+ 
+@@ -406,6 +411,11 @@  __ca17_errata:
+ 	mrcle	p15, 0, r10, c15, c0, 1		@ read diagnostic register
+ 	orrle	r10, r10, #1 << 12		@ set bit #12
+ 	mcrle	p15, 0, r10, c15, c0, 1		@ write diagnostic register
++#endif
++#ifdef CONFIG_ARM_ERRATA_857272
++	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
++	orr	r10, r10, #1 << 10		@ set bit #10
++	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
+ #endif
+ 	b	__errata_finish
+ 

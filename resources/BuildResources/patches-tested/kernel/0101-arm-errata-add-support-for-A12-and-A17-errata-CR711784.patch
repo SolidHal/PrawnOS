@@ -1,0 +1,85 @@
+[2/2] ARM: errata: add support for A12/A17 errata CR711784 
+
+This adds a code for turning on chicken bit 11, which appears to avoid
+a potential CPU deadlock that could occur.  The exact set of
+instruction needed to trigger this errata is not totaly known but we
+have a high level of confidence that the problem is fixed by setting
+chicken bit 11.
+
+All details are in http://crbug.com/711784
+
+This erratum has no known number and thus I have tagged it CR711784
+(after the Chrome OS bug number).  I have created separate A12 / A17
+configs to match how the rest of the A12 / A17 errata is handled.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+
+ arch/arm/Kconfig      | 18 ++++++++++++++++++
+ arch/arm/mm/proc-v7.S | 10 ++++++++++
+ 2 files changed, 28 insertions(+)
+
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 4376fe74f95e..34ec9039206b 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1181,6 +1181,13 @@  config ARM_ERRATA_857271
+ 	  hang. The workaround is expected to have a negligible performance
+ 	  impact.
+ 
++config ARM_ERRATA_CR711784_A12
++	bool "ARM errata: A12: conditional instructions can lead to a CPU hang"
++	depends on CPU_V7
++	help
++	  This option enables the workaround for a Cortex-A12 erratum without a
++	  number. The problems are best described in https://crbug.com/711784
++
+ config ARM_ERRATA_852421
+ 	bool "ARM errata: A17: DMB ST might fail to create order between stores"
+ 	depends on CPU_V7
+@@ -1212,6 +1219,17 @@  config ARM_ERRATA_857272
+ 	  config option from the A12 erratum due to the way errata are checked
+ 	  for and handled.
+ 
++config ARM_ERRATA_CR711784_A17
++	bool "ARM errata: A17: conditional instructions can lead to a CPU hang"
++	depends on CPU_V7
++	help
++	  This option enables the workaround for a Cortex-A17 erratum without a
++	  number. The problems are best described in https://crbug.com/711784
++	  This erratum is not known to be fixed in any A17 revision.
++	  This is identical to Cortex-A12 erratum CR711784.  It is a separate
++	  config option from the A12 erratum due to the way errata are checked
++	  for and handled.
++
+ endmenu
+ 
+ source "arch/arm/common/Kconfig"
+diff --git a/arch/arm/mm/proc-v7.S b/arch/arm/mm/proc-v7.S
+index cd2accbab844..a5156ea734ee 100644
+--- a/arch/arm/mm/proc-v7.S
++++ b/arch/arm/mm/proc-v7.S
+@@ -396,6 +396,11 @@  __ca12_errata:
+ 	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
+ 	orr	r10, r10, #1 << 10		@ set bit #10
+ 	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
++#endif
++#ifdef CONFIG_ARM_ERRATA_CR711784_A12
++	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
++	orr	r10, r10, #1 << 11		@ set bit #11
++	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
+ #endif
+ 	b	__errata_finish
+ 
+@@ -416,6 +421,11 @@  __ca17_errata:
+ 	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
+ 	orr	r10, r10, #1 << 10		@ set bit #10
+ 	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
++#endif
++#ifdef CONFIG_ARM_ERRATA_CR711784_A17
++	mrc	p15, 0, r10, c15, c0, 1		@ read diagnostic register
++	orr	r10, r10, #1 << 11		@ set bit #11
++	mcr	p15, 0, r10, c15, c0, 1		@ write diagnostic register
+ #endif
+ 	b	__errata_finish
