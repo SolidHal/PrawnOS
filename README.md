@@ -17,7 +17,7 @@ Build a deblobbed mainline kernel with:
 * Patches for reliable USB.
 * Patches to support the custom GPT partition table required to boot.
 * Support for Atheros AR9271 and AR7010 WiFi dongles.
-* Support for CSR8150 bluetooth dongles.
+* Support for CSR8510 (and possibly other) bluetooth dongles.
 
 Don't want to use one of the two USB ports of for the WiFi dongle? [check out this](#build-the-wifi-dongle-into-the-laptop)
 
