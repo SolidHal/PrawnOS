@@ -6,7 +6,7 @@ PrawnOS
 </h1>
 
 
-#### A build system for making blobless Debian and mainline kernel for the Asus c201 Chromebook
+#### A build system for making blobless Debian and mainline Linux kernel for the Asus c201 Chromebook
 
 Build Debian filesystem with:
 * No blobs, anywhere. 
@@ -19,17 +19,22 @@ Build a deblobbed mainline kernel with:
 * Support for Atheros AR9271 and AR7010 WiFi dongles.
 * Support for CSR8510 (and possibly other) bluetooth dongles.
 
-Don't want to use one of the two USB ports of for the WiFi dongle? [check out this](#build-the-wifi-dongle-into-the-laptop)
+Don't want to use one of the two USB ports for the WiFi dongle? [check out this](#build-the-wifi-dongle-into-the-laptop)
 
-### Why
+## Why
 
 Combined with Libreboot, an AR9271 or AR7010 WiFi dongle, and a libre OS (like Debian with the main repos, the one built by PrawnOS) the Asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
-### Image Download
+## What is a blob?
+
+In the world of free and open-source software, the term is used to refer to proprietary device drivers, which are distributed without their source code, exclusively through binary code; in such use, the term binary blob is common.
+[wikipedia](https://en.wikipedia.org/wiki/Binary_large_object)
+
+## Image Download
 
 If you don't want to or can't build the image, you can find downloads under <releases> https://github.com/SolidHal/PrawnOS/releases
 
-### Dependencies
+## Dependencies
 
 Building PrawnOS has been tested on Debian 9 Stretch (in a VM)
 This is the only build enviroment that is supported. 
@@ -45,21 +50,21 @@ These packages are required:
 		lzip libssl-dev libncurses-dev flex bison sudo patch bc
 ```
 
-### Build
+## Build
 Clone this Git repo. 
 
 Build the `PrawnOS-...-.img` by running `sudo make image`
 
 This has only been tested on a Debian stretch VM, and borrows some components from the host system to setup apt/debootstrap during the build process so I would recommend using a Debian Stretch VM to avoid any issues. 
 
-### Write to a flash drive or SD card
+## Write to a flash drive or SD card
 Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or SD card device. If you're not familiar with dd, check out Debian's
  how to page https://www.debian.org/CD/faq/#write-usb
 ```
 sudo dd if=PrawnOs-*-c201-libre-2GB*.img of=/dev/$USB_DEVICE bs=50M; sync
 ```
 
-### Installing
+## Installing
 
 There are two ways to use PrawnOS. 
 
@@ -159,11 +164,17 @@ dhclient wlan0
 When that finishes, you should have access to the internet. 
 
 
-### Documentation
+### Upgrading the kernel
+
+The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
+
+To use it, write the new PrawnOS image to a USB drive or SD card, boot the laptop to it by pressing `control+u` at boot, navigate to the `/InstallResources` folder, and run the script. 
+
+## Documentation
 Some useful things can be found in `DOCUMENTATION.md`
 
 
-### Make options, developer tools
+## Make options, developer tools
 (All of these should be run as root or with sudo to avoid issues) 
 The makefile automates many processes that make debugging the kernel or the filesystem easier. 
 To begin with:
@@ -197,11 +208,11 @@ Sick of having a USB dongle on the outside of your machine for wi-fi? Want to be
 Check out the instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
 Warning: decent soldering skills required
 
-### Troubleshooting
+## Troubleshooting
 
 The pulse audio mixer will only run if you are logged in as a non-root account. This is an issue (feature?) of pulse audio
 
-### Credits and Legal Information
+## Credits and Legal Information
 
 Thanks to dimkr for his great devsus scripts for the Chrome OS 3.14 kernel, from which PrawnOS took much inspiration
 https://github.com/dimkr/devsus
