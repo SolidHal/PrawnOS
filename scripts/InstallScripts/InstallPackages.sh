@@ -43,7 +43,7 @@ DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FR
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
 if [ "$DE" = "xfce" ]
@@ -59,6 +59,10 @@ then
   cp -f $DIR/icons/icon-small.png /etc/lightdm/icon.png
   chmod 644 /etc/lightdm/icon.png
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
+
+
+  #Patch xflock4 to support xfce-screensaver https://docs.xfce.org/apps/screensaver/faq
+  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock4-xfce4-screensaver.patch
 
   #Copy in wallpapers
   rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
