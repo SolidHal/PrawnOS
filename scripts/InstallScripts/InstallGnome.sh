@@ -37,14 +37,14 @@ dpkg-reconfigure tzdata
 DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome gnome-session dbus-user-session accountsservice gnome-js-common gnome-shell-extensions fonts-cantarell
 
-# #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
+# #skip installing firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 #DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 
 # #install generic browser from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y epiphany-browser || DEBIAN_FRONTEND=noninteractive apt install -y epiphany-browser
 
-[ "$DE" = "mini" ] && apt install -y gnome-terminal
-[ "$DE" = "lite" ] && apt install -y gnome-terminal nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak synaptic gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility
+[ "$DE" = "mini" ] && apt install -y gnome-terminal nautilus nautilus-admin
+[ "$DE" = "lite" ] && apt install -y gnome-terminal nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak synaptic gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-shell-extension-appindicator gnome-shell-extension-dashtodock gnome-shell-extension-desktop-icons gnome-shell-extension-workspaces-to-dock
 
 if [ "$DE" = "mini" ]
 then
@@ -82,8 +82,8 @@ then
 #  cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
   #install firefox-esr default settings
-  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+#  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+#  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
 #  #Install the source code pro font for spacemacs
 #  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
@@ -101,6 +101,9 @@ then
 #  cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
 #  mkdir -p /etc/udev/rules.d/
 #  cp $DIR/xfce-config/brightness/backlight.rules /etc/udev/rules.d/
+
+# Since we commented out that whole section we have to run a command to avoid an incorrect syntax error
+ ls
 fi
 
 
@@ -113,6 +116,9 @@ cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
 apt remove -y light-locker
+
+# remove xterm, as no one explicitly installed it
+apt remove -y xterm
 
 apt clean && apt autoremove --purge
 
