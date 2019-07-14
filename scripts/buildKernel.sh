@@ -28,10 +28,15 @@ TEST_PATCHES=false
 
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
-
-
 [ ! -d build ] && mkdir build
 cd build
+# build AR9271 firmware
+[ ! -d open-ath9k-htc-firmware ] && git clone --depth 1 https://github.com/qca/open-ath9k-htc-firmware.git
+cd open-ath9k-htc-firmware
+make toolchain
+make -C target_firmware
+cd ..
+
 # build Linux-libre, with ath9k_htc
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
 [ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
@@ -58,13 +63,5 @@ vbutil_kernel --pack vmlinux.kpart \
               --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
               --config $RESOURCES/cmdline \
               --bootloader bootloader.bin
-cd ..
-
-
-# build AR9271 firmware
-[ ! -d open-ath9k-htc-firmware ] && git clone --depth 1 https://github.com/qca/open-ath9k-htc-firmware.git
-cd open-ath9k-htc-firmware
-make toolchain
-make -C target_firmware
 cd ..
 cd $ROOT_DIR

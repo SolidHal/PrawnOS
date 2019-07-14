@@ -60,8 +60,9 @@ mount -o noatime ${outdev}p2 $outmnt
 dd if=$build_resources/blank_kernel of=${outdev}p1 conv=notrunc
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
-install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
-install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_7010.fw $outmnt/lib/firmware/ath9k_htc/htc_7010-1.4.0.fw
+#Dont put ath firmware in filesystem, it is now built into the kernel image
+# install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_9271.fw $outmnt/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
+# install -D -m 644 build/open-ath9k-htc-firmware/target_firmware/htc_7010.fw $outmnt/lib/firmware/ath9k_htc/htc_7010-1.4.0.fw
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
