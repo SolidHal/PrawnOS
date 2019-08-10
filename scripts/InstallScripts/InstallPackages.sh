@@ -22,11 +22,12 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
+    read -p "Install (G)nome (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
     case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
-        * ) echo "Please answer (X)fce4 or (L)xqt";;
+        [Gg]* ) DE=gnome; break;;
+        * ) echo "Please answer (G)nome (X)fce4 or (L)xqt";;
     esac
 done
 
@@ -34,17 +35,18 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs25
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx emacs25
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 # #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
+#DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
+#DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver
-[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver mousepad vlc epiphany
+[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt mousepad vlc epiphany
+[ "$DE" = "gnome"] && apt install -y gnome-session dbus-user-session gnome-js-common gnome-shell-extensions nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-terminal epiphany
 
 if [ "$DE" = "xfce" ]
 then
@@ -86,8 +88,9 @@ then
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
   #install firefox-esr default settings
-  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+#The firefox part was commented out previously
+#  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+#  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
   #Install the source code pro font for spacemacs
   [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
@@ -134,13 +137,13 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 echo "*************Welcome To PrawnOS*************"
 echo ""
-#Have the user set a root password
-echo "-----Enter a password for the root user-----"
-until passwd
-do
-    echo "-----Enter a password for the root user-----"
-    passwd
-done
+#Skip having the user set a root password, since they'll have sudo
+#echo "-----Enter a password for the root user-----"
+#until passwd
+#do
+#    echo "-----Enter a password for the root user-----"
+#    passwd
+#done
 
 #Force a safe username
 while true; do
@@ -160,6 +163,7 @@ do
 done
 
 usermod -a -G sudo,netdev,input,video $username
+passwd -l root
 
 dmesg -E
 
