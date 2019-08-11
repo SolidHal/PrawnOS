@@ -35,7 +35,7 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx emacs25
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 # #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
@@ -44,9 +44,9 @@ DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-mana
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 #DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver mousepad vlc epiphany
-[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt mousepad vlc epiphany
-[ "$DE" = "gnome"] && apt install -y gnome-session dbus-user-session gnome-js-common gnome-shell-extensions nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-terminal epiphany
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver mousepad vlc epiphany-browser
+[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt xfce4-terminal mousepad vlc epiphany-browser
+[ "$DE" = "gnome"] && apt install -y gnome-session fonts-cantarell dbus-user-session gnome-js-common gnome-shell-extensions nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-terminal epiphany-browser
 
 if [ "$DE" = "xfce" ]
 then
@@ -88,7 +88,7 @@ then
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
   #install firefox-esr default settings
-#The firefox part was commented out previously
+  #The firefox part was commented out previously, so this should be too
 #  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
 #  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
@@ -120,6 +120,8 @@ cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
 apt remove -y light-locker
+# also remove xterm, it's old and ugly
+apt remove -y xterm
 
 apt clean && apt autoremove --purge
 
