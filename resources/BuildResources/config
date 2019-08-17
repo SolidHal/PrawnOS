@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 4.19.53-gnu Kernel Configuration
+# Linux/arm 4.19.67-gnu Kernel Configuration
 #
 
 #
@@ -1441,7 +1441,7 @@ CONFIG_SWPHY=y
 #
 # CONFIG_AMD_PHY is not set
 # CONFIG_AQUANTIA_PHY is not set
-# CONFIG_ASIX_PHY is not set
+# CONFIG_AX88796B_PHY is not set
 # CONFIG_AT803X_PHY is not set
 # CONFIG_BCM7XXX_PHY is not set
 # CONFIG_BCM87XX_PHY is not set
@@ -1525,15 +1525,18 @@ CONFIG_WLAN=y
 # CONFIG_WLAN_VENDOR_ADMTEK is not set
 CONFIG_ATH_COMMON=y
 CONFIG_WLAN_VENDOR_ATH=y
-# CONFIG_ATH_DEBUG is not set
+CONFIG_ATH_DEBUG=y
+# CONFIG_ATH_TRACEPOINTS is not set
 # CONFIG_ATH5K is not set
 # CONFIG_ATH5K_PCI is not set
 CONFIG_ATH9K_HW=y
 CONFIG_ATH9K_COMMON=y
+CONFIG_ATH9K_COMMON_DEBUG=y
 CONFIG_ATH9K_BTCOEX_SUPPORT=y
 # CONFIG_ATH9K is not set
 CONFIG_ATH9K_HTC=y
-# CONFIG_ATH9K_HTC_DEBUGFS is not set
+CONFIG_ATH9K_HTC_DEBUGFS=y
+# CONFIG_ATH9K_COMMON_SPECTRAL is not set
 CONFIG_CARL9170=y
 CONFIG_CARL9170_LEDS=y
 CONFIG_CARL9170_WPC=y
@@ -2906,8 +2909,10 @@ CONFIG_USB_DWC2_HOST=y
 # Gadget/Dual-role mode requires USB Gadget support to be enabled
 #
 # CONFIG_USB_DWC2_PCI is not set
-# CONFIG_USB_DWC2_DEBUG is not set
+CONFIG_USB_DWC2_DEBUG=y
+# CONFIG_USB_DWC2_VERBOSE is not set
 # CONFIG_USB_DWC2_TRACK_MISSED_SOFS is not set
+# CONFIG_USB_DWC2_DEBUG_PERIODIC is not set
 # CONFIG_USB_CHIPIDEA is not set
 # CONFIG_USB_ISP1760 is not set
 
