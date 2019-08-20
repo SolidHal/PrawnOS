@@ -25,6 +25,11 @@ Don't want to use one of the two USB ports for the WiFi dongle? [check out this]
 
 Combined with Libreboot, an AR9271 or AR7010 WiFi dongle, and a libre OS (like Debian with the main repos, the one built by PrawnOS) the Asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
+### WARNING: flashing libreboot to asus c201 chromebooks that have recently been updated to a new version of chromeOS may leave the device in a non-functional (bricked) state.
+If you do not have a way to recover your device by using an external flasher as described in the second part of this page https://libreboot.org/docs/install/c201.html it would be safest to wait until this issue is resolved. I have opened a bug with libreboot, which can be found here https://notabug.org/libreboot/libreboot/issues/666 If you have any information that may help with debugging, please post it there.
+
+_The install process of PrawnOS does not flash your bios, so it is safe to use along with the default coreboot/depthcharge and does not risk bricking your device_
+
 ## What is a blob?
 
 In the world of free and open-source software, the term is used to refer to proprietary device drivers, which are distributed without their source code, exclusively through binary code; in such use, the term binary blob is common.
