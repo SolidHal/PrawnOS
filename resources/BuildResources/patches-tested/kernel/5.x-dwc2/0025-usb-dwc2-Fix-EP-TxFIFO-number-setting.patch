@@ -1,0 +1,31 @@
+From 97311c8f8b6e26d5ba6508f0df430ad80fc59327 Mon Sep 17 00:00:00 2001
+From: Minas Harutyunyan <minas.harutyunyan@synopsys.com>
+Date: Thu, 31 Jan 2019 18:28:07 +0400
+Subject: [PATCH 25/53] usb: dwc2: Fix EP TxFIFO number setting
+
+In case when some EP IN is frequently reused, i.e. enabled/disabled by
+function driver. It is required to clear TxFIFO number field in DIEPCTL
+register before setting new number. Otherwise there is probability to
+have same TxFIFO number for different EP's because of OR operator.
+
+Signed-off-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/gadget.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 55ef3cc2701b..e15d8a462085 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -4005,6 +4005,7 @@ static int dwc2_hsotg_ep_enable(struct usb_ep *ep,
+ 			ret = -ENOMEM;
+ 			goto error1;
+ 		}
++		epctrl &= ~(DXEPCTL_TXFNUM_LIMIT << DXEPCTL_TXFNUM_SHIFT);
+ 		hsotg->fifo_map |= 1 << fifo_index;
+ 		epctrl |= DXEPCTL_TXFNUM(fifo_index);
+ 		hs_ep->fifo_index = fifo_index;
+-- 
+2.11.0
+

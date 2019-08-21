@@ -1,0 +1,37 @@
+From 4abe453750db8ada8b0a56c45c89ab18920e9a80 Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 21:02:28 +0400
+Subject: [PATCH 13/53] usb: dwc2: gadget: enable WKUP_ALERT interrupt
+
+WKUP_ALERT interrupt should be unmask when lpm mode is enabled.
+
+This interrupt is asserted when the device is in L1 for the duration
+mentioned in GREFCLK.SOF_CNN_WKUP_ALERT. This is used to alert SW to
+initiate Remote wake up so that the device resumes in time in order not
+to lose sync with the host frame number.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/gadget.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index e8dd6897e2c3..24bd9fdabc67 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -5003,6 +5003,10 @@ void dwc2_gadget_init_lpm(struct dwc2_hsotg *hsotg)
+ 	val |= hsotg->params.besl ? GLPMCFG_ENBESL : 0;
+ 	dwc2_writel(hsotg, val, GLPMCFG);
+ 	dev_dbg(hsotg->dev, "GLPMCFG=0x%08x\n", dwc2_readl(hsotg, GLPMCFG));
++
++	/* Unmask WKUP_ALERT Interrupt */
++	if (hsotg->params.service_interval)
++		dwc2_set_bit(hsotg, GINTMSK2, GINTMSK2_WKUP_ALERT_INT_MSK);
+ }
+ 
+ /**
+-- 
+2.11.0
+

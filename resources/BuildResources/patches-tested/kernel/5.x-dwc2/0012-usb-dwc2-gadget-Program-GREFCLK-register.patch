@@ -1,0 +1,80 @@
+From 15d9dbf8cbd4fc777a7fc92209903dbb47d0783e Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 21:01:59 +0400
+Subject: [PATCH 12/53] usb: dwc2: gadget: Program GREFCLK register
+
+Added dwc2_gadget_program_ref_clk function to program GREFCLK
+register in device mode.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/core.h   |  2 ++
+ drivers/usb/dwc2/gadget.c | 23 +++++++++++++++++++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index 655f5274e801..30bab8463c96 100644
+--- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -1381,6 +1381,7 @@ int dwc2_hsotg_tx_fifo_count(struct dwc2_hsotg *hsotg);
+ int dwc2_hsotg_tx_fifo_total_depth(struct dwc2_hsotg *hsotg);
+ int dwc2_hsotg_tx_fifo_average_depth(struct dwc2_hsotg *hsotg);
+ void dwc2_gadget_init_lpm(struct dwc2_hsotg *hsotg);
++void dwc2_gadget_program_ref_clk(struct dwc2_hsotg *hsotg);
+ #else
+ static inline int dwc2_hsotg_remove(struct dwc2_hsotg *dwc2)
+ { return 0; }
+@@ -1415,6 +1416,7 @@ static inline int dwc2_hsotg_tx_fifo_total_depth(struct dwc2_hsotg *hsotg)
+ static inline int dwc2_hsotg_tx_fifo_average_depth(struct dwc2_hsotg *hsotg)
+ { return 0; }
+ static inline void dwc2_gadget_init_lpm(struct dwc2_hsotg *hsotg) {}
++static inline void dwc2_gadget_program_ref_clk(struct dwc2_hsotg *hsotg) {}
+ #endif
+ 
+ #if IS_ENABLED(CONFIG_USB_DWC2_HOST) || IS_ENABLED(CONFIG_USB_DWC2_DUAL_ROLE)
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 9de16453a890..e8dd6897e2c3 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -3418,6 +3418,10 @@ void dwc2_hsotg_core_init_disconnected(struct dwc2_hsotg *hsotg,
+ 	/* configure the core to support LPM */
+ 	dwc2_gadget_init_lpm(hsotg);
+ 
++	/* program GREFCLK register if needed */
++	if (using_desc_dma(hsotg) && hsotg->params.service_interval)
++		dwc2_gadget_program_ref_clk(hsotg);
++
+ 	/* must be at-least 3ms to allow bus to see disconnect */
+ 	mdelay(3);
+ 
+@@ -5002,6 +5006,25 @@ void dwc2_gadget_init_lpm(struct dwc2_hsotg *hsotg)
+ }
+ 
+ /**
++ * dwc2_gadget_program_ref_clk - Program GREFCLK register in device mode
++ *
++ * @hsotg: Programming view of DWC_otg controller
++ *
++ */
++void dwc2_gadget_program_ref_clk(struct dwc2_hsotg *hsotg)
++{
++	u32 val = 0;
++
++	val |= GREFCLK_REF_CLK_MODE;
++	val |= hsotg->params.ref_clk_per << GREFCLK_REFCLKPER_SHIFT;
++	val |= hsotg->params.sof_cnt_wkup_alert <<
++	       GREFCLK_SOF_CNT_WKUP_ALERT_SHIFT;
++
++	dwc2_writel(hsotg, val, GREFCLK);
++	dev_dbg(hsotg->dev, "GREFCLK=0x%08x\n", dwc2_readl(hsotg, GREFCLK));
++}
++
++/**
+  * dwc2_gadget_enter_hibernation() - Put controller in Hibernation.
+  *
+  * @hsotg: Programming view of the DWC_otg controller
+-- 
+2.11.0
+

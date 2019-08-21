@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=4.19.53
+KVER=4.19.67
 ifeq ($(PRAWNOS_SUITE),)
 PRAWNOS_SUITE=buster
 endif

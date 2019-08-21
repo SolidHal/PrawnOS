@@ -1,0 +1,65 @@
+From 01b2a2d52169372d73ec3639620b2b3255d5eb53 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Mon, 25 Mar 2019 09:20:05 -0700
+Subject: [PATCH 18/54] ARM: dts: rockchip: Add device tree for
+ rk3288-veyron-mighty
+
+Mighty is basically the same Chromebook as Jaq but it has a full-sized
+SD slot and some different (slightly more rugged) plastics around it.
+Like Jaq, Mighty may show up with various different brandings but all
+of them have the same board inside.
+
+In the downstream kernel Mighty and Jaq share a "dtsi" and Mighty just
+adds the SD write protect (needed for a full-sized SD slot).  We'll do
+this upstream by just including the Jaq dts and make the changes.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-mighty.dts | 34 ++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+ create mode 100644 arch/arm/boot/dts/rk3288-veyron-mighty.dts
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-mighty.dts b/arch/arm/boot/dts/rk3288-veyron-mighty.dts
+new file mode 100644
+index 000000000000..f640857cbdae
+--- /dev/null
++++ b/arch/arm/boot/dts/rk3288-veyron-mighty.dts
+@@ -0,0 +1,34 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Google Veyron Mighty Rev 1+ board device tree source
++ *
++ * Copyright 2015 Google, Inc
++ */
++
++/dts-v1/;
++
++#include "rk3288-veyron-jaq.dts"
++
++/ {
++	model = "Google Mighty";
++	compatible = "google,veyron-mighty-rev5", "google,veyron-mighty-rev4",
++		     "google,veyron-mighty-rev3", "google,veyron-mighty-rev2",
++		     "google,veyron-mighty-rev1", "google,veyron-mighty",
++		     "google,veyron", "rockchip,rk3288";
++};
++
++&sdmmc {
++	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd_disabled &sdmmc_cd_gpio
++			&sdmmc_wp_gpio &sdmmc_bus4>;
++	wp-gpios = <&gpio7 10 GPIO_ACTIVE_HIGH>;
++
++	/delete-property/ disable-wp;
++};
++
++&pinctrl {
++	sdmmc {
++		sdmmc_wp_gpio: sdmmc-wp-gpio {
++			rockchip,pins = <7 10 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++};
+-- 
+2.11.0
+

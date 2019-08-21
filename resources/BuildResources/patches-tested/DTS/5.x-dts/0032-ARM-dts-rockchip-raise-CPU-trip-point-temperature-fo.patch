@@ -1,0 +1,66 @@
+From 83be81e3b0b6eb5df2fba66baa7a25f7e7dc9775 Mon Sep 17 00:00:00 2001
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Thu, 16 May 2019 09:29:40 -0700
+Subject: [PATCH 32/54] ARM: dts: rockchip: raise CPU trip point temperature
+ for veyron to 100 degC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This value matches what is used by the downstream Chrome OS 3.14
+kernel, the 'official' kernel for veyron devices. Keep the temperature
+for 'speedy' at 90°C, as in the downstream kernel.
+
+Increase the temperature for a hardware shutdown to 125°C, which
+matches the downstream configuration and gives the system a chance
+to shut down orderly at the criticial trip point.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-speedy.dts | 4 ++++
+ arch/arm/boot/dts/rk3288-veyron.dtsi       | 5 +++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-speedy.dts b/arch/arm/boot/dts/rk3288-veyron-speedy.dts
+index 2ac8748a3a0c..b07a07e81551 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-speedy.dts
++++ b/arch/arm/boot/dts/rk3288-veyron-speedy.dts
+@@ -64,6 +64,10 @@
+ 	temperature = <70000>;
+ };
+ 
++&cpu_crit {
++	temperature = <90000>;
++};
++
+ &edp {
+ 	/delete-property/pinctrl-names;
+ 	/delete-property/pinctrl-0;
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 1252522392c7..e81f1a0cac83 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -123,6 +123,10 @@
+ 	cpu0-supply = <&vdd_cpu>;
+ };
+ 
++&cpu_crit {
++	temperature = <100000>;
++};
++
+ /* rk3288-c used in Veyron Chrome-devices has slightly changed OPPs */
+ &cpu_opp_table {
+ 	/delete-node/ opp-312000000;
+@@ -394,6 +398,7 @@
+ 
+ 	rockchip,hw-tshut-mode = <1>; /* tshut mode 0:CRU 1:GPIO */
+ 	rockchip,hw-tshut-polarity = <1>; /* tshut polarity 0:LOW 1:HIGH */
++	rockchip,hw-tshut-temp = <125000>;
+ };
+ 
+ &uart0 {
+-- 
+2.11.0
+

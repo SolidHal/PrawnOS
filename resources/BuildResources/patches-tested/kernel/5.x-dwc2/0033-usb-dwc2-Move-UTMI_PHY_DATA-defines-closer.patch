@@ -1,0 +1,38 @@
+From a89bae709b3492b478480a2c9734e7e9393b279c Mon Sep 17 00:00:00 2001
+From: Jules Maselbas <jmaselbas@kalray.eu>
+Date: Fri, 5 Apr 2019 15:35:29 +0200
+Subject: [PATCH 33/53] usb: dwc2: Move UTMI_PHY_DATA defines closer
+
+Makes GHWCFG4_UTMI_PHY_DATA* defines closer to their relative shift and
+mask defines to improve readability.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Jules Maselbas <jmaselbas@kalray.eu>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/hw.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/usb/dwc2/hw.h b/drivers/usb/dwc2/hw.h
+index 1bc394dcfa9d..510e87ec0be8 100644
+--- a/drivers/usb/dwc2/hw.h
++++ b/drivers/usb/dwc2/hw.h
+@@ -310,12 +310,12 @@
+ #define GHWCFG4_NUM_DEV_MODE_CTRL_EP_SHIFT	16
+ #define GHWCFG4_UTMI_PHY_DATA_WIDTH_MASK	(0x3 << 14)
+ #define GHWCFG4_UTMI_PHY_DATA_WIDTH_SHIFT	14
+-#define GHWCFG4_ACG_SUPPORTED			BIT(12)
+-#define GHWCFG4_IPG_ISOC_SUPPORTED		BIT(11)
+-#define GHWCFG4_SERVICE_INTERVAL_SUPPORTED      BIT(10)
+ #define GHWCFG4_UTMI_PHY_DATA_WIDTH_8		0
+ #define GHWCFG4_UTMI_PHY_DATA_WIDTH_16		1
+ #define GHWCFG4_UTMI_PHY_DATA_WIDTH_8_OR_16	2
++#define GHWCFG4_ACG_SUPPORTED			BIT(12)
++#define GHWCFG4_IPG_ISOC_SUPPORTED		BIT(11)
++#define GHWCFG4_SERVICE_INTERVAL_SUPPORTED      BIT(10)
+ #define GHWCFG4_XHIBER				BIT(7)
+ #define GHWCFG4_HIBER				BIT(6)
+ #define GHWCFG4_MIN_AHB_FREQ			BIT(5)
+-- 
+2.11.0
+

@@ -1,0 +1,52 @@
+From bf09924f21767e6bb7cb3aae48c48c2c2ab8261a Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Thu, 2 May 2019 15:53:34 -0700
+Subject: [PATCH 45/54] ARM: dts: rockchip: Switch to builtin HDMI DDC bus on
+ rk3288-veyron
+
+Downstream Chrome OS kernels use the builtin DDC bus from dw_hdmi on
+veyron.  This is the only way to get them to negotiate HDCP.
+
+Although HDCP isn't currently all supported upstream, it still seems
+like it makes sense to use dw_hdmi's builtin I2C.  Maybe eventually we
+can get HDCP negotiation working.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Sean Paul <sean@poorly.run>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 90c8312d01ff..99e2771d4d31 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -175,7 +175,8 @@
+ };
+ 
+ &hdmi {
+-	ddc-i2c-bus = <&i2c5>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&hdmi_ddc>;
+ 	status = "okay";
+ };
+ 
+@@ -346,14 +347,6 @@
+ 	i2c-scl-rising-time-ns = <300>;		/* 225ns measured */
+ };
+ 
+-&i2c5 {
+-	status = "okay";
+-
+-	clock-frequency = <100000>;
+-	i2c-scl-falling-time-ns = <300>;
+-	i2c-scl-rising-time-ns = <1000>;
+-};
+-
+ &io_domains {
+ 	status = "okay";
+ 
+-- 
+2.11.0
+

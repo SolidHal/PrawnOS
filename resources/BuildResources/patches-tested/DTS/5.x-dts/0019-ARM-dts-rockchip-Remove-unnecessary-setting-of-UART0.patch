@@ -1,0 +1,40 @@
+From 2f60eb2f03b9c3d0a31592c55a88ef62b1403b5d Mon Sep 17 00:00:00 2001
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Wed, 10 Apr 2019 11:30:10 -0700
+Subject: [PATCH 19/54] ARM: dts: rockchip: Remove unnecessary setting of UART0
+ SCLK rate on veyron
+
+Some veyron devices have a Bluetooth controller connected on UART0.
+The UART needs to operate at a high speed, however setting the clock
+rate at initialization has no practical effect. During initialization
+user space adjusts the UART baudrate multiple times, which ends up
+changing the SCLK rate. After a successful initiatalization the clk
+is running at the desired speed (48MHz).
+
+Remove the unnecessary clock rate configuration from the DT.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 5181d9435fda..fa38eb967f12 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -395,10 +395,6 @@
+ &uart0 {
+ 	status = "okay";
+ 
+-	/* We need to go faster than 24MHz, so adjust clock parents / rates */
+-	assigned-clocks = <&cru SCLK_UART0>;
+-	assigned-clock-rates = <48000000>;
+-
+ 	/* Pins don't include flow control by default; add that in */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_xfer &uart0_cts &uart0_rts>;
+-- 
+2.11.0
+

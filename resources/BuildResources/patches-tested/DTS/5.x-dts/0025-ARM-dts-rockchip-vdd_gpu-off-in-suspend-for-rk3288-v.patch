@@ -1,0 +1,41 @@
+From 356150e86d75653d1f679c6ef583144b26d0a686 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Thu, 11 Apr 2019 16:21:57 -0700
+Subject: [PATCH 25/54] ARM: dts: rockchip: vdd_gpu off in suspend for
+ rk3288-veyron
+
+At some point long long ago the downstream GPU driver would crash if
+we turned the GPU off during suspend.  For some context you can see:
+
+https://chromium-review.googlesource.com/#/c/215780/5..6/arch/arm/boot/dts/rk3288-pinky-rev2.dts
+
+At some point in time not too long after that got fixed.
+
+It's unclear why the GPU is left enabled during suspend on the
+mainline kernel.  Everything seems fine if I turn this off, so let's
+do it.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Elaine Zhang <zhangqing@rock-chips.com>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 35755870bf66..758fe225c702 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -219,8 +219,7 @@
+ 				regulator-max-microvolt = <1250000>;
+ 				regulator-ramp-delay = <6001>;
+ 				regulator-state-mem {
+-					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <1000000>;
++					regulator-off-in-suspend;
+ 				};
+ 			};
+ 
+-- 
+2.11.0
+

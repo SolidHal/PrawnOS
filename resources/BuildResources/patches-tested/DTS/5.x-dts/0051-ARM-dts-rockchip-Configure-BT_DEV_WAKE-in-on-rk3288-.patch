@@ -1,0 +1,95 @@
+From 4db11c378ab1e170c3a197ea3719ffe54cd06637 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Wed, 19 Jun 2019 11:34:25 -0700
+Subject: [PATCH 51/54] ARM: dts: rockchip: Configure BT_DEV_WAKE in on
+ rk3288-veyron
+
+This is the other half of the hacky solution from commit f497ab6b4bb8
+("ARM: dts: rockchip: Configure BT_HOST_WAKE as wake-up signal on
+veyron").  Specifically the LPM driver that the Broadcom Bluetooth
+expects to have (but is missing in mainline) has two halves of the
+equation: BT_HOST_WAKE and BT_DEV_WAKE.  The BT_HOST_WAKE (which was
+handled in the previous commit) is the one that lets the Bluetooth
+wake the system up.  The BT_DEV_WAKE (this patch) tells the Bluetooth
+that it's OK to go into a low power mode.  That means we were burning
+a bit of extra power in S3 without this patch.  Measurements are a bit
+noisy, but it appears to be a few mA worth of difference.
+
+NOTE: Though these pins don't do much on systems with Marvell
+Bluetooth, downstream kernels set it on all veyron boards so we'll do
+the same.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi |  2 ++
+ arch/arm/boot/dts/rk3288-veyron.dtsi            | 20 ++++++++++++++++++++
+ 2 files changed, 22 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+index 5727017f34b2..1cadb522fd0d 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+@@ -237,6 +237,7 @@
+ 
+ 		/* Wake only */
+ 		&suspend_l_wake
++		&bt_dev_wake_awake
+ 	>;
+ 	pinctrl-1 = <
+ 		/* Common for sleep and wake, but no owners */
+@@ -246,6 +247,7 @@
+ 
+ 		/* Sleep only */
+ 		&suspend_l_sleep
++		&bt_dev_wake_sleep
+ 	>;
+ 
+ 	backlight {
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index e2635ad574e7..53d2f2452868 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -485,12 +485,18 @@
+ 		&ddr0_retention
+ 		&ddrio_pwroff
+ 		&global_pwroff
++
++		/* Wake only */
++		&bt_dev_wake_awake
+ 	>;
+ 	pinctrl-1 = <
+ 		/* Common for sleep and wake, but no owners */
+ 		&ddr0_retention
+ 		&ddrio_pwroff
+ 		&global_pwroff
++
++		/* Sleep only */
++		&bt_dev_wake_sleep
+ 	>;
+ 
+ 	pcfg_pull_none_drv_8ma: pcfg-pull-none-drv-8ma {
+@@ -596,6 +602,20 @@
+ 		sdio0_clk: sdio0-clk {
+ 			rockchip,pins = <4 RK_PD1 1 &pcfg_pull_none_drv_8ma>;
+ 		};
++
++		/*
++		 * These pins are only present on very new veyron boards; on
++		 * older boards bt_dev_wake is simply always high.  Note that
++		 * gpio4_D2 is a NC on old veyron boards, so it doesn't hurt
++		 * to map this pin everywhere
++		 */
++		bt_dev_wake_sleep: bt-dev-wake-sleep {
++			rockchip,pins = <4 RK_PD2 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		bt_dev_wake_awake: bt-dev-wake-awake {
++			rockchip,pins = <4 RK_PD2 RK_FUNC_GPIO &pcfg_output_high>;
++		};
+ 	};
+ 
+ 	tpm {
+-- 
+2.11.0
+

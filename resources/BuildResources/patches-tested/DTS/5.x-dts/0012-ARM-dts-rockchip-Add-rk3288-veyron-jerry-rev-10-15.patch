@@ -1,0 +1,44 @@
+From 0c4cac5e8f0313a8777055c0c66a2216f78c6054 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Fri, 22 Mar 2019 12:59:24 -0700
+Subject: [PATCH 12/54] ARM: dts: rockchip: Add rk3288-veyron-jerry rev 10-15
+
+As far as I can tell/remember rev10 was originally created to support
+making a SKU of jerry that had a different LCD.  rev11-rev15 were
+added to give some wiggle room for future builds.  Downstream has a
+separate device tree for rev10-rev15 (compared to rev3-rev7) with the
+expectation that differences relating to the LCD would be accounted
+for there but nothing was ever added to the rev10-rev15 making it
+identical to the rev3-rev7 one.
+
+It's likely nothing actually shipped with rev10-rev15 but they are
+listed in the downstream kernel's device tree and it seems like it
+should add a little safety if we match them here just in case
+something actually shipped with one of these revisions and that device
+will break if we don't claim support.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-jerry.dts | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-jerry.dts b/arch/arm/boot/dts/rk3288-veyron-jerry.dts
+index 2ba89895c33a..517c6999a978 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-jerry.dts
++++ b/arch/arm/boot/dts/rk3288-veyron-jerry.dts
+@@ -11,7 +11,10 @@
+ 
+ / {
+ 	model = "Google Jerry";
+-	compatible = "google,veyron-jerry-rev7", "google,veyron-jerry-rev6",
++	compatible = "google,veyron-jerry-rev15", "google,veyron-jerry-rev14",
++		     "google,veyron-jerry-rev13", "google,veyron-jerry-rev12",
++		     "google,veyron-jerry-rev11", "google,veyron-jerry-rev10",
++		     "google,veyron-jerry-rev7", "google,veyron-jerry-rev6",
+ 		     "google,veyron-jerry-rev5", "google,veyron-jerry-rev4",
+ 		     "google,veyron-jerry-rev3", "google,veyron-jerry",
+ 		     "google,veyron", "rockchip,rk3288";
+-- 
+2.11.0
+

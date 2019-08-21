@@ -1,0 +1,48 @@
+From 1d390437f605db28596ad4c4bfeca2fed052c025 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Mon, 20 May 2019 10:56:05 -0700
+Subject: [PATCH 50/54] ARM: dts: rockchip: Allow wakeup from rk3288-veyron's
+ dwc2 USB ports
+
+We want to be able to wake from USB if a device is plugged in that
+wants remote wakeup.  Enable it on both dwc2 controllers.
+
+NOTE: this is added specifically to veyron and not to rk3288 in
+general since it's not known whether all rk3288 boards are designed to
+support USB wakeup.  It is plausible that some boards could shut down
+important rails in S3.
+
+Also note that currently wakeup doesn't seem to happen unless you use
+the "deep" suspend mode (where SDRAM is turned off).  Presumably the
+shallow suspend mode is gating some sort of clock that's important but
+I couldn't easily figure out how to get it working.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 1252522392c7..1d8bfed7830c 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -424,6 +424,7 @@
+ 
+ &usb_host1 {
+ 	status = "okay";
++	snps,need-phy-for-wake;
+ };
+ 
+ &usb_otg {
+@@ -432,6 +433,7 @@
+ 	assigned-clocks = <&cru SCLK_USBPHY480M_SRC>;
+ 	assigned-clock-parents = <&usbphy0>;
+ 	dr_mode = "host";
++	snps,need-phy-for-wake;
+ };
+ 
+ &vopb {
+-- 
+2.11.0
+

@@ -2909,10 +2909,8 @@ CONFIG_USB_DWC2_HOST=y
 # Gadget/Dual-role mode requires USB Gadget support to be enabled
 #
 # CONFIG_USB_DWC2_PCI is not set
-CONFIG_USB_DWC2_DEBUG=y
-# CONFIG_USB_DWC2_VERBOSE is not set
+# CONFIG_USB_DWC2_DEBUG is not set
 # CONFIG_USB_DWC2_TRACK_MISSED_SOFS is not set
-# CONFIG_USB_DWC2_DEBUG_PERIODIC is not set
 # CONFIG_USB_CHIPIDEA is not set
 # CONFIG_USB_ISP1760 is not set
 

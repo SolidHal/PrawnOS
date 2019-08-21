@@ -1,0 +1,33 @@
+From 4faf3b36553a0a5304f58ee3a620e659739a2e20 Mon Sep 17 00:00:00 2001
+From: Minas Harutyunyan <Minas.Harutyunyan@synopsys.com>
+Date: Mon, 29 Apr 2019 15:23:43 +0400
+Subject: [PATCH 47/53] usb: dwc2: Set actual frame number for completed ISOC
+ transfer for none DDMA
+
+On ISOC OUT transfer completion, in none DDMA mode, set actual frame
+number returning to function driver in usb_request.
+
+Signed-off-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/gadget.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 16ffd9fd9361..1d4aef8d4137 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -2417,6 +2417,10 @@ static void dwc2_hsotg_handle_outdone(struct dwc2_hsotg *hsotg, int epnum)
+ 			dwc2_gadget_incr_frame_num(hs_ep);
+ 	}
+ 
++	/* Set actual frame number for completed transfers */
++	if (!using_desc_dma(hsotg) && hs_ep->isochronous)
++		req->frame_number = hsotg->frame_number;
++
+ 	dwc2_hsotg_complete_request(hsotg, hs_ep, hs_req, result);
+ }
+ 
+-- 
+2.11.0
+

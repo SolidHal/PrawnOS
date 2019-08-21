@@ -1,0 +1,68 @@
+From f3a61e4e033e808e7ac1239b151ec46f833fff4a Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 21:01:31 +0400
+Subject: [PATCH 11/53] usb: dwc2: gadget: Add parameters for GREFCLK register
+
+Added ref_clk_per and sof_cnt_wkup_alert parameters in
+dwc2_core_params struct and set default values.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/core.h   | 18 ++++++++++++++++++
+ drivers/usb/dwc2/params.c |  2 ++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index 2678dc9d559b..655f5274e801 100644
+--- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -393,6 +393,20 @@ enum dwc2_ep0_state {
+  *			0 - No
+  *			1 - Yes
+  * @hird_threshold:	Value of BESL or HIRD Threshold.
++ * @ref_clk_per:        Indicates in terms of pico seconds the period
++ *                      of ref_clk.
++ *			62500 - 16MHz
++ *                      58823 - 17MHz
++ *                      52083 - 19.2MHz
++ *			50000 - 20MHz
++ *			41666 - 24MHz
++ *			33333 - 30MHz (default)
++ *			25000 - 40MHz
++ * @sof_cnt_wkup_alert: Indicates in term of number of SOF's after which
++ *                      the controller should generate an interrupt if the
++ *                      device had been in L1 state until that period.
++ *                      This is used by SW to initiate Remote WakeUp in the
++ *                      controller so as to sync to the uF number from the host.
+  * @activate_stm_fs_transceiver: Activate internal transceiver using GGPIO
+  *			register.
+  *			0 - Deactivate the transceiver (default)
+@@ -472,6 +486,10 @@ struct dwc2_core_params {
+ 	u32 max_transfer_size;
+ 	u32 ahbcfg;
+ 
++	/* GREFCLK parameters */
++	u32 ref_clk_per;
++	u16 sof_cnt_wkup_alert;
++
+ 	/* Host parameters */
+ 	bool host_dma;
+ 	bool dma_desc_enable;
+diff --git a/drivers/usb/dwc2/params.c b/drivers/usb/dwc2/params.c
+index dd3c10d537e2..d150984406ee 100644
+--- a/drivers/usb/dwc2/params.c
++++ b/drivers/usb/dwc2/params.c
+@@ -303,6 +303,8 @@ static void dwc2_set_default_params(struct dwc2_hsotg *hsotg)
+ 	p->max_packet_count = hw->max_packet_count;
+ 	p->max_transfer_size = hw->max_transfer_size;
+ 	p->ahbcfg = GAHBCFG_HBSTLEN_INCR << GAHBCFG_HBSTLEN_SHIFT;
++	p->ref_clk_per = 33333;
++	p->sof_cnt_wkup_alert = 100;
+ 
+ 	if ((hsotg->dr_mode == USB_DR_MODE_HOST) ||
+ 	    (hsotg->dr_mode == USB_DR_MODE_OTG)) {
+-- 
+2.11.0
+
