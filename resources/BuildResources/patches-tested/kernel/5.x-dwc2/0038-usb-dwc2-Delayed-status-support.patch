@@ -1,0 +1,111 @@
+From b4c53b4ac66a75a93672abf08aafac64dfb08d00 Mon Sep 17 00:00:00 2001
+From: Minas Harutyunyan <minas.harutyunyan@synopsys.com>
+Date: Tue, 12 Mar 2019 11:45:12 +0400
+Subject: [PATCH 38/53] usb: dwc2: Delayed status support
+
+Added delayed status support for Control transfers.
+
+Tested in all 3 modes: Slave, BDMA and DDMA.
+Performed tests: USB CV (Ch9 and MSC), Control Read/Write tests
+using Synopsys USB test environment function driver.
+
+Signed-off-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/core.h   |  2 ++
+ drivers/usb/dwc2/gadget.c | 31 +++++++++++++++++++++++++++----
+ 2 files changed, 29 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index 9f3fc8e18277..152ac41dfb2d 100644
+--- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -993,6 +993,7 @@ struct dwc2_hregs_backup {
+  * @ctrl_buff:          Buffer for EP0 control requests.
+  * @ctrl_req:           Request for EP0 control packets.
+  * @ep0_state:          EP0 control transfers state
++ * @delayed_status:		true when gadget driver asks for delayed status
+  * @test_mode:          USB test mode requested by the host
+  * @remote_wakeup_allowed: True if device is allowed to wake-up host by
+  *                      remote-wakeup signalling
+@@ -1175,6 +1176,7 @@ struct dwc2_hsotg {
+ 	void *ep0_buff;
+ 	void *ctrl_buff;
+ 	enum dwc2_ep0_state ep0_state;
++	unsigned delayed_status : 1;
+ 	u8 test_mode;
+ 
+ 	dma_addr_t setup_desc_dma[2];
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 2e2f9cbf6a3d..5f314a10a116 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -27,6 +27,8 @@
+ #include <linux/usb/ch9.h>
+ #include <linux/usb/gadget.h>
+ #include <linux/usb/phy.h>
++#include <linux/usb/composite.h>
++
+ 
+ #include "core.h"
+ #include "hw.h"
+@@ -1446,6 +1448,11 @@ static int dwc2_hsotg_ep_queue(struct usb_ep *ep, struct usb_request *req,
+ 		return 0;
+ 	}
+ 
++	/* Change EP direction if status phase request is after data out */
++	if (!hs_ep->index && !req->length && !hs_ep->dir_in &&
++	    hs->ep0_state == DWC2_EP0_DATA_OUT)
++		hs_ep->dir_in = 1;
++
+ 	if (first) {
+ 		if (!hs_ep->isochronous) {
+ 			dwc2_hsotg_start_req(hs, hs_ep, hs_req, false);
+@@ -1938,6 +1945,10 @@ static void dwc2_hsotg_process_control(struct dwc2_hsotg *hsotg,
+ 			dev_dbg(hsotg->dev, "driver->setup() ret %d\n", ret);
+ 	}
+ 
++	hsotg->delayed_status = false;
++	if (ret == USB_GADGET_DELAYED_STATUS)
++		hsotg->delayed_status = true;
++
+ 	/*
+ 	 * the request is either unhandlable, or is not formatted correctly
+ 	 * so respond with a STALL for the status stage to indicate failure.
+@@ -2387,8 +2398,8 @@ static void dwc2_hsotg_handle_outdone(struct dwc2_hsotg *hsotg, int epnum)
+ 	if (!using_desc_dma(hsotg) && epnum == 0 &&
+ 	    hsotg->ep0_state == DWC2_EP0_DATA_OUT) {
+ 		/* Move to STATUS IN */
+-		dwc2_hsotg_ep0_zlp(hsotg, true);
+-		return;
++		if (!hsotg->delayed_status)
++			dwc2_hsotg_ep0_zlp(hsotg, true);
+ 	}
+ 
+ 	/*
+@@ -3053,8 +3064,20 @@ static void dwc2_hsotg_epint(struct dwc2_hsotg *hsotg, unsigned int idx,
+ 		/* Safety check EP0 state when STSPHSERCVD asserted */
+ 		if (hsotg->ep0_state == DWC2_EP0_DATA_OUT) {
+ 			/* Move to STATUS IN for DDMA */
+-			if (using_desc_dma(hsotg))
+-				dwc2_hsotg_ep0_zlp(hsotg, true);
++			if (using_desc_dma(hsotg)) {
++				if (!hsotg->delayed_status)
++					dwc2_hsotg_ep0_zlp(hsotg, true);
++				else
++				/* In case of 3 stage Control Write with delayed
++				 * status, when Status IN transfer started
++				 * before STSPHSERCVD asserted, NAKSTS bit not
++				 * cleared by CNAK in dwc2_hsotg_start_req()
++				 * function. Clear now NAKSTS to allow complete
++				 * transfer.
++				 */
++					dwc2_set_bit(hsotg, DIEPCTL(0),
++						     DXEPCTL_CNAK);
++			}
+ 		}
+ 
+ 	}
+-- 
+2.11.0
+

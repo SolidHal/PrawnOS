@@ -1,0 +1,40 @@
+From 0a4c330869fbdd1a2372609cac13a98492e0e149 Mon Sep 17 00:00:00 2001
+From: Hal Emmerich <hal@halemmerich.com>
+Date: Wed, 21 Aug 2019 16:52:41 -0500
+Subject: [PATCH] Fix ath9k dwc2 init frame overruns
+
+This is a workaround for ar9271 drvices using the open ath9k firmware
+With the dwc2 usb driver these endpoints end up throwing piles of
+frame overrun errors and prevent the ath9k firmware from communicating
+properly with the c201
+
+This fix elongates the microframes by 4 so the dwc2 and ath9k devices
+communicate properly. In my testing this did not impact network speeds.
+---
+ drivers/usb/dwc2/hcd_queue.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/usb/dwc2/hcd_queue.c b/drivers/usb/dwc2/hcd_queue.c
+index 68bbac6..8562db7 100644
+--- a/drivers/usb/dwc2/hcd_queue.c
++++ b/drivers/usb/dwc2/hcd_queue.c
+@@ -1558,6 +1558,16 @@ static void dwc2_qh_init(struct dwc2_hsotg *hsotg, struct dwc2_qh *qh,
+ 			device_ns += dwc_tt->usb_tt->think_time;
+ 		qh->device_us = NS_TO_US(device_ns);
+ 
++    //Only enable workaround for highspeed devices, since only low and full speed devices so split, we can just check split
++    //The packets that fail right after the firmware is transferred are on an interrupt ep so we can use that to further narrow it down
++    //The ath9k device has issues with ep 3 and ep4
++    if(!do_split && !ep_is_isoc && ep_is_int && (urb->pipe_info.ep_num == 3 || urb->pipe_info.ep_num == 4)){
++      if (urb->interval == 1){
++        urb->interval = 4;
++        dev_err(hsotg->dev, "PRAWNOS Set usb urb interval to %d\n", urb->interval);
++      }
++    }
++
+ 		qh->device_interval = urb->interval;
+ 		qh->host_interval = urb->interval * (do_split ? 8 : 1);
+ 
+-- 
+2.11.0
+

@@ -1,0 +1,50 @@
+From d17aa2d262e8574a8c6befb5b6470d1c32875cf8 Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Tue, 16 Apr 2019 14:53:50 -0700
+Subject: [PATCH 26/54] ARM: dts: rockchip: Hook resets up to USB PHYs on
+ rk3288.
+
+Let's hook up the resets to the three USB PHYs on rk3288 as per the
+bindings.  This is in preparation for a future patch that will set the
+"snps,reset-phy-on-wake" on the host port.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index a024d1e7e74c..3f361fad4684 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -904,6 +904,8 @@
+ 				clocks = <&cru SCLK_OTGPHY0>;
+ 				clock-names = "phyclk";
+ 				#clock-cells = <0>;
++				resets = <&cru SRST_USBOTG_PHY>;
++				reset-names = "phy-reset";
+ 			};
+ 
+ 			usbphy1: usb-phy@334 {
+@@ -912,6 +914,8 @@
+ 				clocks = <&cru SCLK_OTGPHY1>;
+ 				clock-names = "phyclk";
+ 				#clock-cells = <0>;
++				resets = <&cru SRST_USBHOST0_PHY>;
++				reset-names = "phy-reset";
+ 			};
+ 
+ 			usbphy2: usb-phy@348 {
+@@ -920,6 +924,8 @@
+ 				clocks = <&cru SCLK_OTGPHY2>;
+ 				clock-names = "phyclk";
+ 				#clock-cells = <0>;
++				resets = <&cru SRST_USBHOST1_PHY>;
++				reset-names = "phy-reset";
+ 			};
+ 		};
+ 	};
+-- 
+2.11.0
+

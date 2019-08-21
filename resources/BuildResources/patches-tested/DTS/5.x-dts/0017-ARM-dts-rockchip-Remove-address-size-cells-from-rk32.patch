@@ -1,0 +1,36 @@
+From 1a96665143c355b1019ed13b927266185d2a1e4f Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Wed, 20 Mar 2019 13:14:02 -0700
+Subject: [PATCH 17/54] ARM: dts: rockchip: Remove #address/#size-cells from
+ rk3288-veyron gpio-keys
+
+They are pointless.  As dtc points out:
+  Warning (avoid_unnecessary_addr_size):
+  /gpio-keys:
+  unnecessary #address-cells/#size-cells without "ranges" or child "reg" property
+
+Let's remove them.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 0bc2409f6903..192dbc089ade 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -25,8 +25,6 @@
+ 
+ 	gpio_keys: gpio-keys {
+ 		compatible = "gpio-keys";
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+ 
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pwr_key_l>;
+-- 
+2.11.0
+

@@ -1,0 +1,57 @@
+From 6773af2684b7bc1b7b2d9ef874599cccaba2559e Mon Sep 17 00:00:00 2001
+From: Caesar Wang <caesar.wang@rock-chips.com>
+Date: Tue, 9 Apr 2019 13:47:07 -0700
+Subject: [PATCH 28/54] ARM: dts: rockchip: fix PWM clock found on RK3288 Socs
+
+We use the new PWM IP on RK3288, but the PWM's clock indeed incorrect.
+
+Signed-off-by: Caesar Wang <caesar.wang@rock-chips.com>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index aa017abf4f42..171231a0cd9b 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -682,7 +682,7 @@
+ 		#pwm-cells = <3>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pwm0_pin>;
+-		clocks = <&cru PCLK_PWM>;
++		clocks = <&cru PCLK_RKPWM>;
+ 		clock-names = "pwm";
+ 		status = "disabled";
+ 	};
+@@ -693,7 +693,7 @@
+ 		#pwm-cells = <3>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pwm1_pin>;
+-		clocks = <&cru PCLK_PWM>;
++		clocks = <&cru PCLK_RKPWM>;
+ 		clock-names = "pwm";
+ 		status = "disabled";
+ 	};
+@@ -704,7 +704,7 @@
+ 		#pwm-cells = <3>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pwm2_pin>;
+-		clocks = <&cru PCLK_PWM>;
++		clocks = <&cru PCLK_RKPWM>;
+ 		clock-names = "pwm";
+ 		status = "disabled";
+ 	};
+@@ -715,7 +715,7 @@
+ 		#pwm-cells = <2>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pwm3_pin>;
+-		clocks = <&cru PCLK_PWM>;
++		clocks = <&cru PCLK_RKPWM>;
+ 		clock-names = "pwm";
+ 		status = "disabled";
+ 	};
+-- 
+2.11.0
+

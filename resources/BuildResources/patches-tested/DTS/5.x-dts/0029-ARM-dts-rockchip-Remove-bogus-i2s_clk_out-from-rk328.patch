@@ -1,0 +1,42 @@
+From d190bfaaa2a1575e7998d8487ed26cdf9e74b42b Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Fri, 3 May 2019 16:48:14 -0700
+Subject: [PATCH 29/54] ARM: dts: rockchip: Remove bogus 'i2s_clk_out' from
+ rk3288-veyron-mickey
+
+The rk3288-veyron-mickey device tree overrides the default "i2s" clock
+settings to add the clock for "i2s_clk_out".
+
+That clock is only present in the bindings downstream Chrome OS 3.14
+tree.  Upstream the i2s port bindings doesn't specify that as a
+possible clock.
+
+Let's remove it.
+
+NOTE: for other rk3288-veyron devices this clock is consumed by
+'maxim,max98090'.  Presumably if this clock is needed for mickey it'll
+need to be consumed by something similar.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Matthias Kaehlcke <mka@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-mickey.dts | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-mickey.dts b/arch/arm/boot/dts/rk3288-veyron-mickey.dts
+index e852594417b5..f9c4ece3c0d3 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-mickey.dts
++++ b/arch/arm/boot/dts/rk3288-veyron-mickey.dts
+@@ -142,8 +142,6 @@
+ 
+ &i2s {
+ 	status = "okay";
+-	clock-names = "i2s_hclk", "i2s_clk", "i2s_clk_out";
+-	clocks = <&cru HCLK_I2S0>, <&cru SCLK_I2S0>, <&cru SCLK_I2S0_OUT>;
+ };
+ 
+ &rk808 {
+-- 
+2.11.0
+

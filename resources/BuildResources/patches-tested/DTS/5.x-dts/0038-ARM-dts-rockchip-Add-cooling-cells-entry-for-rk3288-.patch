@@ -1,0 +1,31 @@
+From f6dcbb3ad5ce927adbdcc04bde312387f3b68035 Mon Sep 17 00:00:00 2001
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Thu, 16 May 2019 10:25:09 -0700
+Subject: [PATCH 38/54] ARM: dts: rockchip: Add #cooling-cells entry for rk3288
+ GPU
+
+The Mali GPU of the rk3288 can be used as cooling device, add
+a #cooling-cells entry for it.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 1e5260b556b7..7e9b8c7f6ab7 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -1286,6 +1286,7 @@
+ 		interrupt-names = "job", "mmu", "gpu";
+ 		clocks = <&cru ACLK_GPU>;
+ 		operating-points-v2 = <&gpu_opp_table>;
++		#cooling-cells = <2>; /* min followed by max */
+ 		power-domains = <&power RK3288_PD_GPU>;
+ 		status = "disabled";
+ 	};
+-- 
+2.11.0
+

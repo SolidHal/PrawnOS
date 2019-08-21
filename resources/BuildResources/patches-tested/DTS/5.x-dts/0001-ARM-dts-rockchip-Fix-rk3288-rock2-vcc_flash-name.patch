@@ -1,0 +1,31 @@
+From 03d9f8fa2bfdc791865624d3adc29070cf67814e Mon Sep 17 00:00:00 2001
+From: John Keeping <john@metanate.com>
+Date: Tue, 13 Nov 2018 15:24:13 +0000
+Subject: [PATCH 01/54] ARM: dts: rockchip: Fix rk3288-rock2 vcc_flash name
+
+There is no functional change from this, but it is confusing to find two
+copies of vcc_sys and no vcc_flash when looking in
+/sys/class/regulator/*/name.
+
+Signed-off-by: John Keeping <john@metanate.com>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-rock2-som.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-rock2-som.dtsi b/arch/arm/boot/dts/rk3288-rock2-som.dtsi
+index 50325489c0ce..32e1ab336662 100644
+--- a/arch/arm/boot/dts/rk3288-rock2-som.dtsi
++++ b/arch/arm/boot/dts/rk3288-rock2-som.dtsi
+@@ -25,7 +25,7 @@
+ 
+ 	vcc_flash: flash-regulator {
+ 		compatible = "regulator-fixed";
+-		regulator-name = "vcc_sys";
++		regulator-name = "vcc_flash";
+ 		regulator-min-microvolt = <1800000>;
+ 		regulator-max-microvolt = <1800000>;
+ 		startup-delay-us = <150>;
+-- 
+2.11.0
+

@@ -1,0 +1,118 @@
+From ca531bc2bfa655a1a0acaac4f7a6ea4b2111cc43 Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 20:59:34 +0400
+Subject: [PATCH 07/53] usb: dwc2: Add core parameter for service interval
+ support
+
+Added core parameter for service interval based scheduling.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/core.h    | 9 +++++++++
+ drivers/usb/dwc2/debugfs.c | 1 +
+ drivers/usb/dwc2/gadget.c  | 4 ++++
+ drivers/usb/dwc2/params.c  | 4 ++++
+ 4 files changed, 18 insertions(+)
+
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index cc9c93affa14..2678dc9d559b 100644
+--- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -416,6 +416,9 @@ enum dwc2_ep0_state {
+  *                      back to DWC2_SPEED_PARAM_HIGH while device is gone.
+  *			0 - No (default)
+  *			1 - Yes
++ * @service_interval:   Enable service interval based scheduling.
++ *                      0 - No
++ *                      1 - Yes
+  *
+  * The following parameters may be specified when starting the module. These
+  * parameters define how the DWC_otg controller should be configured. A
+@@ -461,6 +464,7 @@ struct dwc2_core_params {
+ 	bool lpm_clock_gating;
+ 	bool besl;
+ 	bool hird_threshold_en;
++	bool service_interval;
+ 	u8 hird_threshold;
+ 	bool activate_stm_fs_transceiver;
+ 	bool ipg_isoc_en;
+@@ -605,6 +609,10 @@ struct dwc2_core_params {
+  *			FIFO sizing is enabled 16 to 32768
+  *			Actual maximum value is autodetected and also
+  *			the default.
++ * @service_interval_mode: For enabling service interval based scheduling in the
++ *                         controller.
++ *                           0 - Disable
++ *                           1 - Enable
+  */
+ struct dwc2_hw_params {
+ 	unsigned op_mode:3;
+@@ -635,6 +643,7 @@ struct dwc2_hw_params {
+ 	unsigned utmi_phy_data_width:2;
+ 	unsigned lpm_mode:1;
+ 	unsigned ipg_isoc_en:1;
++	unsigned service_interval_mode:1;
+ 	u32 snpsid;
+ 	u32 dev_ep_dirs;
+ 	u32 g_tx_fifo_size[MAX_EPS_CHANNELS];
+diff --git a/drivers/usb/dwc2/debugfs.c b/drivers/usb/dwc2/debugfs.c
+index 22d015b0424f..7f62f4cdc265 100644
+--- a/drivers/usb/dwc2/debugfs.c
++++ b/drivers/usb/dwc2/debugfs.c
+@@ -701,6 +701,7 @@ static int params_show(struct seq_file *seq, void *v)
+ 	print_param(seq, p, besl);
+ 	print_param(seq, p, hird_threshold_en);
+ 	print_param(seq, p, hird_threshold);
++	print_param(seq, p, service_interval);
+ 	print_param(seq, p, host_dma);
+ 	print_param(seq, p, g_dma);
+ 	print_param(seq, p, g_dma_desc);
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 79189db4bf17..12032f0488d8 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -3323,6 +3323,10 @@ void dwc2_hsotg_core_init_disconnected(struct dwc2_hsotg *hsotg,
+ 		dwc2_set_bit(hsotg, DIEPMSK, DIEPMSK_BNAININTRMSK);
+ 	}
+ 
++	/* Enable Service Interval mode if supported */
++	if (using_desc_dma(hsotg) && hsotg->params.service_interval)
++		dwc2_set_bit(hsotg, DCTL, DCTL_SERVICE_INTERVAL_SUPPORTED);
++
+ 	dwc2_writel(hsotg, 0, DAINTMSK);
+ 
+ 	dev_dbg(hsotg->dev, "EP0: DIEPCTL0=0x%08x, DOEPCTL0=0x%08x\n",
+diff --git a/drivers/usb/dwc2/params.c b/drivers/usb/dwc2/params.c
+index bf7052e037d6..dd3c10d537e2 100644
+--- a/drivers/usb/dwc2/params.c
++++ b/drivers/usb/dwc2/params.c
+@@ -299,6 +299,7 @@ static void dwc2_set_default_params(struct dwc2_hsotg *hsotg)
+ 	p->hird_threshold_en = true;
+ 	p->hird_threshold = 4;
+ 	p->ipg_isoc_en = false;
++	p->service_interval = false;
+ 	p->max_packet_count = hw->max_packet_count;
+ 	p->max_transfer_size = hw->max_transfer_size;
+ 	p->ahbcfg = GAHBCFG_HBSTLEN_INCR << GAHBCFG_HBSTLEN_SHIFT;
+@@ -592,6 +593,7 @@ static void dwc2_check_params(struct dwc2_hsotg *hsotg)
+ 	CHECK_BOOL(besl, (hsotg->hw_params.snpsid >= DWC2_CORE_REV_3_00a));
+ 	CHECK_BOOL(hird_threshold_en, hsotg->params.lpm);
+ 	CHECK_RANGE(hird_threshold, 0, hsotg->params.besl ? 12 : 7, 0);
++	CHECK_BOOL(service_interval, hw->service_interval_mode);
+ 	CHECK_RANGE(max_packet_count,
+ 		    15, hw->max_packet_count,
+ 		    hw->max_packet_count);
+@@ -780,6 +782,8 @@ int dwc2_get_hwparams(struct dwc2_hsotg *hsotg)
+ 				  GHWCFG4_UTMI_PHY_DATA_WIDTH_SHIFT;
+ 	hw->acg_enable = !!(hwcfg4 & GHWCFG4_ACG_SUPPORTED);
+ 	hw->ipg_isoc_en = !!(hwcfg4 & GHWCFG4_IPG_ISOC_SUPPORTED);
++	hw->service_interval_mode = !!(hwcfg4 &
++				       GHWCFG4_SERVICE_INTERVAL_SUPPORTED);
+ 
+ 	/* fifo sizes */
+ 	hw->rx_fifo_size = (grxfsiz & GRXFSIZ_DEPTH_MASK) >>
+-- 
+2.11.0
+

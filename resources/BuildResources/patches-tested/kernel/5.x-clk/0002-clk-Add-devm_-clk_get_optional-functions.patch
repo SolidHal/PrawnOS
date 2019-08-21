@@ -1,0 +1,48 @@
+From 60b8f0ddf1a927ef02141a6610fd52575134f821 Mon Sep 17 00:00:00 2001
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Date: Mon, 3 Dec 2018 11:13:09 +0000
+Subject: [PATCH 2/3] clk: Add (devm_)clk_get_optional() functions
+
+This adds clk_get_optional() and devm_clk_get_optional() functions to get
+optional clocks.
+
+They behave the same as (devm_)clk_get() except where there is no clock
+producer. In this case, instead of returning -ENOENT, the function
+returns NULL. This makes error checking simpler and allows
+clk_prepare_enable, etc to be called on the returned reference
+without additional checks.
+
+Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Russell King <linux@armlinux.org.uk>
+[sboyd@kernel.org: Document in devres.txt]
+Signed-off-by: Stephen Boyd <sboyd@kernel.org>
+---
+ drivers/clk/clk-devres.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/clk/clk-devres.c b/drivers/clk/clk-devres.c
+index c9a86156ced8..daa1fc8fba53 100644
+--- a/drivers/clk/clk-devres.c
++++ b/drivers/clk/clk-devres.c
+@@ -29,6 +29,17 @@ struct clk *devm_clk_get(struct device *dev, const char *id)
+ }
+ EXPORT_SYMBOL(devm_clk_get);
+ 
++struct clk *devm_clk_get_optional(struct device *dev, const char *id)
++{
++	struct clk *clk = devm_clk_get(dev, id);
++
++	if (clk == ERR_PTR(-ENOENT))
++		return NULL;
++
++	return clk;
++}
++EXPORT_SYMBOL(devm_clk_get_optional);
++
+ struct clk_bulk_devres {
+ 	struct clk_bulk_data *clks;
+ 	int num_clks;
+-- 
+2.11.0
+

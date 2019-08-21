@@ -1,0 +1,37 @@
+From 494da92d56e45c88966fab4db2bed1a2f300c5f8 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sun, 24 Feb 2019 21:52:00 +0000
+Subject: [PATCH 09/54] ARM: dts: rockchip: add grf reference in rk3288 tsadc
+ node
+
+The following message can be seen during boot:
+
+  rockchip-thermal ff280000.tsadc: Missing rockchip,grf property
+
+Fix this by adding rockchip,grf property to tsadc node.
+
+The warning itself is not relevant on rk3288 right now, as the
+tsadc doesn't need to set GRF-values at this point and only newer
+variants do.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index ca7d52daa8fb..b577f3e41811 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -569,6 +569,7 @@
+ 		pinctrl-1 = <&otp_out>;
+ 		pinctrl-2 = <&otp_gpio>;
+ 		#thermal-sensor-cells = <1>;
++		rockchip,grf = <&grf>;
+ 		rockchip,hw-tshut-temp = <95000>;
+ 		status = "disabled";
+ 	};
+-- 
+2.11.0
+

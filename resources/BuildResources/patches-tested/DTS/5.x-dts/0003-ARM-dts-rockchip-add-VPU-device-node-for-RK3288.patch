@@ -1,0 +1,52 @@
+From ad5399d12ca4f68fdb9e58e4b9a556eb997a9639 Mon Sep 17 00:00:00 2001
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Fri, 30 Nov 2018 14:34:31 -0300
+Subject: [PATCH 03/54] ARM: dts: rockchip: add VPU device node for RK3288
+
+Add the Video Processing Unit node for RK3288 SoC.
+
+Fix the VPU IOMMU node, which was disabled and lacking
+its power domain property.
+
+Reviewed-by: Tomasz Figa <tfiga@chromium.org>
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 1da86e82bb57..ca7d52daa8fb 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -1232,6 +1232,18 @@
+ 		};
+ 	};
+ 
++	vpu: video-codec@ff9a0000 {
++		compatible = "rockchip,rk3288-vpu";
++		reg = <0x0 0xff9a0000 0x0 0x800>;
++		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>,
++			     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "vepu", "vdpu";
++		clocks = <&cru ACLK_VCODEC>, <&cru HCLK_VCODEC>;
++		clock-names = "aclk", "hclk";
++		iommus = <&vpu_mmu>;
++		power-domains = <&power RK3288_PD_VIDEO>;
++	};
++
+ 	vpu_mmu: iommu@ff9a0800 {
+ 		compatible = "rockchip,iommu";
+ 		reg = <0x0 0xff9a0800 0x0 0x100>;
+@@ -1240,7 +1252,7 @@
+ 		clocks = <&cru ACLK_VCODEC>, <&cru HCLK_VCODEC>;
+ 		clock-names = "aclk", "iface";
+ 		#iommu-cells = <0>;
+-		status = "disabled";
++		power-domains = <&power RK3288_PD_VIDEO>;
+ 	};
+ 
+ 	hevc_mmu: iommu@ff9c0440 {
+-- 
+2.11.0
+

@@ -1,0 +1,50 @@
+From 280fa349757bb240c650882feee5a861150ccc2d Mon Sep 17 00:00:00 2001
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Tue, 9 Apr 2019 16:14:05 -0700
+Subject: [PATCH 20/54] ARM: dts: rockchip: Add BT_EN to the power sequence for
+ veyron
+
+Add GPIO D5 (BT_ENABLE_L) as reset-GPIO to the power sequence for the
+Bluetooth/WiFi module. On devices with a Broadcom module the signal
+needs to be asserted to use Bluetooth.
+
+Note that BT_ENABLE_L is a misnomer in the schematics, the signal
+actually is active-high.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index fa38eb967f12..efa7b425c9ed 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -62,12 +62,19 @@
+ 		pinctrl-0 = <&bt_enable_l>, <&wifi_enable_h>;
+ 
+ 		/*
+-		 * On the module itself this is one of these (depending
+-		 * on the actual card populated):
++		 * Depending on the actual card populated GPIO4 D4 and D5
++		 * correspond to one of these signals on the module:
++		 *
++		 * D4:
+ 		 * - SDIO_RESET_L_WL_REG_ON
+ 		 * - PDN (power down when low)
++		 *
++		 * D5:
++		 * - BT_I2S_WS_BT_RFDISABLE_L
++		 * - No connect
+ 		 */
+-		reset-gpios = <&gpio4 RK_PD4 GPIO_ACTIVE_LOW>;
++		reset-gpios = <&gpio4 RK_PD4 GPIO_ACTIVE_LOW>,
++			      <&gpio4 RK_PD5 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+ 	vcc_5v: vcc-5v {
+-- 
+2.11.0
+

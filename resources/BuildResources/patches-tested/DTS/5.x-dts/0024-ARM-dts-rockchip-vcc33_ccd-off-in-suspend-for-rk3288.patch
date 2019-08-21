@@ -1,0 +1,44 @@
+From ed27ae71bf610004d04cb956d0a7687342006a1f Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Thu, 11 Apr 2019 16:21:56 -0700
+Subject: [PATCH 24/54] ARM: dts: rockchip: vcc33_ccd off in suspend for
+ rk3288-veyron-chromebook
+
+As per my comments when the device tree for rk3288-veyron-chromebook
+first landed:
+
+> Technically I think vcc33_ccd can be off since we have
+> 'needs-reset-on-resume' down in the EHCI port (this regulator is for
+> the USB webcam that's connected to the EHCI port).
+>
+>  ...but leaving it on for now seems fine until we get suspend/resume
+> more solid.
+
+It's probably about time to do it right.
+
+[1] https://lore.kernel.org/linux-arm-kernel/CAD=FV=U37Yx8Mqk75_x05zxonvdc3qRMhqp8TyTDPWGHqSuRqg@mail.gmail.com/
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Elaine Zhang <zhangqing@rock-chips.com>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+index b9cc90f0f25c..fbef34578100 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+@@ -176,8 +176,7 @@
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;
+ 			regulator-state-mem {
+-				regulator-on-in-suspend;
+-				regulator-suspend-microvolt = <3300000>;
++				regulator-off-in-suspend;
+ 			};
+ 		};
+ 	};
+-- 
+2.11.0
+

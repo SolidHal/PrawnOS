@@ -1,0 +1,62 @@
+From 187c5298a12292eab55e3eb09e70e2b145646bcc Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 21:02:57 +0400
+Subject: [PATCH 14/53] usb: dwc2: gadget: Add handler for WkupAlert interrupt
+
+Added interrupt handler for WkupAlert interrupt.
+
+This interrupt should initiate Remote Wake up.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/gadget.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 24bd9fdabc67..2d6d2c8244de 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -246,6 +246,27 @@ int dwc2_hsotg_tx_fifo_total_depth(struct dwc2_hsotg *hsotg)
+ }
+ 
+ /**
++ * dwc2_gadget_wkup_alert_handler - Handler for WKUP_ALERT interrupt
++ *
++ * @hsotg: Programming view of the DWC_otg controller
++ *
++ */
++static void dwc2_gadget_wkup_alert_handler(struct dwc2_hsotg *hsotg)
++{
++	u32 gintsts2;
++	u32 gintmsk2;
++
++	gintsts2 = dwc2_readl(hsotg, GINTSTS2);
++	gintmsk2 = dwc2_readl(hsotg, GINTMSK2);
++
++	if (gintsts2 & GINTSTS2_WKUP_ALERT_INT) {
++		dev_dbg(hsotg->dev, "%s: Wkup_Alert_Int\n", __func__);
++		dwc2_clear_bit(hsotg, GINTSTS2, GINTSTS2_WKUP_ALERT_INT);
++		dwc2_set_bit(hsotg, DCFG, DCTL_RMTWKUPSIG);
++	}
++}
++
++/**
+  * dwc2_hsotg_tx_fifo_average_depth - returns average depth of device mode
+  * TX FIFOs
+  *
+@@ -3730,6 +3751,10 @@ static irqreturn_t dwc2_hsotg_irq(int irq, void *pw)
+ 	if (gintsts & IRQ_RETRY_MASK && --retry_count > 0)
+ 		goto irq_retry;
+ 
++	/* Check WKUP_ALERT interrupt*/
++	if (hsotg->params.service_interval)
++		dwc2_gadget_wkup_alert_handler(hsotg);
++
+ 	spin_unlock(&hsotg->lock);
+ 
+ 	return IRQ_HANDLED;
+-- 
+2.11.0
+

@@ -1,0 +1,65 @@
+From 11983d8530e3d4e9cdd9e5cb7c23611adaf67c73 Mon Sep 17 00:00:00 2001
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Mon, 20 May 2019 15:00:50 -0700
+Subject: [PATCH 41/54] ARM: dts: rockchip: Use the GPU to cool CPU thermal
+ zone of veyron mickey
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+On rk3288 the CPU and GPU temperatures are correlated. Limit the GPU
+frequency on veyron mickey to 400 MHz for CPU temperatures >= 65°C
+and to 300 MHz for CPU temperatures >= 85°C.
+
+This matches the configuration of the downstream Chrome OS 3.14 kernel,
+the 'official' kernel for mickey.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ arch/arm/boot/dts/rk3288-veyron-mickey.dts | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-mickey.dts b/arch/arm/boot/dts/rk3288-veyron-mickey.dts
+index 52f6abc22291..34797abe3403 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-mickey.dts
++++ b/arch/arm/boot/dts/rk3288-veyron-mickey.dts
+@@ -75,9 +75,7 @@
+ 	cooling-maps {
+ 		/*
+ 		 * After 1st level, throttle the CPU down to as low as 1.4 GHz
+-		 * and don't let the GPU go faster than 400 MHz.  Note that we
+-		 * won't throttle the GPU lower than 400 MHz due to CPU
+-		 * heat--we'll let the GPU do the rest itself.
++		 * and don't let the GPU go faster than 400 MHz.
+ 		 */
+ 		cpu_warm_limit_cpu {
+ 			trip = <&cpu_alert_warm>;
+@@ -86,6 +84,10 @@
+ 					 <&cpu2 THERMAL_NO_LIMIT 4>,
+ 					 <&cpu3 THERMAL_NO_LIMIT 4>;
+ 		};
++		cpu_warm_limit_gpu {
++			trip = <&cpu_alert_warm>;
++			cooling-device = <&gpu 1 1>;
++		};
+ 
+ 		/*
+ 		 * Add some discrete steps to help throttling system deal
+@@ -125,6 +127,12 @@
+ 					 <&cpu2 8 THERMAL_NO_LIMIT>,
+ 					 <&cpu3 8 THERMAL_NO_LIMIT>;
+ 		};
++
++		/* At very hot, don't let GPU go over 300 MHz */
++		cpu_very_hot_limit_gpu {
++			trip = <&cpu_alert_very_hot>;
++			cooling-device = <&gpu 2 2>;
++		};
+ 	};
+ };
+ 
+-- 
+2.11.0
+
