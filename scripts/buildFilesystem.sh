@@ -113,12 +113,7 @@ cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
 chmod +x $outmnt/*.sh
 
-
-#Copy in the test script
-cp scripts/InstallScripts/wifi-test.sh $outmnt/wifi-test.sh
-chmod +x $outmnt/wifi-test.sh
-
-#Setup the chroot for apt 
+#Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
