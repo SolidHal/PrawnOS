@@ -25,7 +25,6 @@ then
 fi
 KVER=$1
 TEST_PATCHES=false
-
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
 [ ! -d build ] && mkdir build
@@ -44,12 +43,10 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/5.x-dts/*.patch; do echo $i; patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do echo $i; patch -p1 < $i; done
 [ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/5.x-clk/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/5.x-usb/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/5.x-dts/*.patch; do echo $i; patch -p1 < $i; done
 #Apply all of the rockMyy patches that make sense
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/kernel/*.patch; do patch -p1 < $i; done
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/DTS/*.patch; do patch -p1 < $i; done
