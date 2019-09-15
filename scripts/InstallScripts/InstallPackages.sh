@@ -43,11 +43,22 @@ DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FR
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice && apt install -t sid -y libxfce4ui-2-0 xfce4-screensaver
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
 if [ "$DE" = "xfce" ]
 then
+  # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
+  apt remove -y light-locker
+  apt purge -y light-locker
+
+  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
+  # light-locker is outright broken, and xfce4-screensaver crashes if system
+  # is told to sleep at lid close, and activate lock
+  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
+  # xscreensaver works as well, if you prefer that but is less simple
+  apt install xsecurelock
+
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
 
@@ -61,8 +72,8 @@ then
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
 
-  #Patch xflock4 to support xfce-screensaver https://docs.xfce.org/apps/screensaver/faq
-  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock4-xfce4-screensaver.patch
+  #Patch xflock4 to activate xsecurelock
+  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
 
   #Copy in wallpapers
   rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
@@ -115,13 +126,10 @@ cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
 cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
-# remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
-apt remove -y light-locker
-
 apt clean && apt autoremove --purge
 
 #enable periodic TRIM
-cp /usr/share/doc/util-linux/examples/fstrim.{service,timer} /etc/systemd/system || cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
+cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
 systemctl enable fstrim.timer
 
 dmesg -D
