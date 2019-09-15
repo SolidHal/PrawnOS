@@ -29,18 +29,8 @@ read -p "This will replace the kernel installed on the internal storage (EMMC) w
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
     echo Writing kernel partition
     dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
-    echo Copying over ath9k module
-    mkdir -p /mnt/mmc
-    mount /dev/mmcblk2p2 /mnt/mmc
-    rm /mnt/mmc/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
-    install -D -m 644 /lib/firmware/ath9k_htc/htc_9271-1.4.0.fw /mnt/mmc/lib/firmware/ath9k_htc/htc_9271-1.4.0.fw
-    echo Copying over module information
-    rm -rf /mnt/mmc/lib/modules
-    install -d -D -m 755 /lib/modules /mnt/mmc/lib/modules
-    umount /mnt/mmc
     echo You can now reboot
 fi
 
