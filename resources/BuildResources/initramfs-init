@@ -1,0 +1,51 @@
+#!/bin/busybox sh
+
+
+cmdline() {
+    local value
+    value=" $(cat /proc/cmdline) "
+    value="${value##* ${1}=}"
+    value="${value%% *}"
+    [ "${value}" != "" ] && echo "${value}"
+}
+
+rootpartuuid() {
+    local value
+    value=$1
+    value="${value%/*}"
+    value="${value#*=}"
+    [ "${value}" != "" ] && echo "${value}"
+}
+
+# mount the bare necesities 
+mount -n -t proc     proc      /proc
+mount -n -t sysfs    sysfs     /sys
+mount -n -t devtmpfs devtmpfs  /dev
+mount -n -t tmpfs    tmpfs     /run
+
+# get the root device, so we can find the boot partiton
+UNPARSED=$(cmdline root)
+ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
+echo ${ROOT_PARTUUID}
+BLKID=$(/bin/blkid | grep $ROOT_PARTUUID )
+echo ${BLKID}
+#If its an mmcblk device, the partiton will p1. If it is a usb device, the partiton will just be 1
+#Just want everything before the 1: so this will work
+ROOT_DEV="${BLKID%1:*}"
+
+echo ${ROOT_DEV}
+
+
+# we use this to change what cmdline options get passed into
+# the next boot stage, aka to enable root encryption
+CMDLINE='cat /proc/cmdline'
+
+# mount new root
+[ -d /newroot ] || mkdir -p /newroot
+mount ${ROOT_DEV}3 /newroot
+
+umount /sys
+umount /proc
+
+#swith to the new rootfs
+exec swith_root /newroot "/sbin/init" ${CMDLINE}
