@@ -62,35 +62,23 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
-#layout the partitons and write filesystem information
+
 create_image() {
+  # it's a sparse file - that's how we fit a 16GB image inside a 3GB one
   dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
   parted --script $1 mklabel gpt
   cgpt create $1
   cgpt add -i 1 -t kernel -b 8192 -s 65536 -l Kernel -S 1 -T 5 -P 10 $1
-  boot_start=$((8192 + 65536))
-  boot_end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
-  size=$(($boot_end - $boot_start))
-  #create the initramfs partiton, aka /boot
-  boot_start=$(($start + $size))
-  boot_size=409600 # 200 MB
-  cgpt add -i 2 -t data -b $boot_start -s $boot_size -l Boot $1
-  #Now the main filesystem
-  root_start=$(($boot_start + $boot_size))
+  start=$((8192 + 65536))
   end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
-  root_size=$(($end - $root_start))
-  cgpt add -i 3 -t data -b $start -s $size -l Root $1
+  size=$(($end - $start))
+  cgpt add -i 2 -t data -b $start -s $size -l Root $1
   # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($boot_size / 2))
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p3 $(($root_size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($size / 2))
 
   # mount the / partition
   mount -o noatime ${2}p2 $5
-
-  # mount the /boot partiton
-  mkdir -p $5/boot
-  mount -o noatime ${2}p2 $5/boot
 }
 
 # use buster if no suite is specified
@@ -164,27 +152,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static
-
-#make the initramfs image that gets copied to partiton 2
-#make a skeleton filesystem
-initramfs_src=/usr/src/initramfs
-chroot $outmnt mkdir -p $initramfs_src
-chroot $outmnt mkdir $initramfs_src/{bin,dev,etc,newroot,proc,sys,sbin,run,lib,lib/arm-linux-gnueabihf}
-#install the few tools we need
-chroot $outmnt cp /bin/busybox /sbin/cryptsetup $initramfs_src/bin/
-chroot $outmnt cp /lib/arm-linux-gnueabihf/{libblkid.so.1,libc.so.6,libuuid.so.1} $initramfs_src/lib/arm-linux-gnueabihf/
-chroot $outmnt cp /lib/ld-linux-armhf.so.3 $initramfs_src/lib/
-chroot $outmnt cp /sbin/blkid $initramfs_src/bin/
-
-#add the init script
-cp $build_resources/initramfs-init $outmnt/$initramfs_src/init
-chroot $outmnt chmod +x $initramfs_src/init
-
-#compress and install
-#TODO, make this correct
-chroot $outmnt find $initramfs_src -print0 | cpio --null --create --verbose --format=newc | gzip --best > /boot/PrawnOS-initramfs.cpio.gz 
-
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
