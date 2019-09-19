@@ -44,7 +44,7 @@ clean:
 
 .PHONY: clean_kernel
 clean_kernel:
-	rm -rf build/linux-[0-9].*
+	rm -rf build/linux-$(KVER)
 
 .PHONY: clean_ath
 clean_ath:
