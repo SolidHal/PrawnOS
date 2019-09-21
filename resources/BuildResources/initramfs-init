@@ -1,6 +1,8 @@
 #!/bin/busybox sh
 
 
+echo In PrawnOS Init
+
 cmdline() {
     local value
     value=" $(cat /proc/cmdline) "
@@ -21,7 +23,6 @@ rootpartuuid() {
 mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
-mount -n -t tmpfs    tmpfs     /run
 
 # get the root device, so we can find the boot partiton
 UNPARSED=$(cmdline root)
@@ -35,6 +36,8 @@ ROOT_DEV="${BLKID%1:*}"
 
 echo ${ROOT_DEV}
 
+#uncomment for debugging
+# exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 
 # we use this to change what cmdline options get passed into
 # the next boot stage, aka to enable root encryption
@@ -46,6 +49,9 @@ mount ${ROOT_DEV}3 /newroot
 
 umount /sys
 umount /proc
+umount /dev
+
+# exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 
 #swith to the new rootfs
-exec swith_root /newroot "/sbin/init" ${CMDLINE}
+exec switch_root /newroot /sbin/init ${CMDLINE}

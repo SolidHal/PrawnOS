@@ -27,12 +27,24 @@
 				algo = "sha1";
 			};
 		};
+		ramdisk@1{
+			description = "initrd.img";
+			data = /incbin/("PrawnOS-initramfs.cpio.gz");
+			type = "ramdisk";
+			arch = "arm";
+			os = "linux";
+			compression = "none";
+			hash@1{
+				algo = "sha1";
+			};
+		};
 	};
 	configurations {
 		default = "conf";
 		conf{
 			kernel = "kernel";
 			fdt = "fdt";
+			ramdisk = "ramdisk@1";
 		};
 	};
 };
