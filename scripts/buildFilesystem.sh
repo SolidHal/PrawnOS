@@ -35,8 +35,6 @@ then
 fi
 KVER=$1
 
-[ ! -d build ] && echo "No build folder found, is the kernel built?" && exit
-
 outmnt=$(mktemp -d -p `pwd`)
 
 outdev=/dev/loop5
