@@ -83,6 +83,7 @@ cp $outmnt/sbin/blkid $initramfs_src/bin/
 #add the init script
 cp $build_resources/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
+cp $initramfs_src/init $initramfs_src/sbin/init
 
 #compress and install
 rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
