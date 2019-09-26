@@ -47,13 +47,10 @@ This is the only build enviroment that is supported.
 These packages are required:
 
 ```
-	apt install --no-install-recommends --no-install-suggests \
-		parted cgpt \
-		git gawk device-tree-compiler vboot-kernel-utils gcc-arm-none-eabi \
-	        u-boot-tools \
-		gcc make libc-dev wget g++ cmake \
-		binfmt-support qemu-user-static debootstrap \
-		lzip libssl-dev libncurses-dev flex bison sudo patch bc
+	apt install --no-install-recommends --no-install-suggests parted cgpt git \
+	gawk device-tree-compiler vboot-kernel-utils gcc-arm-none-eabi u-boot-tools \
+	gcc make libc-dev wget g++ cmake binfmt-support qemu-user-static debootstrap \
+	lzip libssl-dev libncurses-dev flex bison sudo patch bc
 ```
 
 ## Build
