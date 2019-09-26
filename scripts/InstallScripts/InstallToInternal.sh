@@ -57,22 +57,23 @@ then
     dmesg -E
 
     echo Writing kernel partition
+    dd if=/dev/zero of=/dev/mmcblk2p1 bs=512 count=65536
     dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
 
     BOOT_DEV_NAME=mmcblk2p2
     ROOT_DEV_NAME=mmcblk2p3
     CRYPTO=false
     #Handle full disk encryption
-    read -p "Would you like to setup full disk encrytion using LUKs/DmCrypt? [Y/n]" -n 1 -r
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        CRYPTO=true
-        # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
-        # desktop cpu, maually supply -i 15000 for security at the cost of a slightly slower unlock
-        cryptsetup -s 512 luksFormat -i 15000 /dev/mmcblk2p2
-        cryptsetup luksOpen /dev/mmcblk2p2 mmcblk2p2-encrypted
-        ROOT_DEV_NAME=mapper/mmcblk2p2-encrypted
-    fi
+    # read -p "Would you like to setup full disk encrytion using LUKs/DmCrypt? [Y/n]" -n 1 -r
+    # if [[ $REPLY =~ ^[Yy]$ ]]
+    # then
+    #     CRYPTO=true
+    #     # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
+    #     # desktop cpu, maually supply -i 15000 for security at the cost of a slightly slower unlock
+    #     cryptsetup -s 512 luksFormat -i 15000 /dev/mmcblk2p2
+    #     cryptsetup luksOpen /dev/mmcblk2p2 mmcblk2p2-encrypted
+    #     ROOT_DEV_NAME=mapper/mmcblk2p2-encrypted
+    # fi
 
     echo Writing Filesystem, this will take about 4 minutes...
     mkfs.ext4 -F -b 1024 /dev/$ROOT_DEV_NAME
@@ -81,20 +82,17 @@ then
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
     #Remove the live-fstab and install a base fstab
     rm /mnt/mmc/etc/fstab
-    if [ $CRYPTO false]
-    then
-        echo "/dev/mmcblk2p2 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
-        umount /dev/mmcblk2p2
-        echo Running fsck
-        e2fsck -p -f /dev/mmcblk2p2
-    fi
-    if [ $CRYPTO true ]
-    then
-        # unmount and close encrypted storage
-        cryptsetup luksClose mmcblk2p2-encrypted
-        echo Running fsck
-        #TODO run fsck on luks part
-    fi
+    echo "/dev/mmcblk2p3 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
+    umount /dev/$ROOT_DEV_NAME
+    echo Running fsck
+    e2fsck -p -f /dev/$ROOT_DEV_NAME
+    # if [ $CRYPTO true ]
+    # then
+    #     # unmount and close encrypted storage
+    #     cryptsetup luksClose mmcblk2p2-encrypted
+    #     echo Running fsck
+    #     #TODO run fsck on luks part
+    # fi
     echo Rebooting... Please remove the usb drive once shutdown is complete
     reboot
 fi
