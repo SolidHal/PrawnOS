@@ -21,7 +21,7 @@
 
 RESOURCES=/InstallResources
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
+BOOT_DEVICE=$(mount | head -n 1 | cut -d '3' -f 1)
 
 
 read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when finished, do you want to continue? [Y/n]" -n 1 -r
