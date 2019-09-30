@@ -57,7 +57,7 @@ then
   # is told to sleep at lid close, and activate lock
   # gnome-screensaver shows the desktop for a fraction of a second at wakeup
   # xscreensaver works as well, if you prefer that but is less simple
-  apt install xsecurelock
+  apt install -y -t unstable xsecurelock
 
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
