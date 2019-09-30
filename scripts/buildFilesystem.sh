@@ -163,41 +163,6 @@ chroot $outmnt locale-gen
 chroot $outmnt apt update
 chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup
 
-#make the initramfs image that gets copied to partiton 2
-#this is not yet fully funtional, needs the kernel parts which are
-#added in "injectKernelIntoFS.sh"
-
-#make a skeleton filesystem
-initramfs_src=$outmnt/InstallResources/initramfs_src
-mkdir -p $initramfs_src
-mkdir $initramfs_src/bin
-mkdir $initramfs_src/dev
-mkdir $initramfs_src/etc
-mkdir $initramfs_src/newroot
-mkdir $initramfs_src/proc
-mkdir $initramfs_src/sys
-mkdir $initramfs_src/sbin
-mkdir $initramfs_src/run
-mkdir $initramfs_src/lib
-mkdir $initramfs_src/lib/arm-linux-gnueabihf
-
-#install the few tools we need, and the supporting libs
-cp $outmnt/bin/busybox $outmnt/sbin/cryptsetup $initramfs_src/bin/
-cp $outmnt/lib/arm-linux-gnueabihf/libblkid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/
-cp $outmnt/lib/arm-linux-gnueabihf/libuuid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/
-cp $outmnt/lib/arm-linux-gnueabihf/libc.so.6 $initramfs_src/lib/arm-linux-gnueabihf/
-
-cp $outmnt/lib/ld-linux-armhf.so.3 $initramfs_src/lib/
-cp $outmnt/sbin/blkid $initramfs_src/bin/
-
-#add the init script
-cp $build_resources/initramfs-init $initramfs_src/init
-chmod +x $initramfs_src/init
-
-#compress and install
-find $initramfs_src -print0 | cpio --null --create --verbose --format=newc | gzip --best > $outmnt/boot/PrawnOS-initramfs.cpio.gz 
-
-
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
 chmod 644 /etc/fstab

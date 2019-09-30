@@ -1,7 +1,12 @@
 #!/bin/busybox sh
 
-
 echo In PrawnOS Init
+
+#add this to start shell at desired point
+rescue_shell() {
+    [ $1 != "debug" ] && echo "Something went wrong. Dropping to a shell."
+    exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
+}
 
 cmdline() {
     local value
@@ -36,21 +41,32 @@ ROOT_DEV="${BLKID%1:*}"
 
 echo ${ROOT_DEV}
 
-#uncomment for debugging
-# exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
-
 # we use this to change what cmdline options get passed into
 # the next boot stage, aka to enable root encryption
 CMDLINE='cat /proc/cmdline'
 
-# mount new root
-[ -d /newroot ] || mkdir -p /newroot
-mount ${ROOT_DEV}3 /newroot
+[ -d /boot ] || mkdir -p /boot
+mount ${ROOT_DEV}2 /boot
+
+#Debugging can be facilitated by creating /boot/debug
+[ -f /boot/debug ] && rescue_shell debug
+
+if [ -f /boot/root_encryption ]
+then
+    #decrypt and mount the root filesystem
+    cryptsetup --tries 5 luksOpen /dev/{ROOT_DEV}3 luksroot || rescue_shell
+    mount /dev/mapper/luksroot /newroot
+    #TODO: UPDATE THE CMDLINE??
+else
+    # mount the unencrypted root filesystem
+    [ -d /newroot ] || mkdir -p /newroot
+    mount ${ROOT_DEV}3 /newroot
+fi
 
 umount /sys
 umount /proc
 
-# exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
+
 
 #swith to the new rootfs
 exec switch_root /newroot /sbin/init ${CMDLINE}
