@@ -1,7 +1,8 @@
 su -
 
-apt build-dep mesa
-git clone https://gitlab.freedesktop.org/mesa/mesa -b "19.2"
+apt -y build-dep mesa
+apt -y install mesa-utils
+git clone https://gitlab.freedesktop.org/mesa/mesa -b master
 cd mesa
 mkdir build
 cd build
