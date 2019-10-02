@@ -9,4 +9,7 @@ cd build
 meson .. . -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro -Dlibunwind=false
 ninja install
 
+apt -y remove llvm-7-dev
+apt -y autoremove
+
 reboot
