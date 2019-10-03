@@ -1,13 +1,32 @@
 #!/bin/busybox sh
 
+# This is the init script built into the PrawnOS initramfs
+
+# This file is part of PrawnOS (http://www.prawnos.com)
+# Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
+
+# PrawnOS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+
+# PrawnOS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
+
 echo In PrawnOS Init
 
 #add this to start shell at desired point
 rescue_shell() {
-    [ $1 != "debug" ] && echo "Something went wrong. Dropping to a shell."
+    [ "{$1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
+    [ "{$1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
     exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 }
 
+#used to parse the kernel cmdline
 cmdline() {
     local value
     value=" $(cat /proc/cmdline) "
@@ -16,6 +35,7 @@ cmdline() {
     [ "${value}" != "" ] && echo "${value}"
 }
 
+#used to get the uuid of the root partiton since findfs isn't in debian busybox-static
 rootpartuuid() {
     local value
     value=$1
@@ -32,34 +52,34 @@ mount -n -t devtmpfs devtmpfs  /dev
 # get the root device, so we can find the boot partiton
 UNPARSED=$(cmdline root)
 ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-echo ${ROOT_PARTUUID}
+echo ${ROOT_PARTUUID} > /dev/tty1
 BLKID=$(/bin/blkid | grep $ROOT_PARTUUID )
-echo ${BLKID}
-#If its an mmcblk device, the partiton will p1. If it is a usb device, the partiton will just be 1
-#Just want everything before the 1: so this will work
+echo ${BLKID} > /dev/tty1
+#If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
+#Just want everything before the 1
 ROOT_DEV="${BLKID%1:*}"
 
-echo ${ROOT_DEV}
+echo ${ROOT_DEV} > /dev/tty1
 
-# we use this to change what cmdline options get passed into
-# the next boot stage, aka to enable root encryption
+# we can use this to change what cmdline options get passed into
+# the next boot stage
 CMDLINE='cat /proc/cmdline'
 
-[ -d /boot ] || mkdir -p /boot
+[ -d "/boot" ] || mkdir -p /boot
 mount ${ROOT_DEV}2 /boot
 
 #Debugging can be facilitated by creating /boot/debug
-[ -f /boot/debug ] && rescue_shell debug
+[ -f "/boot/debug" ] && rescue_shell debug
 
-if [ -f /boot/root_encryption ]
+if [ -f "/boot/root_encryption" ]
 then
     #decrypt and mount the root filesystem
-    cryptsetup --tries 5 luksOpen /dev/{ROOT_DEV}3 luksroot || rescue_shell
+    echo "Opening encrypted root partition, this will take 30s..."
+    cryptsetup --tries 5 luksOpen ${ROOT_DEV}3 luksroot || rescue_shell debug
     mount /dev/mapper/luksroot /newroot
-    #TODO: UPDATE THE CMDLINE??
 else
     # mount the unencrypted root filesystem
-    [ -d /newroot ] || mkdir -p /newroot
+    [ -d "/newroot" ] || mkdir -p /newroot
     mount ${ROOT_DEV}3 /newroot
 fi
 

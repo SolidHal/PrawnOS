@@ -6,12 +6,13 @@ PrawnOS
 </h1>
 
 
-#### A build system for making blobless Debian and mainline Linux kernel for the Asus c201 Chromebook
+#### A build system for making blobless Debian and mainline Linux kernel for the Asus c201 Chromebook with support for dmcrypt/LUKS root partition encryption
 
 Build Debian filesystem with:
 * No blobs, anywhere. 
 * Sources from only main, not contrib or non-free which keeps Debian libre.
-* Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment. 
+* Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment.
+* full root filesystem encryption
 
 Build a deblobbed mainline kernel with:
 * Patches for reliable USB.
@@ -82,6 +83,60 @@ The second and, recommended, option is to install it on your internal storage (e
 [click here](#install-to-internal-drive-emmc)
 * This is faster, and frees up a USB port. 
 
+### Install to Internal drive (emmc)
+Now on the C201, press `control+u` at boot to boot from the USB drive. 
+
+
+If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+
+At the prompt, login as root. The password is blank. 
+
+WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or other Linux install and all of the associated user data) Make sure to back up any data you would like to keep before running this.  
+
+If you would like to install it to the internal emmc storage run:
+```
+cd /
+./InstallToInternal.sh
+```
+_This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything long-term._
+
+#### Setting up root partition encryption
+PrawnOS supports encrypting the full root partition with the use of a custom initramfs and dmcrypt/LUKS
+Press "Y" at the prompt, type "YES" at the following prompt, then enter the password you would like to use and verify it
+You will then be prompted one more time to enter your encryption password to mount and setup the filesystem
+If you are curious how the initramfs, and root partition encryption work on PrawnOS check out the Initramfs and Encryption section in [DOCUMENTATION.md](DOCUMENTATION.md)
+
+The device will then reboot. If you are running the stock coreboot, you will have to press `control+d` or wait 30 seconds past the beep to boot to the internal storage.
+
+If you are running Libreboot, it should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
+
+Now login as root again and run:
+```
+cd /InstallResources
+./InstallPackages.sh
+```
+Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
+
+
+If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.
+
+When finished, it will reboot once again placing you at a login screen. 
+
+Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+
+#### Connecting to WiFi in a basic environment
+If you just want a basic environment without xfce or lxqt can skip running InstallPackages.sh. You can connect to WiFi using wpa_supplicant by running the following commands:
+```
+wpa_passphrase <Network_name> <network_password> > wpa.conf
+wpa_supplicant -i wlan0 -c wpa.conf
+```
+Now switch to another tty by pressing ctrl+alt+f2
+Login as root, and run
+```
+dhclient wlan0
+```
+When that finishes, you should have access to the internet. 
+
 ### Install To USB drive or SD card
 Now on the C201, press `control+u` at boot to boot from the USB drive. 
 
@@ -120,56 +175,6 @@ When finished, it will reboot once again placing you at a login screen.
 This will take a while; USB 2.0 is slow.
 Welcome to PrawnOS. If you like it, I would suggest installing it to your internal storage (emmc).
 
-
-### Install to Internal drive (emmc)
-Now on the C201, press `control+u` at boot to boot from the USB drive. 
-
-
-If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
-
-At the prompt, login as root. The password is blank. 
-
-WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or other Linux install and all of the associated user data) Make sure to back up any data you would like to keep before running this.  
-
-If you would like to install it to the internal emmc storage run:
-```
-cd /
-./InstallToInternal.sh
-```
-_This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything long-term._
-
-The device will then reboot. If you are running the stock coreboot, you will have to press `control+d` or wait 30 seconds past the beep to boot to the internal storage.
-
-If you are running Libreboot, it should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
-
-Now login as root again and run:
-```
-cd /InstallResources
-./InstallPackages.sh
-```
-Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
-
-
-If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.
-
-When finished, it will reboot once again placing you at a login screen. 
-
-Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
-
-#### Connecting to WiFi in a basic environment
-If you just want a basic environment without xfce or lxqt can skip running InstallPackages.sh. You can connect to WiFi using wpa_supplicant by running the following commands:
-```
-wpa_passphrase <Network_name> <network_password> > wpa.conf
-wpa_supplicant -i wlan0 -c wpa.conf
-```
-Now switch to another tty by pressing ctrl+alt+f2
-Login as root, and run
-```
-dhclient wlan0
-```
-When that finishes, you should have access to the internet. 
-
-
 ### Upgrading the kernel
 
 The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
@@ -191,12 +196,14 @@ To begin with:
 
 `make filesystem` builds the -BASE filesystem image with no kernel
 
-`make image` builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_inject
+`make initramfs` builds the PrawnOS-initramfs.cpio.gz, which can be found in /build
+
+`make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_inject
 
 `make kernel_inject` Injects a newly built kernel into a previously built PrawnOS.img located in the root of the checkout. Usually, this will be a copy of the -BASE image made by make filesystem. Only use this if you already have a built kernel and filesystem -BASE image. 
 
 
-You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `stretch`.  For example, to use Debian Buster, you can build with `sudo PRAWNOS_SUITE=buster make image`.  Note that only `stretch` and `buster` have been tested.
+You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Buster`.  For example, to use Debian stretch, you can build with `sudo PRAWNOS_SUITE=stretch make image`.  Note that only `stretch` and `buster` have been tested.
 
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
@@ -223,7 +230,7 @@ The pulse audio mixer will only run if you are logged in as a non-root account. 
 Thanks to dimkr for his great devsus scripts for the Chrome OS 3.14 kernel, from which PrawnOS took much inspiration
 https://github.com/dimkr/devsus
 
-Because PrawnOS started as a fork of devsus-3.14, much of this repo's history can be found at https://github.com/SolidHal/devsus/tree/hybrid_debian
+Because PrawnOS started as a fork of devsus-3.14, some of this repo's ancient history can be found at https://github.com/SolidHal/devsus/tree/hybrid_debian
 
 PrawnOS is free and unencumbered software released under the terms of the GNU
 General Public License, version 2; see COPYING for the license text. For a list

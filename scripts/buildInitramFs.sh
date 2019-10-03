@@ -50,6 +50,8 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
+[ ! -d build ] && mkdir build
+
 losetup -P $outdev $ROOT_DIR/PrawnOS-*-c201-libre-2GB.img-BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p3 $outmnt
@@ -69,8 +71,11 @@ mkdir $initramfs_src/proc
 mkdir $initramfs_src/sys
 mkdir $initramfs_src/sbin
 mkdir $initramfs_src/run
+mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 mkdir $initramfs_src/lib/arm-linux-gnueabihf
+
+cp -a $outmnt/dev/console $outmnt/dev/tty $initramfs_src/dev/
 
 #install the few tools we need, and the supporting libs
 cp $outmnt/bin/busybox $outmnt/sbin/cryptsetup $initramfs_src/bin/
@@ -101,6 +106,7 @@ cp $outmnt/lib/arm-linux-gnueabihf/libselinux.so.1 $initramfs_src/lib/arm-linux-
 cp $outmnt/lib/arm-linux-gnueabihf/libudev.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libudev.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libpthread.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpthread.so.0
 cp $outmnt/lib/arm-linux-gnueabihf/libpcre.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libpcre.so.3
+cp $outmnt/lib/arm-linux-gnueabihf/libgcc_s.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libgcc_s.so.1
 
 #add the init script
 cp $build_resources/initramfs-init $initramfs_src/init
@@ -115,11 +121,7 @@ ln -s busybox bin/mount
 ln -s busybox bin/sh
 ln -s busybox bin/switch_root
 ln -s busybox bin/umount
-find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $outmnt/boot/PrawnOS-initramfs.cpio.gz 
 
-cd $ROOT_DIR
-
-[ ! -d build ] && mkdir build
-cd build
 # store for kernel building
-cp $outmnt/boot/PrawnOS-initramfs.cpio.gz .
+find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $ROOT_DIR/build/PrawnOS-initramfs.cpio.gz
+
