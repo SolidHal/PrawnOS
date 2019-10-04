@@ -64,15 +64,6 @@ dd if=$build_resources/blank_kernel of=${outdev}p1 conv=notrunc
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 
-# put the required kernel items into the initramfs aka the device tree and the kernel image
-# TODO: the in-place kernel upgrade script must be changed to copy in new versions of these files
-# cp build/linux-$KVER/arch/arm/boot/dts/rk3288-veyron-speedy.dtb $outmnt/boot/rk3288-veyron-speedy.dtb
-# cp build/linux-$KVER/vmlinux.kpart $outmnt/boot
-
-#TODO: do we actually need the kernel in /boot?? I think not. lets test and find out
-
-# the initramfs is build into the kernel image
-
 # the ath9k firmware is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1
