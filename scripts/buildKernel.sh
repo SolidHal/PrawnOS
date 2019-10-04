@@ -29,6 +29,12 @@ ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
 [ ! -d build ] && mkdir build
 cd build
+if [ ! -f PrawnOS-initramfs.cpio.gz ]
+then
+    echo "No initramfs image, run 'make initramfs' first"
+    cd $ROOT_DIR
+    exit 1
+fi
 # build AR9271 firmware
 [ ! -d open-ath9k-htc-firmware ] && git clone --depth 1 https://github.com/qca/open-ath9k-htc-firmware.git
 cd open-ath9k-htc-firmware
@@ -51,6 +57,8 @@ make mrproper
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/kernel/*.patch; do patch -p1 < $i; done
 [ "$TEST_PATCHES" = true ] && for i in $RESOURCES/patches-untested/DTS/*.patch; do patch -p1 < $i; done
 
+#copy in the initramfs and kernel config
+cp $ROOT_DIR/build/PrawnOS-initramfs.cpio.gz .
 cp $RESOURCES/config .config
 make -j `grep ^processor /proc/cpuinfo  | wc -l`  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
 [ ! -h kernel.its ] && ln -s $RESOURCES/kernel.its .

@@ -35,8 +35,6 @@ then
 fi
 KVER=$1
 
-[ ! -d build ] && echo "No build folder found, is the kernel built?" && exit
-
 outmnt=$(mktemp -d -p `pwd`)
 
 outdev=/dev/loop5
@@ -152,7 +150,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
@@ -167,8 +165,9 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 #Package is copied into /InstallResources/packages
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt xsecurelock
+chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt
 
 if [ "$PRAWNOS_SUITE" = "stretch" ]
 then
