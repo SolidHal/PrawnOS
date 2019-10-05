@@ -14,8 +14,8 @@ Some additional documentation for PrawnOS that wouldn't fit in the README
 * control+alt+left:           move window to left workspace
 * control+alt+right:          move window to right workspace
 
-* control+left:               tile widow to the left
-* control+right:              tile window to the right
+* control+bracketleft ([):    tile widow to the left
+* control+bracketright (]):   tile window to the right
 * control+up:                 maximize window
 
 * alt+tab:                    app switcher
