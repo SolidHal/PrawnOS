@@ -60,23 +60,34 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
-
+#layout the partitons and write filesystem information
 create_image() {
-  # it's a sparse file - that's how we fit a 16GB image inside a 3GB one
   dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
   parted --script $1 mklabel gpt
   cgpt create $1
-  cgpt add -i 1 -t kernel -b 8192 -s 65536 -l Kernel -S 1 -T 5 -P 10 $1
-  start=$((8192 + 65536))
+  kernel_start=8192
+  kernel_size=65536
+  boot_size=409600 # 200 MB
+  cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
+  #create the initramfs partiton, aka /boot
+  boot_start=$(($kernel_start + $kernel_size))
+  cgpt add -i 2 -t data -b $boot_start -s $boot_size -l Boot $1
+  #Now the main filesystem
+  root_start=$(($boot_start + $boot_size))
   end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
-  size=$(($end - $start))
-  cgpt add -i 2 -t data -b $start -s $size -l Root $1
+  root_size=$(($end - $root_start))
+  cgpt add -i 3 -t data -b $root_start -s $root_size -l Root $1
   # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($boot_size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p3 $(($root_size / 2))
 
   # mount the / partition
-  mount -o noatime ${2}p2 $5
+  mount -o noatime ${2}p3 $5
+
+  # mount the /boot partiton
+  mkdir -p $5/boot
+  mount -o noatime ${2}p2 $5/boot
 }
 
 # use buster if no suite is specified
