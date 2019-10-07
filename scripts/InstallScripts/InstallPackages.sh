@@ -22,12 +22,12 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (G)nome (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
+    read -p "Install (G)nome3, (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
     case $XL in
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
         [Gg]* ) DE=gnome; break;;
-        * ) echo "Please answer (G)nome (X)fce4 or (L)xqt";;
+        * ) echo "Please answer (G)nome3, (X)fce4 or (L)xqt";;
     esac
 done
 
@@ -35,21 +35,32 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support gdm3 fonts-cantarell tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx 
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 # #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-#DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
+DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-#DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
+DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice xfce4-screensaver mousepad vlc epiphany-browser
-[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt xfce4-terminal mousepad vlc epiphany-browser
-[ "$DE" = "gnome"] && apt install -y gnome-session fonts-cantarell dbus-user-session gnome-js-common gnome-shell-extensions nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-terminal epiphany-browser
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice mousepad vlc emacs25
+[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt mousepad vlc emacs25
+[ "$DE" = "gnome" ] && apt install -y gnome-session dbus-user-session gnome-js-common gnome-shell-extensions nautilus nautilus-admin gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-disk-utility gnome-terminal epiphany-browser
 
 if [ "$DE" = "xfce" ]
 then
+  # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
+  apt remove -y light-locker
+  apt purge -y light-locker
+
+  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
+  # light-locker is outright broken, and xfce4-screensaver crashes if system
+  # is told to sleep at lid close, and activate lock
+  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
+  # xscreensaver works as well, if you prefer that but is less simple
+  DEBIAN_FRONTEND=noninteractive apt install -y -t unstable xsecurelock
+
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
 
@@ -63,8 +74,8 @@ then
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
 
-  #Patch xflock4 to support xfce-screensaver https://docs.xfce.org/apps/screensaver/faq
-  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock4-xfce4-screensaver.patch
+  #Patch xflock4 to activate xsecurelock
+  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
 
   #Copy in wallpapers
   rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
@@ -88,9 +99,8 @@ then
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
   #install firefox-esr default settings
-  #The firefox part was commented out previously, so this should be too
-#  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-#  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
   #Install the source code pro font for spacemacs
   [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
@@ -118,15 +128,10 @@ cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
 cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
-# remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
-apt remove -y light-locker
-# also remove xterm, it's old and ugly
-apt remove -y xterm
-
 apt clean && apt autoremove --purge
 
 #enable periodic TRIM
-cp /usr/share/doc/util-linux/examples/fstrim.{service,timer} /etc/systemd/system || cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
+cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
 systemctl enable fstrim.timer
 
 dmesg -D
@@ -139,13 +144,13 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 echo "*************Welcome To PrawnOS*************"
 echo ""
-#Skip having the user set a root password, since they'll have sudo
-#echo "-----Enter a password for the root user-----"
-#until passwd
-#do
-#    echo "-----Enter a password for the root user-----"
-#    passwd
-#done
+#Have the user set a root password
+echo "-----Enter a password for the root user-----"
+until passwd
+do
+    echo "-----Enter a password for the root user-----"
+    passwd
+done
 
 #Force a safe username
 while true; do
@@ -165,7 +170,6 @@ do
 done
 
 usermod -a -G sudo,netdev,input,video $username
-passwd -l root
 
 dmesg -E
 
