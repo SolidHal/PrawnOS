@@ -107,7 +107,7 @@ cp $outmnt/lib/arm-linux-gnueabihf/libudev.so.1 $initramfs_src/lib/arm-linux-gnu
 cp $outmnt/lib/arm-linux-gnueabihf/libpthread.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpthread.so.0
 cp $outmnt/lib/arm-linux-gnueabihf/libpcre.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libpcre.so.3
 cp $outmnt/lib/arm-linux-gnueabihf/libgcc_s.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libgcc_s.so.1
-
+cp $outmnt/lib/arm-linux-gnueabihf/libjson-c.so.4 $initramfs_src/lib/arm-linux-gnueabihf/libjson-c.so.4
 #add the init script
 cp $build_resources/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
