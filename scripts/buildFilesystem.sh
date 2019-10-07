@@ -126,33 +126,29 @@ chmod +x $outmnt/*.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
-sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
 if [ "$PRAWNOS_SUITE" != "sid" ]
 then
     # sid doesn't have updates or security; they're present for all other suites
     cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
     # sid doesn't have backports; it's present for all other suites
     cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
     #setup apt pinning
     cp $build_resources/backports.pref $outmnt/etc/apt/preferences.d/
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
-fi
-if [ "$PRAWNOS_SUITE" = "stretch" ]
-then
-    # Install buster as an additional source if the suite is less than buster
-    cp $build_resources/buster.list $outmnt/etc/apt/sources.list.d/
-    #setup apt pinning
-    cp $build_resources/buster.pref $outmnt/etc/apt/preferences.d/
-fi
-if [ "$PRAWNOS_SUITE" = "stretch" ] || [ "$PRAWNOS_SUITE" = "buster" ]
-then
-    # Install sid as an additional source if the suite is less than bullseye.
-    # This should be replaced with bullseye after bullseye branches from sid.
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
+    # Install sid (unstable) as an additional source for bleeding edge packages.
     cp $build_resources/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
     cp $build_resources/sid.pref $outmnt/etc/apt/preferences.d/
+fi
+if [ "$PRAWNOS_SUITE" = "buster" ]
+then
+    # Install bullseye (testing) as an additional source
+    cp $build_resources/bullseye.list $outmnt/etc/apt/sources.list.d/
+    #setup apt pinning
+    cp $build_resources/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
 #Setup the locale
@@ -178,7 +174,7 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt
 
 if [ "$PRAWNOS_SUITE" = "stretch" ]
 then
