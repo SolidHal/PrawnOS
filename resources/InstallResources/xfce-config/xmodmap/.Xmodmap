@@ -28,3 +28,10 @@ keycode 73 = XF86MonBrightnessUp XF86MonBrightnessUp F7 F7 F7 F7 XF86Switch_VT_7
 keycode 74 = XF86AudioMute XF86AudioMute F8 F8 F8 F8 XF86Switch_VT_8
 keycode 75 = XF86AudioLowerVolume XF86AudioLowerVolume F9 F9 F9 F9 XF86Switch_VT_9
 keycode 76 = XF86AudioRaiseVolume XF86AudioRaiseVolume F10 F10 F10 F10 XF86Switch_VT_10
+
+!German Umlaute
+keycode 38 = a NoSymbol Adiaeresis
+keycode 30 = u NoSymbol Udiaeresis
+keycode 32 = o NoSymbol Odiaeresis
+!German Sharp S
+keycode 39 = s NoSymbol ssharp
