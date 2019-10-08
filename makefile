@@ -70,6 +70,10 @@ clean_all:
 kernel:
 	scripts/buildKernel.sh $(KVER)
 
+.PHONY: initramfs
+initramfs:
+	scripts/buildInitramFs.sh
+
 #makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
@@ -88,8 +92,9 @@ injected_image: #makes a copy of the base image with a new injected kernel
 .PHONY: image
 image:
 	make clean_img
-	make kernel
 	make filesystem
+	make initramfs
+	make kernel
 #Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
 	make kernel_inject

@@ -35,8 +35,6 @@ then
 fi
 KVER=$1
 
-[ ! -d build ] && echo "No build folder found, is the kernel built?" && exit
-
 outmnt=$(mktemp -d -p `pwd`)
 
 outdev=/dev/loop5
@@ -62,23 +60,34 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
-
+#layout the partitons and write filesystem information
 create_image() {
-  # it's a sparse file - that's how we fit a 16GB image inside a 3GB one
   dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
   parted --script $1 mklabel gpt
   cgpt create $1
-  cgpt add -i 1 -t kernel -b 8192 -s 65536 -l Kernel -S 1 -T 5 -P 10 $1
-  start=$((8192 + 65536))
+  kernel_start=8192
+  kernel_size=65536
+  boot_size=409600 # 200 MB
+  cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
+  #create the initramfs partiton, aka /boot
+  boot_start=$(($kernel_start + $kernel_size))
+  cgpt add -i 2 -t data -b $boot_start -s $boot_size -l Boot $1
+  #Now the main filesystem
+  root_start=$(($boot_start + $boot_size))
   end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
-  size=$(($end - $start))
-  cgpt add -i 2 -t data -b $start -s $size -l Root $1
+  root_size=$(($end - $root_start))
+  cgpt add -i 3 -t data -b $root_start -s $root_size -l Root $1
   # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($boot_size / 2))
+  mkfs.ext4 -F -b 1024 -m 0 ${2}p3 $(($root_size / 2))
 
   # mount the / partition
-  mount -o noatime ${2}p2 $5
+  mount -o noatime ${2}p3 $5
+
+  # mount the /boot partiton
+  mkdir -p $5/boot
+  mount -o noatime ${2}p2 $5/boot
 }
 
 # use buster if no suite is specified
@@ -117,33 +126,29 @@ chmod +x $outmnt/*.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
-sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
 if [ "$PRAWNOS_SUITE" != "sid" ]
 then
     # sid doesn't have updates or security; they're present for all other suites
     cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
     # sid doesn't have backports; it's present for all other suites
     cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
     #setup apt pinning
     cp $build_resources/backports.pref $outmnt/etc/apt/preferences.d/
-    sed -i -e "s/stretch/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
-fi
-if [ "$PRAWNOS_SUITE" = "stretch" ]
-then
-    # Install buster as an additional source if the suite is less than buster
-    cp $build_resources/buster.list $outmnt/etc/apt/sources.list.d/
-    #setup apt pinning
-    cp $build_resources/buster.pref $outmnt/etc/apt/preferences.d/
-fi
-if [ "$PRAWNOS_SUITE" = "stretch" ] || [ "$PRAWNOS_SUITE" = "buster" ]
-then
-    # Install sid as an additional source if the suite is less than bullseye.
-    # This should be replaced with bullseye after bullseye branches from sid.
+    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
+    # Install sid (unstable) as an additional source for bleeding edge packages.
     cp $build_resources/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
     cp $build_resources/sid.pref $outmnt/etc/apt/preferences.d/
+fi
+if [ "$PRAWNOS_SUITE" = "buster" ]
+then
+    # Install bullseye (testing) as an additional source
+    cp $build_resources/bullseye.list $outmnt/etc/apt/sources.list.d/
+    #setup apt pinning
+    cp $build_resources/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
 #Setup the locale
@@ -152,7 +157,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync
+chroot $outmnt apt install -y initscripts udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
@@ -169,8 +174,7 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs25 accountsservice sudo pavucontrol-qt
-
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt
 
 if [ "$PRAWNOS_SUITE" = "stretch" ]
 then
