@@ -28,7 +28,7 @@ echo "PrawnOS Install To Internal Emmc Script"
 echo "Sets up the internal emmc partitions, root encryption, and copies the filesystem from the bootable media"
 echo "This script can be quit and re-ran at any point"
 echo "--------------------------------------------------------------------------------------------------------"
-read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when finished, do you want to continue? [Y/n]" -n 1 -r
+read -p "This will ERASE ALL DATA ON THE INTERNAL STORAGE (EMMC) and reboot when finished, do you want to continue? [y/N]" -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
@@ -53,14 +53,19 @@ then
     else
         echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
         echo Try a fallback value? This will allow installation to continue, at the cost of a very small amoutnt of disk space. This may not work.
-        read -p "[Y/n]" -n 1 -r
-        if [[ $REPLY =~ ^[Yy]$ ]]
-        then
-            echo Trying Emmc Type 2
-            sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
-        else
-            exit
-        fi
+        select yn in "Yes" "No"
+        do
+            case $yn,$REPLY in
+                Yes,*|*,Yes )
+                    echo Trying Emmc Type 2
+                    sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+                    break
+                    ;;
+                * )
+                    echo "Invalid Option, please enter Yes or No, 1 or 2"
+                    ;;
+            esac
+        done
     fi
     dmesg -E
 
@@ -78,18 +83,28 @@ then
     mount /dev/$BOOT_DEV_NAME /mnt/boot
 
     #Handle full disk encryption
-    read -p "Would you like to setup full disk encrytion using LUKs/DmCrypt? [Y/n]" -n 1 -r
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        CRYPTO=true
-        # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
-        # desktop cpu, maually supply -i 15000 for security at the cost of a slightly slower unlock
-        cryptsetup -s 512 luksFormat -i 15000 /dev/$ROOT_DEV_NAME
-        cryptsetup luksOpen /dev/$ROOT_DEV_NAME luksroot
-        ROOT_DEV_NAME=mapper/luksroot
-        #set the root encryption flag
-        touch /mnt/boot/root_encryption
-    fi
+    echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
+    select yn in "Yes" "No"
+    do
+        case $yn,$REPLY in
+        Yes,*|*,Yes )
+            CRYPTO=true
+            # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
+            # desktop cpu, manually supply -i 15000 for security at the cost of a slightly slower unlock
+            echo "Now to setup the password you would like to use to unlock the encrypted root partition at boot"
+            cryptsetup -q -y -s 512 luksFormat -i 15000 /dev/$ROOT_DEV_NAME || exit 1
+            echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
+            cryptsetup luksOpen /dev/$ROOT_DEV_NAME luksroot || exit 1
+            ROOT_DEV_NAME=mapper/luksroot
+            #set the root encryption flag
+            touch /mnt/boot/root_encryption
+            break
+            ;;
+        * )
+            echo "Invalid Option, please enter Yes or No, 1 or 2"
+            ;;
+        esac
+    done
 
     echo Writing Filesystem, this will take about 4 minutes...
     mkfs.ext4 -F -b 1024 /dev/$ROOT_DEV_NAME

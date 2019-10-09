@@ -48,7 +48,7 @@ DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FR
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
+[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
 # make lightdm pretty and use wallpapers, xmodmap and inputrc in both lxde and xfce
