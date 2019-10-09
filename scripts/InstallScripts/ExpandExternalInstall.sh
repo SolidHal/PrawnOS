@@ -34,32 +34,32 @@ if [ "$TARGET" = "USB" ]
 then
     #Make the boot partition fille the whole drive
     #Delete the partition
-    sgdisk -d 2 /dev/sda
+    sgdisk -d 3 /dev/sda
     #Make new partition map entry, with full size
-    sgdisk -N 2 /dev/sda
+    sgdisk -N 3 /dev/sda
     #Set the type to "data"
-    sgdisk -t 2:0700 /dev/sda
+    sgdisk -t 3:0700 /dev/sda
     #Name is "properly" - Probably not required, but looks nice
-    sgdisk -c 2:Root /dev/sda
+    sgdisk -c 3:Root /dev/sda
     #Reload the partition mapping
     partprobe /dev/sda
     #Force the filesystem to fill the new partition
-    resize2fs -f /dev/sda2
+    resize2fs -f /dev/sda3
 fi
 
 if [ "$TARGET" = "SD" ]
 then
     #Make the boot partition fille the whole drive
     #Delete the partition
-    sgdisk -d 2 /dev/mmcblk0
+    sgdisk -d 3 /dev/mmcblk0
     #Make new partition map entry, with full size
-    sgdisk -N 2 /dev/mmcblk0
+    sgdisk -N 3 /dev/mmcblk0
     #Set the type to "data"
-    sgdisk -t 2:0700 /dev/mmcblk0
+    sgdisk -t 3:0700 /dev/mmcblk0
     #Name is "properly" - Probably not required, but looks nice
-    sgdisk -c 2:Root /dev/mmcblk0
+    sgdisk -c 3:Root /dev/mmcblk0
     #Reload the partition mapping
     partprobe /dev/mmcblk0
     #Force the filesystem to fill the new partition
-    resize2fs -f /dev/mmcblk0p2
+    resize2fs -f /dev/mmcblk0p3
 fi
