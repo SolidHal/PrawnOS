@@ -163,6 +163,9 @@ chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute ipro
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
 chmod 644 /etc/fstab
 
+#disable ertm for csr8510 bluetooth, issue #117
+echo "options bluetooth disable_ertm=Y" > /etc/modprobe.d/bluetooth.conf
+
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
