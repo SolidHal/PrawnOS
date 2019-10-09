@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /InstallResources/xkbpatch
+
 cp ./compat/* /usr/share/X11/xkb/compat/
 cp ./keycodes/* /usr/share/X11/xkb/keycodes/
 cp ./symbols/* /usr/share/X11/xkb/symbols/

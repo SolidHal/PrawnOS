@@ -34,11 +34,16 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc mpv dconf-cli dconf-editor sudo dtrx emacs
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 # #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
+
+  #install firefox-esr default settings
+  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+
 
 # #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
 DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
@@ -46,25 +51,8 @@ DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONT
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
-if [ "$DE" = "xfce" ]
-then
-  # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
-  apt remove -y light-locker
-  apt purge -y light-locker
+# make lightdm pretty and use wallpapers, xmodmap and inputrc in both lxde and xfce
 
-  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
-  # light-locker is outright broken, and xfce4-screensaver crashes if system
-  # is told to sleep at lid close, and activate lock
-  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
-  # xscreensaver works as well, if you prefer that but is less simple
-  DEBIAN_FRONTEND=noninteractive apt install -y -t unstable xsecurelock
-
-  #Install packages not in an apt repo
-  dpkg -i $DIR/xfce-themes/*
-
-  #Copy in xfce4 default settings
-  cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
-  cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
 
   #Copy in lightdm/light greeter settings
   cp -f $DIR/icons/icon-small.png /etc/lightdm/icon.png
@@ -72,11 +60,30 @@ then
   cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
 
-  #Patch xflock4 to activate xsecurelock
-  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
-
   #Copy in wallpapers
   rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+
+
+  #Install the source code pro font for spacemacs
+  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
+  cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
+  fc-cache
+
+
+  #Install xmodmap map, autostart
+  cp -rf $DIR/xfce-config/xmodmap/.Xmodmap /etc/skel/
+  cp -rf $DIR/xfce-config/xmodmap/.xinitrc /etc/skel/
+
+
+  #Install inputrc
+  cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
+
+
+  #Install brightness controls
+  cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
+  mkdir -p /etc/udev/rules.d/
+  cp $DIR/xfce-config/brightness/backlight.rules /etc/udev/rules.d/
+
 
   #Install libinput-gestures and xfdashboard "packages"
   cd $DIR/packages/
@@ -89,6 +96,32 @@ then
   cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
   cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
 
+
+if [ "$DE" = "xfce" ]
+then
+
+  # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
+  apt remove -y light-locker
+  apt purge -y light-locker
+
+  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
+  # light-locker is outright broken, and xfce4-screensaver crashes if system
+  # is told to sleep at lid close, and activate lock
+  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
+  # xscreensaver works as well, if you prefer that but is less simple
+  DEBIAN_FRONTEND=noninteractive apt install -y -t unstable xsecurelock
+
+  #Patch xflock4 to activate xsecurelock
+  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
+
+  #Install packages not in an apt repo
+  dpkg -i $DIR/xfce-themes/*
+
+  #Copy in xfce4 default settings
+  cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+  cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
+
+
   #Make plank autostart
   cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
 
@@ -96,26 +129,7 @@ then
   mkdir -p /etc/skel/.config/plank/dock1/launchers/
   cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 
-  #install firefox-esr default settings
-  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
-  #Install the source code pro font for spacemacs
-  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
-  cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
-  fc-cache
-
-  #Install xmodmap map, autostart
-  cp -rf $DIR/xfce-config/xmodmap/.Xmodmap /etc/skel/
-  cp -rf $DIR/xfce-config/xmodmap/.xinitrc /etc/skel/
-
-  #Install inputrc
-  cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
-
-  #Install brightness controls
-  cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
-  mkdir -p /etc/udev/rules.d/
-  cp $DIR/xfce-config/brightness/backlight.rules /etc/udev/rules.d/
 fi
 
 
