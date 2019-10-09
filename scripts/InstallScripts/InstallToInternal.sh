@@ -91,8 +91,9 @@ then
             CRYPTO=true
             # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
             # desktop cpu, manually supply -i 15000 for security at the cost of a slightly slower unlock
+            echo "Now enter the password you would like to use to unlock the encrypted root partition at boot"
             cryptsetup -q -y -s 512 luksFormat -i 15000 /dev/$ROOT_DEV_NAME
-            echo "Now unlock the newly created encrypted partition so we can mount it and install the filesystem"
+            echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
             cryptsetup luksOpen /dev/$ROOT_DEV_NAME luksroot || exit 1
             ROOT_DEV_NAME=mapper/luksroot
             #set the root encryption flag
