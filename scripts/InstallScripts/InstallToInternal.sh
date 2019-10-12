@@ -100,6 +100,9 @@ then
             touch /mnt/boot/root_encryption
             break
             ;;
+        No,*|*,No )
+            break
+            ;;
         * )
             echo "Invalid Option, please enter Yes or No, 1 or 2"
             ;;
