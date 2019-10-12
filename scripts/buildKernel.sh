@@ -44,6 +44,10 @@ cd ..
 
 # build Linux-libre, with ath9k_htc
 [ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
+[ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz.sign
+
+gpg --import $RESOURCES/linux-libre-signing-key.gpg --verify linux-libre-$KVER-gnu.tar.lz.sign
+
 [ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
 cd linux-$KVER
 make clean
