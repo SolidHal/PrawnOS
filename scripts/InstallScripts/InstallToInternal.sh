@@ -118,7 +118,7 @@ then
     rm /mnt/mmc/etc/fstab
     if [[ $CRYPTO == "true" ]]
     then
-        echo "/dev/mappper/luksroot / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
+        echo "/dev/mapper/luksroot / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     else
         echo "/dev/mmcblk2p3 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     fi
