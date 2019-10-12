@@ -36,7 +36,6 @@ then
     dmesg -D
     umount /dev/mmcblk2p1 || /bin/true
     umount /dev/mmcblk2p2 || /bin/true
-    umount /dev/mmcblk2p3 || /bin/true
 
     echo Writing partition map
     DISK_SZ="$(blockdev --getsz /dev/mmcblk2)"
@@ -73,14 +72,8 @@ then
     dd if=/dev/zero of=/dev/mmcblk2p1 bs=512 count=65536
     dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
 
-    BOOT_DEV_NAME=mmcblk2p2
-    ROOT_DEV_NAME=mmcblk2p3
+    ROOT_DEV_NAME=mmcblk2p2
     CRYPTO=false
-
-    #ready /boot
-    mkfs.ext4 -F -b 1024 /dev/$BOOT_DEV_NAME
-    mkdir -p /mnt/boot
-    mount /dev/$BOOT_DEV_NAME /mnt/boot
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
@@ -96,8 +89,6 @@ then
             echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
             cryptsetup luksOpen /dev/$ROOT_DEV_NAME luksroot || exit 1
             ROOT_DEV_NAME=mapper/luksroot
-            #set the root encryption flag
-            touch /mnt/boot/root_encryption
             break
             ;;
         No,*|*,No )
@@ -120,7 +111,7 @@ then
     then
         echo "/dev/mapper/luksroot / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     else
-        echo "/dev/mmcblk2p3 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
+        echo "/dev/mmcblk2p2 / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
     fi
     umount /dev/$ROOT_DEV_NAME
     echo Running fsck
