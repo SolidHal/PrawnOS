@@ -33,7 +33,7 @@ outdev=/dev/loop7
 build_resources=resources/BuildResources
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
-#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build 
+#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
 cleanup() {
     set +e
 
@@ -54,9 +54,7 @@ trap cleanup INT TERM EXIT
 
 losetup -P $outdev $2
 #mount the root filesystem
-mount -o noatime ${outdev}p3 $outmnt
-#mount the initramfs partition 
-# mount -o noatime ${outdev}p2 $outmnt/boot
+mount -o noatime ${outdev}p2 $outmnt
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
