@@ -38,7 +38,8 @@ clean:
 	@echo "	clean_kernel - which deletes the untar'd kernel folder from build"
 	@echo "	clean_ath - which deletes the untar'd ath9k driver folder from build"
 	@echo "	clean_img - which deletes the built PrawnOS image, this is ran when make image is ran"
-	@echo " clean_fs - which deletes the built PrawnOS base image"
+	@echo " clean_basefs - which deletes the built PrawnOS base image"
+	@echo " clean_initramfs - which deletes the built PrawnOS initramfs image that gets injected into the kernel"
 	@echo "	clean_all - which does all of the above"
 	@echo "	in most cases none of these need to be used manually as most cleanup steps are handled automatically"
 
@@ -54,9 +55,13 @@ clean_ath:
 clean_img:
 	rm -f $(OUTNAME)
 
-.PHONY: clean_fs
-clean_fs:
+.PHONY: clean_basefs
+clean_basefs:
 	rm -r $(BASE)
+
+.PHONY: clean_initramfs
+clean_initramfs:
+	rm -r build/PrawnOS-initramfs.cpio.gz
 
 .PHONY: clean_all
 clean_all:
@@ -64,6 +69,7 @@ clean_all:
 	make clean_ath
 	make clean_img
 	make clean_fs
+	make clean_initramfs
 
 
 .PHONY: kernel
@@ -98,7 +104,6 @@ image:
 #Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
 	make kernel_inject
-
 
 .PHONY: live_image
 live_image:
