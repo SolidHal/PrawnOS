@@ -21,7 +21,7 @@
 
 RESOURCES=/InstallResources
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-BOOT_DEVICE=$(mount | head -n 1 | cut -d '3' -f 1)
+BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
 
 echo "--------------------------------------------------------------------------------------------------------"
 echo "PrawnOS Install To Internal Emmc Script"
