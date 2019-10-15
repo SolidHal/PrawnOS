@@ -30,7 +30,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     echo Writing kernel partition
-    dd if=/dev/zero of=/dev/mmcblk2p1 bs=1 count=65536
+    dd if=/dev/zero of=/dev/mmcblk2p1 bs=512 count=65536
     dd if="$BOOT_DEVICE"1 of=/dev/mmcblk2p1
     echo You can now reboot
 fi
