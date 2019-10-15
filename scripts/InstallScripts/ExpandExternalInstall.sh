@@ -39,12 +39,13 @@ then
     sgdisk -N 2 /dev/sda
     #Set the type to "data"
     sgdisk -t 2:0700 /dev/sda
-    #Name is "properly" - Probably not required, but looks nice
+    #Name it "properly" - Probably not required, but looks nice
     sgdisk -c 2:Root /dev/sda
     #Reload the partition mapping
     partprobe /dev/sda
     #Force the filesystem to fill the new partition
     resize2fs -f /dev/sda2
+    echo "/dev/sda2 / ext4 defaults,noatime 0 1" > /etc/fstab
 fi
 
 if [ "$TARGET" = "SD" ]
@@ -56,10 +57,11 @@ then
     sgdisk -N 2 /dev/mmcblk0
     #Set the type to "data"
     sgdisk -t 2:0700 /dev/mmcblk0
-    #Name is "properly" - Probably not required, but looks nice
+    #Name it "properly" - Probably not required, but looks nice
     sgdisk -c 2:Root /dev/mmcblk0
     #Reload the partition mapping
     partprobe /dev/mmcblk0
     #Force the filesystem to fill the new partition
     resize2fs -f /dev/mmcblk0p2
+    echo "/dev/mmcblk1p2 / ext4 defaults,noatime 0 1" > /etc/fstab
 fi
