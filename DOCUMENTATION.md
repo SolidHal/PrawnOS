@@ -119,16 +119,17 @@ The initramfs is what runs initialy at boot, and allows us to enter a password a
 
 In a normal system, when dmcrypt/LUKS is setup the initramfs image is modified to enable decrypting of the root partiton
 
-Since we have to have a static initramfs image, and can't change it without recompiling the kernel, we have to be a little crafty to support unencrypted and encrypted root partitons with the same initramfs
+Since we have to have a static initramfs image, and can't change it without recompiling the kernel, we detect whether encryption is in use by checking for the tag `crypto_LUKS` on the root device at boot.
 
-This is achieved by placing flags in the /boot partition, aka `/dev/mmcblk2p2` or `/dev/sda2`. The /boot partiton is empty on an unencrypted system. When root encryption is set up, the file `root_encryption` is created, which the initramfs init script uses to determine that it should try and decrypt the root partiton 
 
 ### debugging the init script
-A rescue debug shell is entered when the init script encounters a problem, or if the `debug` flag is set
+A rescue debug shell is entered when the init script encounters a problem, or if a device with the partition label `RESCUESHELL` is present
 
-You can enable the debug flag by mounting /boot and creating a file named `debug`
+Label any partition on the system with `RESCUESHELL` to enter the initramfs rescue shell before mount and root_switch.
 
-To make the system boot normally, from the debug prompt, run `rm /boot/debug` and `exit` to reboot
+You can do this with `cgpt add -i 1 -l RESCUESHELL /dev/sda` for example to label the first partiton of a usb drive.
+
+This is the suggested method, as then debugging can be enabled/disabled by plugging in/removing the usb device. 
 
 
 
