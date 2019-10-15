@@ -72,10 +72,10 @@ create_image() {
   root_start=$(($kernel_start + $kernel_size))
   end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
   root_size=$(($end - $root_start))
-  cgpt add -i 3 -t data -b $root_start -s $root_size -l Root $1
-  # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
+  cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $1
+  # $root_size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($root_size / 2))
+  mkfs.ext4 -F -b 1024 ${2}p2 $(($root_size / 2))
 
   # mount the / partition
   mount -o noatime ${2}p2 $5
