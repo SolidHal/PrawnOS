@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#Install PrawnOS to the desired device. This will wipe the device, enable root encryption if desired and
-#copy the kernel and filesystem to the 
-
+#See the block of "echos" in main() for description of this script
 
 # This file is part of PrawnOS (http://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
@@ -19,16 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+RESOURCES=/InstallResources
+# Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
+BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
+
 main() {
-
-    RESOURCES=/InstallResources
-    # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
-    BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
-
+    echo "---------------------------------------------------------------------------------------------------------------------"
+    echo "PrawnOS Install or Expand Script"
+    echo "Installation sets up the internal emmc partitions, root encryption, and copies the filesystem from the"
+    echo "current boot device to the target device. The target device cannot be the current boot device"
+    echo
+    echo "Expansion simply targets the booted device, and expands the filesystem to fill the entire thing instead of just 2GB."
+    echo "Because of this, root encryption cannot be setup"
+    echo
+    echo "For installation, this script can be quit and re-ran at any point."
+    echo "Unfortunately for expansion this is not the case"
+    echo "---------------------------------------------------------------------------------------------------------------------"
+    echo
     echo "Expand or Install?"
-    echo "Expand in place to fill the entire booted external device"
-    echo "Install to another internal or external device besides the one we are booted from"
-    echo "Installation allow for root encryption to be setup, but must target a external or internal device other than the currently booted device"
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
         read -p "[I]nstall or [E]xpand?" IE
@@ -38,27 +44,24 @@ main() {
             * ) echo "Please answer I or E";;
         esac
     done
-
 }
 
 #Now to pick the install target: internal, sd, or usb
 #if target is usb, and boot device is usb, target is sdb
 #and whether to enable crypto
 install() {
-
     echo "Pick an install target. This can be the Internal Emmc, an SD card, or a USB device"
     echo "Please ensure you have only have the booted device and the desired target device inserted."
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
         read -p "[I]nternal Emmc, [S]D card, or [U]SB device?" ISU
         case $IE in
-            [Ii]* ) $TARGET=/dev/mmcblk2; break;;
-            [Ss]* ) $TARGET=/dev/mmcblk0; break;;
+            [Ii]* ) $TARGET=/dev/mmcblk2p; break;;
+            [Ss]* ) $TARGET=/dev/mmcblk0p; break;;
             [Uu]* ) $TARGET=USB; break;;
             * ) echo "Please answer I, S, or U";;
         esac
     done
-
     if [[ $TARGET == "USB" ]]
     then
         if [[ $BOOT_DEVICE == "/dev/sda" ]]
@@ -70,23 +73,142 @@ install() {
     fi
     if [[ $TARGET == $BOOT_DEVICE ]]
     then
-        echo "Can't install to booted device, please ensure you have only have the booted device and one single other inserted"
+        echo "Can't install to booted device, please ensure you have *only* the booted device and target device inserted"
         exit
     fi
 
     #Now on to the installation, basically copy InstallToInternal.sh
+    while true; do
+        read -p "This will ERASE ALL DATA ON ${TARGET} and reboot when finished, do you want to continue? [y/N]" yn
+        case $yn in
+            [Yy]* ) break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
 
+    umount ${TARGET}1 || /bin/true
+    umount ${TARGET}2 || /bin/true
+
+    if [[ $TARGET == "/dev/mmcblk2p" ]]
+    then
+        emmc_partition
+    else
+        external_partition $TARGET
+    fi
+
+    KERNEL_PARTITION=${TARGET}1
+    ROOT_PARTITION=${TARGET}2
+    CRYPTO=false
+
+    echo Writing kernel partition
+    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
+    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
+
+    #Handle full disk encryption
+    echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
+    select yn in "Yes" "No"
+    do
+        case $yn,$REPLY in
+        Yes,*|*,Yes )
+            CRYPTO=true
+            # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
+            # desktop cpu, manually supply -i 15000 for security at the cost of a slightly slower unlock
+            echo "Enter the password you would like to use to unlock the encrypted root partition at boot"
+            cryptsetup -q -y -s 512 luksFormat -i 15000 $ROOT_PARTITION || exit 1
+            echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
+            cryptsetup luksOpen $ROOT_PARTITION luksroot || exit 1
+            ROOT_PARTITION=/dev/mapper/luksroot
+            break
+            ;;
+        No,*|*,No )
+            break
+            ;;
+        * )
+            echo "Invalid Option, please enter Yes or No, 1 or 2"
+            ;;
+        esac
+    done
+
+    echo Writing Filesystem, this will take about 4 minutes...
+    mkfs.ext4 -F -b 1024 $ROOT_PARTITION
+    mkdir -p /mnt/mmc/
+    mount $ROOT_PARTITION /mnt/mmc
+    rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
+    #Remove the live-fstab and install a base fstab
+    rm /mnt/mmc/etc/fstab
+    echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
+    umount $ROOT_PARTITION
+    echo Running fsck
+    e2fsck -p -f $ROOT_PARTITION
+    if [[ $CRYPTO == "true" ]]
+    then
+        # unmount and close encrypted storage
+        cryptsetup luksClose luksroot
+    fi
+    echo Rebooting... Please remove the usb drive once shutdown is complete
+    reboot
+
+}
+
+#Setup partition map on internal emmc
+emmc_partition() {
+    #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
+    dmesg -D
+    echo Writing partition map to internal emmc
+    DISK_SZ="$(blockdev --getsz /dev/mmcblk2)"
+    echo Total disk size is: $DISK_SZ
+    if [ $DISK_SZ = 30785536 ]
+    then
+        echo Detected Emmc Type 1
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+
+    elif [ $DISK_SZ = 30777344 ]
+    then
+        echo Detected Emmc Type 2
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+    else
+        echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
+        echo Try a fallback value? This will allow installation to continue, at the cost of a very small amoutnt of disk space. This may not work.
+        select yn in "Yes" "No"
+        do
+            case $yn,$REPLY in
+                Yes,*|*,Yes )
+                    echo Trying Emmc Type 2
+                    sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+                    break
+                    ;;
+                * )
+                    echo "Invalid Option, please enter Yes or No, 1 or 2"
+                    ;;
+            esac
+        done
+    fi
+    dmesg -E
+}
+
+#Setup partition map for external bootable device, aka usb or sd card
+external_partition() {
+    $TARGET = $1
+    parted --script $TARGET mklabel gpt
+    cgpt create $TARGET
+    kernel_start=8192
+    kernel_size=65536
+    cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $TARGET
+    #Now the main filesystem
+    root_start=$(($kernel_start + $kernel_size))
+    end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
+    root_size=$(($end - $root_start))
+    cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $TARGET
 }
 
 #simply expand to fill the current boot device
 expand() {
-
     if [[ $BOOT_DEVICE == "/dev/mmcblk2" ]]
     then
         echo "Can't expand to fill internal emmc, install will have done this already"
         exit
     fi
-
     #Make the boot partition fille the whole drive
     #Delete the partition
     sgdisk -d 2 $BOOT_DEVICE
@@ -106,4 +228,5 @@ expand() {
 
 
 #call the main function, script technically starts here
+#Organized this way so that main can come before the functions it calls
 main "$@"; exit
