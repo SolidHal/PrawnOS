@@ -99,7 +99,7 @@ _This will show a bunch of scary red warnings that are a result of the emmc (int
 
 #### Setting up root partition encryption
 PrawnOS supports encrypting the full root partition with the use of a custom initramfs and dmcrypt/LUKS
-Press "Y" at the prompt, type "YES" at the following prompt, then enter the password you would like to use and verify it
+Type "Yes" at the prompt, then enter the password you would like to use and verify it
 You will then be prompted one more time to enter your encryption password to mount and setup the filesystem
 If you are curious how the initramfs, and root partition encryption work on PrawnOS check out the Initramfs and Encryption section in [DOCUMENTATION.md](DOCUMENTATION.md)
 
