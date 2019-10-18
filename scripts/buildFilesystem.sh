@@ -43,7 +43,7 @@ install_resources=resources/InstallResources
 build_resources=resources/BuildResources
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
-#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build 
+#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
 cleanup() {
   set +e
 
@@ -67,27 +67,18 @@ create_image() {
   cgpt create $1
   kernel_start=8192
   kernel_size=65536
-  boot_size=409600 # 200 MB
   cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
-  #create the initramfs partiton, aka /boot
-  boot_start=$(($kernel_start + $kernel_size))
-  cgpt add -i 2 -t data -b $boot_start -s $boot_size -l Boot $1
   #Now the main filesystem
-  root_start=$(($boot_start + $boot_size))
+  root_start=$(($kernel_start + $kernel_size))
   end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
   root_size=$(($end - $root_start))
-  cgpt add -i 3 -t data -b $root_start -s $root_size -l Root $1
-  # $size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
+  cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $1
+  # $root_size is in 512 byte blocks while ext4 uses a block size of 1024 bytes
   losetup -P $2 $1
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p2 $(($boot_size / 2))
-  mkfs.ext4 -F -b 1024 -m 0 ${2}p3 $(($root_size / 2))
+  mkfs.ext4 -F -b 1024 ${2}p2 $(($root_size / 2))
 
   # mount the / partition
-  mount -o noatime ${2}p3 $5
-
-  # mount the /boot partiton
-  mkdir -p $5/boot
-  mount -o noatime ${2}p2 $5/boot
+  mount -o noatime ${2}p2 $5
 }
 
 # use buster if no suite is specified

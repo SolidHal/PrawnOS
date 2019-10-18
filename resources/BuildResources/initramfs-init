@@ -23,6 +23,7 @@ echo In PrawnOS Init
 rescue_shell() {
     [ "{$1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
     [ "{$1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
+    echo "Something went wrong. Dropping to a shell." > /dev/tty1
     exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 }
 
@@ -44,7 +45,7 @@ rootpartuuid() {
     [ "${value}" != "" ] && echo "${value}"
 }
 
-# mount the bare necesities 
+# mount the bare necesities
 mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
@@ -65,28 +66,27 @@ echo ${ROOT_DEV} > /dev/tty1
 # the next boot stage
 CMDLINE='cat /proc/cmdline'
 
-[ -d "/boot" ] || mkdir -p /boot
-mount ${ROOT_DEV}2 /boot
+# label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
+# you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
+if [ -n "$(blkid | grep RESCUESHELL)" ]
+then
+    rescue_shell debug
+fi
 
-#Debugging can be facilitated by creating /boot/debug
-[ -f "/boot/debug" ] && rescue_shell debug
-
-if [ -f "/boot/root_encryption" ]
+if [ -n "$(blkid ${ROOT_DEV}2 | grep crypto_LUKS)" ]
 then
     #decrypt and mount the root filesystem
     echo "Opening encrypted root partition, this will take 30s..."
-    cryptsetup --tries 5 luksOpen ${ROOT_DEV}3 luksroot || rescue_shell debug
+    cryptsetup --tries 5 luksOpen ${ROOT_DEV}2 luksroot || rescue_shell
     mount /dev/mapper/luksroot /newroot
 else
     # mount the unencrypted root filesystem
     [ -d "/newroot" ] || mkdir -p /newroot
-    mount ${ROOT_DEV}3 /newroot
+    mount ${ROOT_DEV}2 /newroot
 fi
 
 umount /sys
 umount /proc
 
-
-
-#swith to the new rootfs
+#switch to the new rootfs
 exec switch_root /newroot /sbin/init ${CMDLINE}

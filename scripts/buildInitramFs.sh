@@ -54,9 +54,7 @@ trap cleanup INT TERM EXIT
 
 losetup -P $outdev $ROOT_DIR/PrawnOS-*-c201-libre-2GB.img-BASE
 #mount the root filesystem
-mount -o noatime ${outdev}p3 $outmnt
-#mount the initramfs partition 
-mount -o noatime ${outdev}p2 $outmnt/boot
+mount -o noatime ${outdev}p2 $outmnt
 
 #make a skeleton filesystem
 initramfs_src=$outmnt/InstallResources/initramfs_src
