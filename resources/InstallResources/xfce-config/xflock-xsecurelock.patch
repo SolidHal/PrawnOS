@@ -1,12 +1,13 @@
 diff --git a/usr/bin/xflock4 b/usr/bin/xflock4
-index 32670f4..1e82a40
+index d55cbf7..b7b28c6
 --- a/usr/bin/xflock4
 +++ b/usr/bin/xflock4
-@@ -26,6 +26,7 @@ LOCK_CMD=$(xfconf-query -c xfce4-session -p /general/LockCommand)
+@@ -26,6 +26,7 @@ export PATH
  
  # Lock by xscreensaver or gnome-screensaver, if a respective daemon is running
  for lock_cmd in \
-+    "env XSECURELOCK_PASSWORD_PROMPT=asterisks xsecurelock" \
-     "$LOCK_CMD" \
-     "xfce4-screensaver-command --lock" \
++    "env XSECURELOCK_PASSWORD_PROMPT=asterisks xsecurelock"\
      "xscreensaver-command -lock" \
+     "light-locker-command --lock" \
+     "gnome-screensaver-command --lock" \
+
