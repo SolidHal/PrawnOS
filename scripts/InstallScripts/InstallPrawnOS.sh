@@ -103,7 +103,7 @@ install() {
 
     echo Writing kernel partition
     dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
-    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
+    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION conv=notrunc
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
@@ -191,13 +191,14 @@ emmc_partition() {
 external_partition() {
     #cut off the "p" if we are using an sd card, doesn't change TARGET if we are using usb
     EXTERNAL_TARGET=$(echo $1 | cut -d 'p' -f 1)
-    parted --script $EXTERNAL_TARGET mklabel gpt
-    cgpt create $EXTERNAL_TARGET
     kernel_start=8192
     kernel_size=65536
+    root_start=$(($kernel_start + $kernel_size))
+    dd if=/dev/zero of=$EXTERNAL_TARGET bs=512 count=$root_start
+    parted --script $EXTERNAL_TARGET mklabel gpt
+    cgpt create $EXTERNAL_TARGET
     cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $EXTERNAL_TARGET
     #Now the main filesystem
-    root_start=$(($kernel_start + $kernel_size))
     end=`cgpt show $EXTERNAL_TARGET | grep 'Sec GPT table' | awk '{print $1}'`
     root_size=$(($end - $root_start))
     cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $EXTERNAL_TARGET
