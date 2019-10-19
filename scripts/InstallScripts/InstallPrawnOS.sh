@@ -34,7 +34,7 @@ main() {
     echo "Unfortunately for expansion this is not the case"
     echo "---------------------------------------------------------------------------------------------------------------------"
     echo
-    echo "Expand or Install?"
+    echo "Expand or Install?: "
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
         read -p "[I]nstall or [E]xpand?" IE
@@ -54,11 +54,11 @@ install() {
     echo "Please ensure you have only have the booted device and the desired target device inserted."
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
-        read -p "[I]nternal Emmc, [S]D card, or [U]SB device?" ISU
-        case $IE in
-            [Ii]* ) $TARGET=/dev/mmcblk2p; break;;
-            [Ss]* ) $TARGET=/dev/mmcblk0p; break;;
-            [Uu]* ) $TARGET=USB; break;;
+        read -p "[I]nternal Emmc, [S]D card, or [U]SB device?: " ISU
+        case $ISU in
+            [Ii]* ) TARGET=/dev/mmcblk2p; break;;
+            [Ss]* ) TARGET=/dev/mmcblk0p; break;;
+            [Uu]* ) TARGET=USB; break;;
             * ) echo "Please answer I, S, or U";;
         esac
     done
@@ -66,9 +66,9 @@ install() {
     then
         if [[ $BOOT_DEVICE == "/dev/sda" ]]
         then
-            $TARGET=/dev/sdb
+            TARGET=/dev/sdb
         else
-            $TARGET=/dev/sda
+            TARGET=/dev/sda
         fi
     fi
     if [[ $TARGET == $BOOT_DEVICE ]]
@@ -189,17 +189,20 @@ emmc_partition() {
 
 #Setup partition map for external bootable device, aka usb or sd card
 external_partition() {
-    $TARGET = $1
-    parted --script $TARGET mklabel gpt
-    cgpt create $TARGET
+    #cut off the "p" if we are using an sd card, doesn't change TARGET if we are using usb
+    EXTERNAL_TARGET=$(echo $1 | cut -d 'p' -f 1)
+    parted --script $EXTERNAL_TARGET mklabel gpt
+    cgpt create $EXTERNAL_TARGET
     kernel_start=8192
     kernel_size=65536
-    cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $TARGET
+    cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $EXTERNAL_TARGET
     #Now the main filesystem
     root_start=$(($kernel_start + $kernel_size))
-    end=`cgpt show $1 | grep 'Sec GPT table' | awk '{print $1}'`
+    end=`cgpt show $EXTERNAL_TARGET | grep 'Sec GPT table' | awk '{print $1}'`
     root_size=$(($end - $root_start))
-    cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $TARGET
+    cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $EXTERNAL_TARGET
+    #Refresh the kernel devices
+    partprobe
 }
 
 #simply expand to fill the current boot device
