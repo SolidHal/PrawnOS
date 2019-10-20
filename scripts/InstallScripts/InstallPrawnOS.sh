@@ -77,9 +77,17 @@ install() {
         exit
     fi
 
+    #cut off the "p" if we are using an sd card or internal emmc, doesn't change TARGET if we are using usb
+    TARGET_NO_P=$(echo $1 | cut -d 'p' -f 1)
+    if [ ! -e $TARGET_NO_P ];
+    then
+        echo "${TARGET_NO_P} does not exist, have you plugged in your target sd card or usb device?"
+        exit 1
+    fi
+
     #Now on to the installation, basically copy InstallToInternal.sh
     while true; do
-        read -p "This will ERASE ALL DATA ON ${TARGET} and reboot when finished, do you want to continue? [y/N]" yn
+        read -p "This will ERASE ALL DATA ON ${TARGET_NO_P} and reboot when finished, do you want to continue? [y/N]" yn
         case $yn in
             [Yy]* ) break;;
             [Nn]* ) exit;;
@@ -94,7 +102,7 @@ install() {
     then
         emmc_partition
     else
-        external_partition $TARGET
+        external_partition $TARGET_NO_P
     fi
 
     KERNEL_PARTITION=${TARGET}1
@@ -144,10 +152,19 @@ install() {
     if [[ $CRYPTO == "true" ]]
     then
         # unmount and close encrypted storage
+        # let things settle, otherwise cryptsetup complainssss
+        sleep 2
         cryptsetup luksClose luksroot
     fi
-    echo Rebooting... Please remove the usb drive once shutdown is complete
-    reboot
+    echo "Please remove the booted device after power off is complete"
+    while true; do
+        read -p "Reboot? [y/N]" re
+        case $re in
+            [Yy]* ) reboot;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
 
 }
 
@@ -189,21 +206,27 @@ emmc_partition() {
 
 #Setup partition map for external bootable device, aka usb or sd card
 external_partition() {
-    #cut off the "p" if we are using an sd card, doesn't change TARGET if we are using usb
-    EXTERNAL_TARGET=$(echo $1 | cut -d 'p' -f 1)
+    EXTERNAL_TARGET=$1
     kernel_start=8192
     kernel_size=65536
     root_start=$(($kernel_start + $kernel_size))
-    dd if=/dev/zero of=$EXTERNAL_TARGET bs=512 count=$root_start
+    #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
+    sgdisk -Z $EXTERNAL_TARGET
+    partprobe $EXTERNAL_TARGET
+    #make the base gpt partition map
     parted --script $EXTERNAL_TARGET mklabel gpt
     cgpt create $EXTERNAL_TARGET
+    #must use cgpt to make the kernel partition, as we need the -S, -T, and -P variables
     cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $EXTERNAL_TARGET
     #Now the main filesystem
-    end=`cgpt show $EXTERNAL_TARGET | grep 'Sec GPT table' | awk '{print $1}'`
-    root_size=$(($end - $root_start))
-    cgpt add -i 2 -t data -b $root_start -s $root_size -l Root $EXTERNAL_TARGET
-    #Refresh the kernel devices
-    partprobe
+    #cgpt doesn't seem to handle this part correctly
+    sgdisk -N 2 $EXTERNAL_TARGET
+    #Set the type to "data"
+    sgdisk -t 2:0700 $EXTERNAL_TARGET
+    #Name it "properly" - Probably not required, but looks nice
+    sgdisk -c 2:Root $EXTERNAL_TARGET
+    #Reload the partition mapping
+    partprobe $EXTERNAL_TARGET
 }
 
 #simply expand to fill the current boot device
