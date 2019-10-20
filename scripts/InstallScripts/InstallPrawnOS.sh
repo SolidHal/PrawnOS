@@ -78,7 +78,7 @@ install() {
     fi
 
     #cut off the "p" if we are using an sd card or internal emmc, doesn't change TARGET if we are using usb
-    TARGET_NO_P=$(echo $1 | cut -d 'p' -f 1)
+    TARGET_NO_P=$(echo $TARGET | cut -d 'p' -f 1)
     if [ ! -e $TARGET_NO_P ];
     then
         echo "${TARGET_NO_P} does not exist, have you plugged in your target sd card or usb device?"

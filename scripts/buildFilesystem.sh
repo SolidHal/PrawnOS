@@ -110,7 +110,7 @@ mkdir $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
-cp scripts/InstallScripts/InstallToInternal.sh $outmnt/
+cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
 chmod +x $outmnt/*.sh
 
 #Setup the chroot for apt
