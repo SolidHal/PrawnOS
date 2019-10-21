@@ -72,54 +72,86 @@ sudo dd if=PrawnOs-*-c201-libre-2GB*.img of=/dev/$USB_DEVICE bs=50M; sync
 
 There are two ways to use PrawnOS. 
 
-The first option is to boot from the external USB or SD device you wrote the image to. 
-[click here](#install-to-usb-drive-or-sd-card)
-* Booting from an external device allows you to try PrawnOS without removing Chrome OS or whatever Linux you are running on your internal storage (emmc), but it is a much slower experience as the c201 only has USB 2.0. 
+The first option is to boot from the external USB or SD device you wrote the image to, and expand the image to take up the entire boot device. 
+[click here](#expand-prawnos)
+* Expanding the PrawnOS image allows you to boot PrawnOS from the same USB or SD device that you wrote the image to
+* Expansion does _NOT_ support root encryption. For root encryption the filesystem must be written after the encrypted root is created.
 
-The second and, recommended, option is to install it on your internal storage (emmc)
-[click here](#install-to-internal-drive-emmc)
-* This is faster, and frees up a USB port. 
+The second and recommended option is to install it on a device other than the one you wrote the PrawnOS image to
+[click here](#install-to-internal-drive-emmc-or-to-sd-card-or-usb-drive)
+* This lets you install PrawnOS to the internal emmc, an SD card or a USB device
+* This allows you to setup root encryption
+* Installing to an external device allows you to try PrawnOS without removing Chrome OS or whatever Linux you are running on your internal storage (emmc), but USB drives especially are a much slower experience as the c201 only has USB 2.0.
+* If you want to boot from external media, I would suggest using an SD card. 
 
-### Install to Internal drive (emmc)
-Now on the C201, press `control+u` at boot to boot from the USB drive. 
+### Install to internal drive (emmc) or to SD card or USB drive
+Now on the C201, insert the drive you wrote the PrawnOS image to. Press `control+u` at boot to boot from the external drive. 
 
-
-If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
 
 At the prompt, login as root. The password is blank. 
 
-WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or other Linux install and all of the associated user data) Make sure to back up any data you would like to keep before running this.  
+Now insert the other USB device or SD card you would like to install PrawnOS on. If you want to boot from the internal emmc, you have nothing to insert!
+Note: If you are installing to an external device, the filesystem portion may take a loooong time (20 minutes). This is because we are reading from one external device (the boot device) and writing to another external device. This more than saturates the USB and/or SD bus.
 
-If you would like to install it to the internal emmc storage run:
+WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or other Linux install and all of the associated user data) OR WHATEVER EXTERNAL DEVICE YOU CHOOSE AS YOUR INSTALL TARGET. Make sure to back up any data you would like to keep before running this.  
+
+Run:
 ```
 cd /
-./InstallToInternal.sh
+./InstallPrawnOS.sh
 ```
-_This will show a bunch of scary red warnings that are a result of the emmc (internal storage) being touchy and the kernel message level being set low for debugging. They don't seem to effect anything long-term._
-
-#### Setting up root partition encryption
-PrawnOS supports encrypting the full root partition with the use of a custom initramfs and dmcrypt/LUKS
-Type "Yes" at the prompt, then enter the password you would like to use and verify it
-You will then be prompted one more time to enter your encryption password to mount and setup the filesystem
+Choose `Install` and follow the prompts. This will ask what device you want to install to and setup root encryption with a custom initramfs and dmcrypt/LUKS if you want.
 If you are curious how the initramfs, and root partition encryption work on PrawnOS check out the Initramfs and Encryption section in [DOCUMENTATION.md](DOCUMENTATION.md)
+If you run in to any problems please open an issue. 
+_If you install to the internal emmc this will show a bunch of scary red warnings that are a result of the emmc (internal storage) having a few unwritable (bad) blocks at the beginning of the device and the kernel message level being set low for debugging. They don't effect anything long-term. All C201s have these bad blocks at the beginning of the emmc_
 
-The device will then reboot. If you are running the stock coreboot, you will have to press `control+d` or wait 30 seconds past the beep to boot to the internal storage.
+After reboot, remove the external media you had booted from originally. If you installed to the internal emmc press `control+d`, if you installed to an external device press `control+u`
 
-If you are running Libreboot, it should boot to the internal storage by default. If it doesn't, turn off the device and remove the flash drive before turning it on again. 
+If you press nothing, it will boot to the internal storage by default.
 
-Now login as root again and run:
+Now to install the packages, desktop environment, and setup a user
+Login as root again and run:
 ```
 cd /InstallResources
 ./InstallPackages.sh
 ```
 Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
 
-
-If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.
-
 When finished, it will reboot once again placing you at a login screen. 
 
 Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+
+### Expand PrawnOS
+Now on the C201, insert the drive you wrote the PrawnOS image to. Press `control+u` at boot to boot from the external drive. 
+
+If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+
+At the prompt, login as root. The password is blank.
+Run:
+```
+cd /
+./InstallPrawnOS.sh
+```
+Choose `Expand` at the prompt
+
+If you run in to any problems please open an issue. 
+
+Now to install the packages, desktop environment, and setup a user
+```
+cd /InstallResources
+./InstallPackages.sh
+```
+Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
+
+When finished, it will reboot.
+Press `control+u` at boot once again, and you'll get to a login screen. 
+
+Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
+
+#### If you simply want a basic Linux environment with no desktop environment or window manager:
+Skip running `InstallPackages`
+Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 
 #### Connecting to WiFi in a basic environment
 If you just want a basic environment without xfce or lxqt can skip running InstallPackages.sh. You can connect to WiFi using wpa_supplicant by running the following commands:
@@ -132,49 +164,11 @@ Login as root, and run
 ```
 dhclient wlan0
 ```
+
 When that finishes, you should have access to the internet. 
-
-### Install To USB drive or SD card
-Now on the C201, press `control+u` at boot to boot from the USB drive. 
-
-If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
-
-
-When it boots, login as root. The password is blank. 
-
-#### If you simply want a basic Linux environment with no desktop environment or window manager:
-Make sure it's the only storage device plugged in, and run this script to expand the partition and filesystem to the full USB drive. This will reboot when complete, so you'll have to press `control+u` again to boot to the external media. 
-```
-cd /InstallResources/
-./ExpandExternalInstall.sh
-```
-Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
-If you want a quick guide on how to connect to WiFi, check out [this down below](#connecting-to-wifi-in-a-basic-environment)
-
-#### For everyone else, two scripts need to be run. 
-
-The first expands the partition and filesystem to use the entire drive.
-Make sure you only have one USB or SD storage device plugged into the machine.
-This will reboot when complete, so you'll have to press `control+u` again to boot to the external media. 
-Run:
-```
-cd /InstallResources/
-./ExpandExternalInstall.sh
-```
-You can verify it worked by running `df -h` after the reboot. The original `/dev/root/` filesystem was only ~2GB
-Then run this script which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
-
-If it asks you about terminal encoding and/or locale, just hit enter. The default works for both.  
-When finished, it will reboot once again placing you at a login screen. 
-```
-./InstallPackages.sh
-```
-This will take a while; USB 2.0 is slow.
-Welcome to PrawnOS. If you like it, I would suggest installing it to your internal storage (emmc).
-
 ### Upgrading the kernel
 
-The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
+The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, initramfs, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
 
 To use it, write the new PrawnOS image to a USB drive or SD card, boot the laptop to it by pressing `control+u` at boot, navigate to the `/InstallResources` folder, and run the script. 
 
