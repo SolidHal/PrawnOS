@@ -248,8 +248,8 @@ expand() {
     #Reload the partition mapping
     partprobe $BOOT_DEVICE
     #Force the filesystem to fill the new partition
-    resize2fs -f ${BOOT_DEVICE}p2
-    echo "/dev/${BOOT_DEVICE}p2 / ext4 defaults,noatime 0 1" > /etc/fstab
+    resize2fs -f ${BOOT_DEVICE}2
+    echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
 
 }
 
