@@ -18,8 +18,6 @@
       <property name="XF86WWW" type="string" value="exo-open --launch WebBrowser"/>
       <property name="XF86Mail" type="string" value="exo-open --launch MailReader"/>
       <property name="override" type="bool" value="true"/>
-      <property name="XF86MonBrightnessDown" type="string" value="/usr/sbin/backlight_down.sh"/>
-      <property name="XF86MonBrightnessUp" type="string" value="/usr/sbin/backlight_up.sh"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">
@@ -69,9 +67,9 @@
       <property name="&lt;Primary&gt;&lt;Alt&gt;KP_4" type="string" value="move_window_workspace_4_key"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;KP_5" type="string" value="move_window_workspace_5_key"/>
       <property name="override" type="bool" value="true"/>
-      <property name="&lt;Primary&gt;Up" type="string" value="maximize_window_key"/>
-      <property name="&lt;Primary&gt;Left" type="string" value="tile_left_key"/>
-      <property name="&lt;Primary&gt;Right" type="string" value="tile_right_key"/>
+      <property name="&lt;Alt&gt;Up" type="string" value="maximize_window_key"/>
+      <property name="&lt;Alt&gt;Left" type="string" value="tile_left_key"/>
+      <property name="&lt;Alt&gt;Right" type="string" value="tile_right_key"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Up" type="string" value="prev_workspace_key"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Down" type="string" value="next_workspace_key"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Left" type="string" value="move_window_prev_workspace_key"/>

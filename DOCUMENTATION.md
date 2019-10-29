@@ -6,7 +6,7 @@ Some additional documentation for PrawnOS that wouldn't fit in the README
 ### Gestures:
 #### Config file: /etc/libinput-gestures.conf
 * four finger swipe left:    Switch to left workspace
-* four finger swipe right:   Switch to right worksace
+* four finger swipe right:   Switch to right workspace
 
 ### Keybindings
 
@@ -14,9 +14,9 @@ Some additional documentation for PrawnOS that wouldn't fit in the README
 * control+alt+left:           move window to left workspace
 * control+alt+right:          move window to right workspace
 
-* control+left:               tile widow to the left
-* control+right:              tile window to the right
-* control+up:                 maximize window
+* alt+left:               tile widow to the left
+* alt+right:              tile window to the right
+* alt+up:                 maximize window
 
 * alt+tab:                    app switcher
 
@@ -25,31 +25,20 @@ Some additional documentation for PrawnOS that wouldn't fit in the README
 * control+alt+l:              Lock screen
 * Brightness scripts are also called here and can be remapped here or in ~/.Xmodmap
 
-#### Configured using ~/.Xmodmap
-* "search" key:                Mode switch aka m_s (function key)
+#### Configured using xkb
+* "search" key:               function (fn) key
 
-* m_s + backspace:             delete
-* m_s + up:                    page up
-* m_s + down:                  page down
-* m_s + left:                  home
-* m_s + right:                 end
-* m_s + period:                insert
+* fn + backspace:             delete
+* fn + up:                    page up
+* fn + down:                  page down
+* fn + left:                  home
+* fn + right:                 end
 
-* "brightness up key":         increase backlight
-* "brightness down key":       decrease backlight
-* "volume mute":               mute volume
-* "volume down":               decrease volume
-* "volume up":                 increase volume
-
-* m_s + "brightness up key":   F7
-* m_s + "brightness down key": F6
-* m_s + "volume mute key":     F8
-* m_s + "volume down key":     F9
-* m_s + "volume up key":       F10
-
-#### Configured using ~/.xinputrc
-* alt+left                     left a word
-* alt+right                    right a word
+* fn + "brightness up key":         increase backlight
+* fn + "brightness down key":       decrease backlight
+* fn + "volume mute":               mute volume
+* fn + "volume down":               decrease volume
+* fn + "volume up":                 increase volume
 
 ## Initramfs and Encryption
 PrawnOS uses a custom initramfs, custom init script, and dmcrypt/LUKS to enable full root partition encryption

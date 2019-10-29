@@ -46,6 +46,20 @@ DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONT
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
 
+#install the keymap by patching xkb, then bindings work for any desktop environment
+cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
+cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
+cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
+
+patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.chromebook.patch
+patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.chromebook.patch
+patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.chromebook.patch
+patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.chromebook.patch
+patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.chromebook.patch
+patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.chromebook.patch
+
+cp  $DIR/xkb/keyboard /etc/default/keyboard
+
 if [ "$DE" = "xfce" ]
 then
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
@@ -105,17 +119,11 @@ then
   cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
   fc-cache
 
-  #Install xmodmap map, autostart
-  cp -rf $DIR/xfce-config/xmodmap/.Xmodmap /etc/skel/
-  cp -rf $DIR/xfce-config/xmodmap/.xinitrc /etc/skel/
-
   #Install inputrc
   cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
 
-  #Install brightness controls
+  #Install brightness control scripts
   cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
-  mkdir -p /etc/udev/rules.d/
-  cp $DIR/xfce-config/brightness/backlight.rules /etc/udev/rules.d/
 fi
 
 

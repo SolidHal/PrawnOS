@@ -19,5 +19,6 @@
     <property name="blank-on-battery" type="int" value="0"/>
     <property name="dpms-on-battery-sleep" type="uint" value="0"/>
     <property name="critical-power-action" type="uint" value="0"/>
+    <property name="handle-brightness-keys" type="bool" value="true"/>
   </property>
 </channel>
