@@ -140,12 +140,22 @@ install() {
 
     echo Writing Filesystem, this will take about 4 minutes...
     mkfs.ext4 -F -b 1024 $ROOT_PARTITION
-    mkdir -p /mnt/mmc/
-    mount $ROOT_PARTITION /mnt/mmc
-    rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /mnt/mmc/
+    INSTALL_MOUNT=/mnt/install_mount
+    mkdir -p $INSTALL_MOUNT/
+    mount $ROOT_PARTITION $INSTALL_MOUNT/
+    rsync -ah --info=progress2 --info=name0 --numeric-ids -x / $INSTALL_MOUNT/
     #Remove the live-fstab and install a base fstab
-    rm /mnt/mmc/etc/fstab
-    echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > /mnt/mmc/etc/fstab
+    rm $INSTALL_MOUNT/etc/fstab
+    echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
+
+    while true; do
+        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        case $ins in
+            [Yy]* ) install_packages $INSTALL_MOUNT; break;;
+            [Nn]* ) break;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
     umount $ROOT_PARTITION
     echo Running fsck
     e2fsck -p -f $ROOT_PARTITION
@@ -250,6 +260,29 @@ expand() {
     #Force the filesystem to fill the new partition
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
+    while true; do
+        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        case $ins in
+            [Yy]* ) /InstallResources/InstallPackages.sh; break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
+
+
+}
+
+#Install all packages, desktop environment to target device
+install_packages() {
+    TARGET_MOUNT=$1
+    echo "Installing Packages"
+    mount -t proc proc $TARGET_MOUNT/proc/
+    mount --rbind /sys $TARGET_MOUNT/sys/
+    mount --rbind /dev $TARGET_MOUNT/dev/
+    chroot $TARGET_MOUNT/ ./InstallResources/InstallPackages.sh
+    umount $TARGET_MOUNT/proc/
+    umount $TARGET_MOUNT/sys/
+    umount $TARGET_MOUNT/dev/
 
 }
 
