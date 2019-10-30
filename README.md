@@ -106,19 +106,12 @@ If you are curious how the initramfs, and root partition encryption work on Praw
 If you run in to any problems please open an issue. 
 _If you install to the internal emmc this will show a bunch of scary red warnings that are a result of the emmc (internal storage) having a few unwritable (bad) blocks at the beginning of the device and the kernel message level being set low for debugging. They don't effect anything long-term. All C201s have these bad blocks at the beginning of the emmc_
 
+After the partitioning and the filesystem copy is complete, it will prompt you to install either the xfce4 or the lxqt desktop environment, sound, trackpad, and Xorg configurations
+It will also prompt you to make a new user that automatically gets sudo privileges.
+
 After reboot, remove the external media you had booted from originally. If you installed to the internal emmc press `control+d`, if you installed to an external device press `control+u`
 
 If you press nothing, it will boot to the internal storage by default.
-
-Now to install the packages, desktop environment, and setup a user
-Login as root again and run:
-```
-cd /InstallResources
-./InstallPackages.sh
-```
-Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
-
-When finished, it will reboot once again placing you at a login screen. 
 
 Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
 
@@ -137,24 +130,20 @@ Choose `Expand` at the prompt
 
 If you run in to any problems please open an issue. 
 
-Now to install the packages, desktop environment, and setup a user
-```
-cd /InstallResources
-./InstallPackages.sh
-```
-Which installs either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations as well as prompts you to make a new user that automatically gets sudo privileges.
+Now you can choose to install the packages, which are either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations.
+It will also prompt you to make a new user that automatically gets sudo privileges.
 
-When finished, it will reboot.
+If you choose in install the packages, when installation is complete it will reboot.
 Press `control+u` at boot once again, and you'll get to a login screen. 
 
 Congratulations! Your computer is now a Prawn! https://sprorgnsm.bandcamp.com/track/the-prawn-song
 
 #### If you simply want a basic Linux environment with no desktop environment or window manager:
-Skip running `InstallPackages`
+Say no at the prompt to install packages and a desktop environment.
 Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 
 #### Connecting to WiFi in a basic environment
-If you just want a basic environment without xfce or lxqt can skip running InstallPackages.sh. You can connect to WiFi using wpa_supplicant by running the following commands:
+If have a basic environment without xfce or lxqt you can connect to WiFi using wpa_supplicant by running the following commands:
 ```
 wpa_passphrase <Network_name> <network_password> > wpa.conf
 wpa_supplicant -i wlan0 -c wpa.conf

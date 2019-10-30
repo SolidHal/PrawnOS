@@ -263,7 +263,7 @@ expand() {
     while true; do
         read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
         case $ins in
-            [Yy]* ) /InstallResources/InstallPackages.sh; break;;
+            [Yy]* ) /InstallResources/InstallPackages.sh; reboot;;
             [Nn]* ) exit;;
             * ) echo "Please answer y or n";;
         esac
@@ -281,8 +281,10 @@ install_packages() {
     mount --rbind /dev $TARGET_MOUNT/dev/
     chroot $TARGET_MOUNT/ ./InstallResources/InstallPackages.sh
     umount $TARGET_MOUNT/proc/
-    umount $TARGET_MOUNT/sys/
-    umount $TARGET_MOUNT/dev/
+    mount --make-rprivate /sys
+    mount --make-rprivate /dev
+    umount -R $TARGET_MOUNT/sys/
+    umount -R $TARGET_MOUNT/dev/
 
 }
 

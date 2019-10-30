@@ -179,6 +179,3 @@ usermod -a -G sudo,netdev,input,video $username
 
 dmesg -E
 
-
-
-reboot
