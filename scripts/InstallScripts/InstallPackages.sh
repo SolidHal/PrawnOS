@@ -34,7 +34,7 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs sysfsutils bluetooth
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
 # #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
@@ -59,6 +59,9 @@ patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.chromebook.p
 patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.chromebook.patch
 
 cp  $DIR/xkb/keyboard /etc/default/keyboard
+
+#disable ertm for csr8510 bluetooth, issue #117
+echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
 
 if [ "$DE" = "xfce" ]
 then
@@ -175,7 +178,7 @@ do
     done
 done
 
-usermod -a -G sudo,netdev,input,video $username
+usermod -a -G sudo,netdev,input,video,bluetooth $username
 
 dmesg -E
 

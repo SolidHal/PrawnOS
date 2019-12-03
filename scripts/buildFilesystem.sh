@@ -154,9 +154,6 @@ chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute ipro
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
 chmod 644 /etc/fstab
 
-#disable ertm for csr8510 bluetooth, issue #117
-echo "options bluetooth disable_ertm=Y" > $outmnt/etc/modprobe.d/bluetooth.conf
-
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
@@ -168,7 +165,7 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 
 #Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme
+chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth
 
 chroot $outmnt apt-get install -d -y firefox-esr
 # grab chromium as well, since sound is still broken in firefox for some media
