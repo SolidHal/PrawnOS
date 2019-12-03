@@ -4,11 +4,12 @@ sudo apt -y install git libx11-dev meson pkg-config python3-setuptools python3-m
 sudo apt -y install mesa-utils
 
 cd /tmp
-git clone https://gitlab.freedesktop.org/mesa/mesa -b "19.2"
+git clone https://gitlab.freedesktop.org/mesa/mesa -b master
 cd mesa
+git checkout 6c4b97011b209fb9c034208b2b2f7e261feaf17c
 mkdir build
 cd build
-meson .. . -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro -Dlibunwind=false
+meson .. . -Dprefix=/usr -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro,swrast -Dlibunwind=false
 sudo ninja install
 
 echo "You may now reboot"
