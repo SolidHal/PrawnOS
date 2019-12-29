@@ -137,7 +137,7 @@ cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/
 cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
-apt clean && apt autoremove --purge
+apt clean -y && apt autoremove --purge -y
 
 #enable periodic TRIM
 cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
