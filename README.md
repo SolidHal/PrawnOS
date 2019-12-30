@@ -72,17 +72,19 @@ sudo dd if=PrawnOs-*-c201-libre-2GB*.img of=/dev/$USB_DEVICE bs=50M; sync
 
 There are two ways to use PrawnOS. 
 
-The first option is to boot from the external USB or SD device you wrote the image to, and expand the image to take up the entire boot device. 
-[click here](#expand-prawnos)
-* Expanding the PrawnOS image allows you to boot PrawnOS from the same USB or SD device that you wrote the image to
-* Expansion does _NOT_ support root encryption. For root encryption the filesystem must be written after the encrypted root is created.
-
-The second and recommended option is to install it on a device other than the one you wrote the PrawnOS image to
+The first and recommended option is to install it on a device other than the one you wrote the PrawnOS image to.
 [click here](#install-to-internal-drive-emmc-or-to-sd-card-or-usb-drive)
 * This lets you install PrawnOS to the internal emmc, an SD card or a USB device
 * This allows you to setup root encryption
 * Installing to an external device allows you to try PrawnOS without removing Chrome OS or whatever Linux you are running on your internal storage (emmc), but USB drives especially are a much slower experience as the c201 only has USB 2.0.
+* The internal emmc is much faster than a usb device or sd card for both reads and writes, data from some tests is available in #133
 * If you want to boot from external media, I would suggest using an SD card. 
+
+The second option is to boot from the external USB or SD device you wrote the image to, and expand the image to take up the entire device.
+[click here](#expand-prawnos)
+* Expanding the PrawnOS image allows you to boot PrawnOS from the same USB or SD device that you wrote the image to
+* Expansion does _NOT_ support root encryption. For root encryption the filesystem must be written after the encrypted root is created.
+
 
 ### Install to internal drive (emmc) or to SD card or USB drive
 Now on the C201, insert the drive you wrote the PrawnOS image to. Press `control+u` at boot to boot from the external drive. 
