@@ -139,6 +139,9 @@ cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 
 apt clean -y && apt autoremove --purge -y
 
+#reload the CA certificate symlinks
+update-ca-certificates --fresh
+
 #enable periodic TRIM
 cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
 systemctl enable fstrim.timer
