@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.2.9-gnu Kernel Configuration
+# Linux/arm 5.2.21-gnu Kernel Configuration
 #
 
 #
@@ -33,7 +33,7 @@ CONFIG_KERNEL_GZIP=y
 # CONFIG_KERNEL_XZ is not set
 # CONFIG_KERNEL_LZO is not set
 # CONFIG_KERNEL_LZ4 is not set
-CONFIG_DEFAULT_HOSTNAME="localhost"
+CONFIG_DEFAULT_HOSTNAME="PrawnOS"
 CONFIG_SWAP=y
 CONFIG_SYSVIPC=y
 CONFIG_SYSVIPC_SYSCTL=y

@@ -22,11 +22,16 @@
 
 outmnt=$(mktemp -d -p `pwd`)
 outdev=/dev/loop7
-KVER=$1
+if [ -z "$1" ]
+then
+    echo "No base file system image filename supplied"
+    exit 1
+fi
+BASE=$1
 ROOT_DIR=`pwd`
 build_resources=$ROOT_DIR/resources/BuildResources
 
-if [ ! -f $ROOT_DIR/PrawnOS-*-c201-libre-2GB.img-BASE ]
+if [ ! -f $ROOT_DIR/$BASE ]
 then
     echo "No base filesystem, run 'make filesystem' first"
     exit 1
@@ -52,7 +57,7 @@ trap cleanup INT TERM EXIT
 
 [ ! -d build ] && mkdir build
 
-losetup -P $outdev $ROOT_DIR/PrawnOS-*-c201-libre-2GB.img-BASE
+losetup -P $outdev $ROOT_DIR/$BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 

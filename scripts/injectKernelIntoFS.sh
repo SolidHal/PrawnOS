@@ -20,13 +20,15 @@ then
     echo "No kernel version supplied"
     exit 1
 fi
-KVER=$1
-
 if [ -z "$2" ]
 then
-    echo "No image filesystem image supplied"
+    echo "No filesystem image supplied"
     exit 1
 fi
+
+KVER=$1
+OUTNAME=$2
+
 outmnt=$(mktemp -d -p `pwd`)
 outdev=/dev/loop7
 
@@ -52,7 +54,7 @@ trap cleanup INT TERM EXIT
 
 #Mount the build filesystem image
 
-losetup -P $outdev $2
+losetup -P $outdev $OUTNAME
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 

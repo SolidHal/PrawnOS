@@ -14,10 +14,13 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 KVER=5.2.21
-ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=buster
+ifeq ($(DEBIAN_SUITE),)
+DEBIAN_SUITE=buster
 endif
-OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-Alpha-c201-libre-2GB.img
+ifeq ($(PRAWNOS_SUITE),)
+PRAWNOS_SUITE=Shiba
+endif
+OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
 
 
@@ -78,12 +81,12 @@ kernel:
 
 .PHONY: initramfs
 initramfs:
-	scripts/buildInitramFs.sh
+	scripts/buildInitramFs.sh $(BASE)
 
 #makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
-	[ -f $(BASE) ] || scripts/buildFilesystem.sh $(KVER)
+	[ -f $(BASE) ] || scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE)
 
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel

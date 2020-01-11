@@ -33,7 +33,19 @@ then
     echo "No kernel version supplied"
     exit 1
 fi
+if [ -z "$2" ]
+then
+    echo "No debian suite supplied"
+    exit 1
+fi
+if [ -z "$3" ]
+then
+    echo "No base file system image filename supplied"
+    exit 1
+fi
 KVER=$1
+DEBIAN_SUITE=$2
+BASE=$3
 
 outmnt=$(mktemp -d -p `pwd`)
 
@@ -81,14 +93,8 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# use buster if no suite is specified
-if [ "$PRAWNOS_SUITE" = "" ]
-then
-    PRAWNOS_SUITE=buster
-fi
-
 # create a 2GB image with the Chrome OS partition layout
-create_image PrawnOS-${PRAWNOS_SUITE}-Alpha-c201-libre-2GB.img-BASE $outdev 50M 40 $outmnt
+create_image $BASE $outdev 50M 40 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -98,7 +104,7 @@ fi
 
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf $PRAWNOS_SUITE --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
+qemu-debootstrap --arch armhf $DEBIAN_SUITE --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
 chroot $outmnt passwd -d root
 
 
@@ -117,24 +123,24 @@ chmod +x $outmnt/*.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
-sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
-if [ "$PRAWNOS_SUITE" != "sid" ]
+sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
+if [ "$DEBIAN_SUITE" != "sid" ]
 then
     # sid doesn't have updates or security; they're present for all other suites
     cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
-    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
     # sid doesn't have backports; it's present for all other suites
     cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
-    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
     #setup apt pinning
     cp $build_resources/backports.pref $outmnt/etc/apt/preferences.d/
-    sed -i -e "s/suite/$PRAWNOS_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
     # Install sid (unstable) as an additional source for bleeding edge packages.
     cp $build_resources/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
     cp $build_resources/sid.pref $outmnt/etc/apt/preferences.d/
 fi
-if [ "$PRAWNOS_SUITE" = "buster" ]
+if [ "$DEBIAN_SUITE" = "buster" ]
 then
     # Install bullseye (testing) as an additional source
     cp $build_resources/bullseye.list $outmnt/etc/apt/sources.list.d/
