@@ -168,14 +168,13 @@ chroot $outmnt apt-get clean
 chroot $outmnt apt install -y libinput-tools xdotool build-essential
 #Package is copied into /InstallResources/packages
 
-chroot $outmnt apt-get install -y -t unstable -d xsecurelock
+chroot $outmnt apt-get install -y -t testing -d xsecurelock
 
 #Download the packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth
 
 chroot $outmnt apt-get install -d -y firefox-esr
 # grab chromium as well, since sound is still broken in firefox for some media
-chroot $outmnt apt-get  install -d -y chromium
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests

@@ -37,11 +37,7 @@ dpkg-reconfigure tzdata
 DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs sysfsutils bluetooth
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 
-# #install firefox from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-DEBIAN_FRONTEND=noninteractive apt -t buster install -y firefox-esr || DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
-
-# #install chromium from buster (if buster repos are present, i.e. installed suite is less than bullseye), otherwise from default suite
-DEBIAN_FRONTEND=noninteractive apt -t buster install -y chromium || DEBIAN_FRONTEND=noninteractive apt install -y chromium
+DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 
 [ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
 [ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
@@ -74,7 +70,7 @@ then
   # is told to sleep at lid close, and activate lock
   # gnome-screensaver shows the desktop for a fraction of a second at wakeup
   # xscreensaver works as well, if you prefer that but is less simple
-  DEBIAN_FRONTEND=noninteractive apt install -y -t unstable xsecurelock
+  DEBIAN_FRONTEND=noninteractive apt install -y -t testing xsecurelock
 
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
@@ -132,6 +128,8 @@ fi
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 cp -rf $DIR/default.pa /etc/pulse/default.pa
+# Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
+echo "flat-volumes = no" > /etc/pulse/daemon.conf
 cp -rf $DIR/sound.sh /etc/acpi/sound.sh
 cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
 mkdir /etc/X11/xorg.conf.d/

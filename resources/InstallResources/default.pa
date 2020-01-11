@@ -138,5 +138,5 @@ load-module module-filter-apply
 ### Make some devices default
 #set-default-sink output
 #set-default-source input
-load-module module-alsa-sink device=sysdefault
-load-module module-alsa-source device=sysdefault
+# load-module module-alsa-sink device=sysdefault
+# load-module module-alsa-source device=sysdefault
