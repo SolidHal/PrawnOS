@@ -109,7 +109,7 @@ chroot $outmnt passwd -d root
 
 
 #Place the config files and installer script and give them the proper permissions
-echo -n PrawnOS-Alpha > $outmnt/etc/hostname
+echo -n PrawnOS > $outmnt/etc/hostname
 cp -R $install_resources/ $outmnt/InstallResources/
 # and the icons for the lockscreen and app menu
 mkdir $outmnt/InstallResources/icons/
