@@ -57,7 +57,7 @@ These packages are required:
 ## Build
 Clone this Git repo. 
 
-Build the `PrawnOS-...-.img` by running `sudo make image`
+Build the `PrawnOS-*-.img` by running `sudo make image`
 
 This has only been tested on a Debian Buster VM, and borrows some components from the host system to setup apt/debootstrap during the build process so I would recommend using a Debian Buster VM to avoid any issues. 
 
@@ -65,7 +65,7 @@ This has only been tested on a Debian Buster VM, and borrows some components fro
 Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or SD card device. If you're not familiar with dd, check out Debian's
  how to page https://www.debian.org/CD/faq/#write-usb
 ```
-sudo dd if=PrawnOs-*-c201-libre-2GB*.img of=/dev/$USB_DEVICE bs=50M; sync
+sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M; sync
 ```
 
 ## Installing
