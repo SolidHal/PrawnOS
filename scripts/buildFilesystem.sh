@@ -178,7 +178,7 @@ chroot $outmnt apt-get install -d -y firefox-esr
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
-echo -n "127.0.0.1        PrawnOS-Alpha" > $outmnt/etc/hosts
+echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
