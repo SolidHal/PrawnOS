@@ -75,9 +75,11 @@ fi
 
 if [ -n "$(blkid ${ROOT_DEV}2 | grep crypto_LUKS)" ]
 then
-    #decrypt and mount the root filesystem
+    #decrypt and mount the root filesystem, disable kernel log messages to avoid clashing with the prompt
+    dmesg -D
     echo "Opening encrypted root partition, this will take 30s..."
     cryptsetup --tries 5 luksOpen ${ROOT_DEV}2 luksroot || rescue_shell
+    dmesg -E
     mount /dev/mapper/luksroot /newroot
 else
     # mount the unencrypted root filesystem
