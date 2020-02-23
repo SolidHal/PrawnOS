@@ -4,7 +4,7 @@
 	description = "Linux-libre kernel image with one or more FDT blobs";
 	#address-cells = <1>;
 	images {
-		kernel {
+		kernel@1 {
 			description = "vmlinuz";
 			data = /incbin/("arch/arm/boot/zImage");
 			type = "kernel_noload";
@@ -17,7 +17,7 @@
 				algo = "sha1";
 			};
 		};
-		fdt {
+		fdt@1 {
 			description = "dtb";
 			data = /incbin/("arch/arm/boot/dts/rk3288-veyron-speedy.dtb");
 			type = "flat_dt";
@@ -27,12 +27,26 @@
 				algo = "sha1";
 			};
 		};
+		fdt@2 {
+			description = "dtb";
+			data = /incbin/("arch/arm/boot/dts/rk3288-veyron-minnie.dtb");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "none";
+			hash {
+				algo = "sha1";
+			};
+		};
 	};
 	configurations {
-		default = "conf";
-		conf{
-			kernel = "kernel";
-			fdt = "fdt";
+		default = "conf@1";
+		conf@1{
+			kernel = "kernel@1";
+			fdt = "fdt@1";
+		};
+		conf@2{
+			kernel = "kernel@1";
+			fdt = "fdt@2";
 		};
 	};
 };
