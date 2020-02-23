@@ -71,7 +71,7 @@ clean_all:
 	make clean_kernel
 	make clean_ath
 	make clean_img
-	make clean_fs
+	make clean_basefs
 	make clean_initramfs
 
 
