@@ -99,7 +99,7 @@ create_image $BASE $outdev 50M 40 $outmnt
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
 then
-    PRAWNOS_DEBOOTSTRAP_MIRROR=http://ftp.us.debian.org/debian
+    PRAWNOS_DEBOOTSTRAP_MIRROR=http://ftp.debian.org/debian
 fi
 
 # install Debian on it
