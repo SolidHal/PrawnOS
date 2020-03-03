@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=5.2.21
+KVER=5.4.23
 ifeq ($(DEBIAN_SUITE),)
 DEBIAN_SUITE=buster
 endif
@@ -91,6 +91,12 @@ filesystem:
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
 	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+
+.PHONY: kernel_update
+kernel_update:
+	make initramfs
+	make kernel
+	make kernel_inject
 
 .PHONY: injected_image
 injected_image: #makes a copy of the base image with a new injected kernel
