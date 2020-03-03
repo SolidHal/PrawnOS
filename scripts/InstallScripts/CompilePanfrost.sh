@@ -6,7 +6,10 @@ sudo apt -y install mesa-utils
 cd /tmp
 git clone https://gitlab.freedesktop.org/mesa/mesa -b master
 cd mesa
+<<<<<<< HEAD
 #git checkout 6c4b97011b209fb9c034208b2b2f7e261feaf17c
+=======
+>>>>>>> f97176b2f908d84f031877bebb3829401e02eace
 mkdir build
 cd build
 meson .. . -Dprefix=/usr -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro,swrast -Dlibunwind=false
