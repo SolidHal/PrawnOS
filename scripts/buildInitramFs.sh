@@ -1,4 +1,3 @@
-
 #!/bin/sh -xe
 
 #Build initramfs image
@@ -78,7 +77,8 @@ mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 mkdir $initramfs_src/lib/arm-linux-gnueabihf
 
-cp -a $outmnt/dev/console $outmnt/dev/tty $initramfs_src/dev/
+mknod -m 622 $initramfs_src/dev/console c 5 1
+mknod -m 622 $initramfs_src/dev/tty c 4 0
 
 #install the few tools we need, and the supporting libs
 cp $outmnt/bin/busybox $outmnt/sbin/cryptsetup $initramfs_src/bin/
@@ -89,28 +89,26 @@ cp $outmnt/lib/arm-linux-gnueabihf/libc.so.6 $initramfs_src/lib/arm-linux-gnueab
 cp $outmnt/lib/ld-linux-armhf.so.3 $initramfs_src/lib/
 cp $outmnt/sbin/blkid $initramfs_src/bin/
 
-cp $outmnt/usr/sbin/cryptsetup $initramfs_src/bin/
+cp $outmnt/usr/lib/arm-linux-gnueabihf/libpopt.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpopt.so.0
+cp $outmnt/usr/lib/arm-linux-gnueabihf/libssl.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libssl.so.1.1
+cp $outmnt/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libcrypto.so.1.1
+cp $outmnt/usr/lib/arm-linux-gnueabihf/libargon2.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libargon2.so.1
+cp $outmnt/usr/lib/arm-linux-gnueabihf/libjson-c.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libjson-c.so.3
 
 cp $outmnt/lib/arm-linux-gnueabihf/libm.so.6 $initramfs_src/lib/arm-linux-gnueabihf/libm.so.6
 cp $outmnt/lib/arm-linux-gnueabihf/libcryptsetup.so.12 $initramfs_src/lib/arm-linux-gnueabihf/libcryptsetup.so.12
-cp $outmnt/lib/arm-linux-gnueabihf/libpopt.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpopt.so.0
 cp $outmnt/lib/arm-linux-gnueabihf/libuuid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libuuid.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libblkid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libblkid.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libc.so.6 $initramfs_src/lib/arm-linux-gnueabihf/libc.so.6
 cp $outmnt/lib/ld-linux-armhf.so.3 $initramfs_src/lib/ld-linux-armhf.so.3
 cp $outmnt/lib/arm-linux-gnueabihf/libdevmapper.so.1.02.1 $initramfs_src/lib/arm-linux-gnueabihf/libdevmapper.so.1.02.1
-cp $outmnt/lib/arm-linux-gnueabihf/libssl.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libssl.so.1.1
-cp $outmnt/lib/arm-linux-gnueabihf/libcrypto.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libcrypto.so.1.1
-cp $outmnt/lib/arm-linux-gnueabihf/libargon2.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libargon2.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/librt.so.1 $initramfs_src/lib/arm-linux-gnueabihf/librt.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libdl.so.2 $initramfs_src/lib/arm-linux-gnueabihf/libdl.so.2
-cp $outmnt/lib/arm-linux-gnueabihf/libjson-c.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libjson-c.so.3
 cp $outmnt/lib/arm-linux-gnueabihf/libselinux.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libselinux.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libudev.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libudev.so.1
 cp $outmnt/lib/arm-linux-gnueabihf/libpthread.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpthread.so.0
 cp $outmnt/lib/arm-linux-gnueabihf/libpcre.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libpcre.so.3
 cp $outmnt/lib/arm-linux-gnueabihf/libgcc_s.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libgcc_s.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libjson-c.so.4 $initramfs_src/lib/arm-linux-gnueabihf/libjson-c.so.4
 #add the init script
 cp $build_resources/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
