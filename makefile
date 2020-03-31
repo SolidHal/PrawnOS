@@ -74,19 +74,28 @@ clean_all:
 	make clean_basefs
 	make clean_initramfs
 
+.PHONY: build_dirs
+build_dirs:
+	mkdir -p build/logs/
 
 .PHONY: kernel
 kernel:
-	scripts/buildKernel.sh $(KVER)
+	make build_dirs
+	rm -rf build/logs/kernel-log.txt
+	bash -x scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
 
 .PHONY: initramfs
 initramfs:
-	scripts/buildInitramFs.sh $(BASE)
+	make build_dirs
+	rm -rf build/logs/kernel-log.txt
+	 bash -x scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
 #makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
-	[ -f $(BASE) ] || scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE)
+	make build_dirs
+	rm -rf build/logs/kernel-log.txt
+	[ -f $(BASE) ] || bash -x scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
