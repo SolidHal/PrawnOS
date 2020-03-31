@@ -154,7 +154,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n
+chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
