@@ -190,6 +190,45 @@ You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
 
+## Crossystem / mosys
+You can run the `buildCrossystem.sh` script located in `/InstallScripts/` to build `mosys` and install `crossystem`
+```
+sudo /InstallScripts/buildCrossystem.sh
+```
+
+### Warning: running these commands can leave you in a state where you cannot boot.
+Specifically, enabling `dev_boot_signed_only` will prevent PrawnOS from booting, as no key is stored in the bootloader for the PrawnOS Linux kernel
+Its also a bad idea to disable `dev_boot_usb` unless you are positive you will always be able to boot to the internal emmc.
+Unless you are running libreboot, the only way to recover if you get in one of these states is to reinstall chromeos using recovery media 
+
+#### Example crossystem  and mosys commands, most require root privileges
+
+Kernels signature verification:
+
+`sudo crossystem dev_boot_signed_only=1` enable
+`sudo crossystem dev_boot_signed_only=0` disable
+
+External media boot:
+
+`sudo crossystem dev_boot_usb=1` enable
+`sudo crossystem dev_boot_usb=0` disable
+
+Legacy payload boot:
+
+`sudo crossystem dev_boot_legacy=1` enable 
+`sudo crossystem dev_boot_legacy=0` disable
+
+Default boot medium:
+`sudo crossystem dev_default_boot=disk` internal storage
+`sudo crossystem dev_default_boot=usb` external media
+`sudo crossystem dev_default_boot=legacy` legacy payload
+
+Dump system state:
+`sudo crossystem`
+
+View mosys command tree:
+`sudo mosys -t`
+
 ### GPU Support
 
 Watch this link for GPU support:
