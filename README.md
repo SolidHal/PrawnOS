@@ -191,10 +191,8 @@ You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-d
 
 
 ## Crossystem / mosys
-You can run the `buildCrossystem.sh` script located in `/InstallScripts/` to build `mosys` and install `crossystem`
-```
-sudo /InstallScripts/buildCrossystem.sh
-```
+
+crossystem is installed from the debian repos and mosys (a dependency of crossystem, and all around useful tool) is built and installed as part of the PrawnOS filesystem build.
 
 ### Warning: running these commands can leave you in a state where you cannot boot.
 Specifically, enabling `dev_boot_signed_only` will prevent PrawnOS from booting, as no key is stored in the bootloader for the PrawnOS Linux kernel
@@ -228,6 +226,11 @@ Dump system state:
 
 View mosys command tree:
 `sudo mosys -t`
+
+On older PrawnOS releases or other distributions, you can run the `buildCrossystem.sh` script located in `scripts/InstallScripts/` to build and install `mosys` and install `crossystem`
+```
+sudo /InstallScripts/buildCrossystem.sh
+```
 
 ### GPU Support
 

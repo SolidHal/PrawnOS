@@ -36,11 +36,9 @@ git clone https://chromium.googlesource.com/chromiumos/platform/mosys
 cd mosys
 git checkout release-R69-10895.B
 
-# compile the c parts
+# compile
 CC=clang meson -Darch=arm build
 ninja -C build
-# compile the rust parts
-MESON_BUILD_ROOT=build cargo build
 
 # install mosys so crossystem can access it. It EXPECTS it to be right here and fails otherwise...
 sudo cp build/mosys /usr/sbin/mosys

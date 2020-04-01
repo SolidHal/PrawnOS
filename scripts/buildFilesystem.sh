@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/bash -xe
 
 # Build fs, image
 
@@ -93,6 +93,44 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
+build_install_crossystem() {
+    # install crossystem
+    apt install -y vboot-utils
+
+    #install clang and pre-reqs
+    apt install -y clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
+
+    flashmap_src=/root/flashmap
+    mosys_src=/root/mosys
+    mkdir $flashmap_src
+    mkdir $mosys_src
+    #clone flashmap, need to build libfmap
+    git clone https://github.com/dhendrix/flashmap.git /root/flashmap
+    cd $flashmap_src && make all
+    cd $flashmap_src && make install
+    ldconfig
+
+    #clone mosys. Later releases start depending on the minijail library which we would have to build, and that we don't care about anyway on linux
+    git clone https://chromium.googlesource.com/chromiumos/platform/mosys /root/mosys
+    cd $mosys_src && git checkout release-R69-10895.B
+
+    mkdir $mosys_src/build
+    # compile the c parts
+    cd $mosys_src && CFLAGS="-Wno-error" CC=clang meson -Darch=arm $mosys_src/build
+    cd $mosys_src && ninja -C $mosys_src/build
+
+    # install mosys so crossystem can access it. It EXPECTS it to be right here and fails otherwise...
+    mkdir -p /usr/sbin/
+    cp --verbose $mosys_src/build/mosys /usr/sbin/
+
+    # cleanup the source
+    rm -rf $flashmap_src
+    rm -rf $mosys_src
+
+    # cleanup the unnecessary build packages, need the noninteractive flag as -y is not enough to avoid prompting users on remove for some reason
+    DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove clang meson libcmocka-dev cargo cmake pkg-config
+}
+
 # create a 2GB image with the Chrome OS partition layout
 create_image $BASE $outdev 50M 40 $outmnt
 
@@ -156,9 +194,13 @@ chroot $outmnt locale-gen
 chroot $outmnt apt update
 chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
 
+#build and install crossystem/mosys, funky way to call the bash function inside the chroot
+export -f build_install_crossystem
+chroot $outmnt /bin/bash -ec "build_install_crossystem"
+
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
-chmod 644 /etc/fstab
+chmod 644 $outmnt/etc/fstab
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
