@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=5.4.23
+KVER=5.4.29
 ifeq ($(DEBIAN_SUITE),)
 DEBIAN_SUITE=buster
 endif
