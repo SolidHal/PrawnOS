@@ -5,7 +5,13 @@ Contributors:
 JeremyRand (jeremyrand@airmail.cc)
 - Improvement to include the proper dconf packages instead of the transitional dummy package
 - Improvements to support building off of buster instead of stretch
-- Support for non-default debootstrap mirrors 
+- Support for non-default debootstrap mirrors
+
+rk-zero
+- c100P support
+- initramfs logging fixes
+- Panfrost compile script
+- keybindings via xkb
 
 With spcial thanks to:
 Dima Krasner (dima@dimakrasner.com) 
