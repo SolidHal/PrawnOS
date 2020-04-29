@@ -243,6 +243,8 @@ external_partition() {
 
 #simply expand to fill the current boot device
 expand() {
+    # need to strip the "p" if BOOT_DEVICE is an sd card or emmc
+    BOOT_DEVICE_NO_P=$(echo $BOOT_DEVICE | cut -d 'p' -f 1)
     if [[ $BOOT_DEVICE == "/dev/mmcblk2" ]]
     then
         echo "Can't expand to fill internal emmc, install will have done this already"
@@ -250,15 +252,15 @@ expand() {
     fi
     #Make the boot partition fille the whole drive
     #Delete the partition
-    sgdisk -d 2 $BOOT_DEVICE
+    sgdisk -d 2 $BOOT_DEVICE_NO_P
     #Make new partition map entry, with full size
-    sgdisk -N 2 $BOOT_DEVICE
+    sgdisk -N 2 $BOOT_DEVICE_NO_P
     #Set the type to "data"
-    sgdisk -t 2:0700 $BOOT_DEVICE
+    sgdisk -t 2:0700 $BOOT_DEVICE_NO_P
     #Name it "properly" - Probably not required, but looks nice
-    sgdisk -c 2:Root $BOOT_DEVICE
+    sgdisk -c 2:Root $BOOT_DEVICE_NO_P
     #Reload the partition mapping
-    partprobe $BOOT_DEVICE
+    partprobe $BOOT_DEVICE_NO_P
     #Force the filesystem to fill the new partition
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
