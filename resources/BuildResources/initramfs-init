@@ -45,6 +45,19 @@ rootpartuuid() {
     [ "${value}" != "" ] && echo "${value}"
 }
 
+# a clever portable shell script to detect occurances of a substring in a string
+# occur <string> <substring> (optional count)
+# if optional count is not provided:
+# returns 1 if substring is not in string
+# returns 0 otherwise
+# if optional count is provided:
+# returns 1 if substring occurs in string < optional count
+# returns 0 otherwise
+occur() while case "$1" in (*"$2"*) set -- \
+        "${1#*"$2"}" "$2" "${3:-0}" "$((${4:-0}+1))";;
+        (*) return "$((${4:-0}<${3:-1}))";;esac
+        do : "${_occur:+$((_occur=$4))}";done
+
 # mount the bare necesities
 mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
@@ -61,10 +74,6 @@ echo ${BLKID} > /dev/tty1
 ROOT_DEV="${BLKID%1:*}"
 
 echo ${ROOT_DEV} > /dev/tty1
-
-# we can use this to change what cmdline options get passed into
-# the next boot stage
-CMDLINE='cat /proc/cmdline'
 
 # label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
 # you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
@@ -91,4 +100,4 @@ umount /sys
 umount /proc
 
 #switch to the new rootfs
-exec switch_root /newroot /sbin/init ${CMDLINE}
+exec switch_root /newroot /sbin/init
