@@ -1,4 +1,7 @@
-#!/bin/sh -xe
+#!/bin/bash
+
+set -x
+set -e
 
 #Runs Make menuconfig with the proper enviroment vars for cross compiling arm 
 #Grabs the file named config in resources/BuildResources directory, and updates it

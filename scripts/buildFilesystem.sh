@@ -1,4 +1,7 @@
-#!/bin/bash -xe
+#!/bin/bash
+
+set -x
+set -e
 
 # Build fs, image
 

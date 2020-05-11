@@ -1,4 +1,7 @@
-#!/bin/sh -xe
+#!/bin/bash
+
+set -x
+set -e
 
 if [ -z "$1" ]
 then

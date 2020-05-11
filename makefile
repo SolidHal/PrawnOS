@@ -68,11 +68,11 @@ clean_initramfs:
 
 .PHONY: clean_all
 clean_all:
-	make clean_kernel
-	make clean_ath
-	make clean_img
-	make clean_basefs
-	make clean_initramfs
+	$(MAKE) clean_kernel
+	$(MAKE) clean_ath
+	$(MAKE) clean_img
+	$(MAKE) clean_basefs
+	$(MAKE) clean_initramfs
 
 .PHONY: build_dirs
 build_dirs:
@@ -80,20 +80,20 @@ build_dirs:
 
 .PHONY: kernel
 kernel:
-	make build_dirs
+	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
 	bash -x scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
 
 .PHONY: initramfs
 initramfs:
-	make build_dirs
+	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
 	 bash -x scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
 #makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
-	make build_dirs
+	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
 	[ -f $(BASE) ] || bash -x scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
@@ -103,25 +103,25 @@ kernel_inject: #Targets an already built .img and swaps the old kernel with the 
 
 .PHONY: kernel_update
 kernel_update:
-	make initramfs
-	make kernel
-	make kernel_inject
+	$(MAKE) initramfs
+	$(MAKE) kernel
+	$(MAKE) kernel_inject
 
 .PHONY: injected_image
 injected_image: #makes a copy of the base image with a new injected kernel
-	make kernel
+	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
-	make kernel_inject
+	$(MAKE) kernel_inject
 
 .PHONY: image
 image:
-	make clean_img
-	make filesystem
-	make initramfs
-	make kernel
+	$(MAKE) clean_img
+	$(MAKE) filesystem
+	$(MAKE) initramfs
+	$(MAKE) kernel
 #Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
-	make kernel_inject
+	$MAKE) kernel_inject
 
 .PHONY: live_image
 live_image:
