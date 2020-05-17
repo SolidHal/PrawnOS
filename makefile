@@ -18,7 +18,7 @@ ifeq ($(DEBIAN_SUITE),)
 DEBIAN_SUITE=buster
 endif
 ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=Shiba
+PRAWNOS_SUITE=Shiba-gnome-contrib
 endif
 OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
@@ -121,7 +121,7 @@ image:
 	$(MAKE) kernel
 #Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
-	$MAKE) kernel_inject
+	$(MAKE) kernel_inject
 
 .PHONY: live_image
 live_image:
