@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+	<enum id="org.gnome.shell.extensions.window-corner-preview.BehaviorMode">
+		<value value="0" nick="seethrough"/>
+		<value value="1" nick="autohide"/>
+		<value value="2" nick="jump-diagonally"/>
+		<value value="3" nick="jump-horizontally"/>
+		<value value="4" nick="jump-vertically"/>
+	</enum>
+    <enum id="org.gnome.shell.extensions.window-corner-preview.Corner">
+        <value value="0" nick="top-left"/>
+        <value value="1" nick="top-right"/>
+        <value value="2" nick="bottom-right"/>
+        <value value="3" nick="bottom-left"/>
+    </enum>
+	<schema path="/org/gnome/shell/extensions/window-corner-preview/" id="org.gnome.shell.extensions.window-corner-preview">
+		<key name="behavior-mode" enum="org.gnome.shell.extensions.window-corner-preview.BehaviorMode">
+			<default>"seethrough"</default>
+			<summary>Mouse over behavior</summary>
+			<description>Behavior when mouse is over the preview</description>
+		</key>
+		<key name="focus-hidden" type="b">
+			<default>false</default>
+			<summary>Hide when window is focused</summary>
+			<description>Whether to automatically hide the preview when the mirrored window is on top.</description>
+		</key>
+		<key name="initial-zoom" type="d">
+            <range min="0.10" max="0.75"/>
+			<default>0.20</default>
+			<summary>Initial zoom ratio</summary>
+			<description>Initial zoom ratio</description>
+		</key>
+        <key name="initial-left-crop" type="d">
+            <range min="0.0" max="0.85"/>
+			<default>0.0</default>
+			<summary>Initial Left Crop Ratio</summary>
+			<description>Initial Left Crop Ratio</description>
+		</key>
+        <key name="initial-right-crop" type="d">
+            <range min="0.0" max="0.85"/>
+			<default>0.0</default>
+			<summary>Initial Right Crop Ratio</summary>
+			<description>Initial Right Crop Ratio</description>
+		</key>
+        <key name="initial-top-crop" type="d">
+            <range min="0.0" max="0.85"/>
+			<default>0.0</default>
+			<summary>Initial Top Crop Ratio</summary>
+			<description>Initial Top Crop Ratio</description>
+		</key>
+        <key name="initial-bottom-crop" type="d">
+            <range min="0.0" max="0.85"/>
+			<default>0.0</default>
+			<summary>Initial Bottom Crop Ratio</summary>
+			<description>Initial Bottom Crop Ratio</description>
+		</key>
+        <key name="initial-corner" enum="org.gnome.shell.extensions.window-corner-preview.Corner">
+			<default>"top-right"</default>
+			<summary>Initial Corner</summary>
+			<description>Initial Corner</description>
+		</key>
+        <key name="last-window-hash" type="s">
+			<default>""</default>
+			<summary>Last Window</summary>
+			<description>Last Window Hash</description>
+		</key>
+	</schema>
+</schemalist>
