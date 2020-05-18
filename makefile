@@ -121,7 +121,7 @@ image:
 	$(MAKE) kernel
 #Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
-	$MAKE) kernel_inject
+	$(MAKE) kernel_inject
 
 .PHONY: live_image
 live_image:
