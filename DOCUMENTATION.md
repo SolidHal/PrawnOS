@@ -121,4 +121,22 @@ You can do this with `cgpt add -i 1 -l RESCUESHELL /dev/sda` for example to labe
 This is the suggested method, as then debugging can be enabled/disabled by plugging in/removing the usb device. 
 
 
+### PrawnOS APT repo
+http://deb.prawnos.com
 
+
+### Key management
+apt repo holds a short life signing private key, and the long life master public key 
+the short life signing key is a sub key of the master key
+This way we can safely keep the master key off of any distribution servers.
+This also allows us to revoke the signing key and issue a new one all without users needing to
+update their key store, as the master public key will be valid for all sub keys
+
+importing/exporting was done based off of https://www.debuntu.org/how-to-importexport-gpg-key-pair/
+
+subkey creation instructions found here https://www.digitalocean.com/community/tutorials/how-to-use-reprepro-for-a-secure-package-repository-on-ubuntu-14-04
+under the "Generate a Subkey for Package Signing" section
+
+### Uploading packages to deb.prawnos.halemmerich.compression
+
+dput or dupload? 
