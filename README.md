@@ -42,17 +42,20 @@ If you don't want to or can't build the image, you can find downloads under <rel
 
 ## Dependencies
 
-Building PrawnOS has been tested on Debian 10 Buster (in a VM)
-_stretch doesn't work as the version of gcc-arm-none-eabi is too old_
-This is the only build enviroment that is supported. 
+Building PrawnOS has been tested on Debian 10 Buster (in a VM).
+
+NOTE: _stretch doesn't work as the version of gcc-arm-none-eabi is too old_!
+
+Debian/Buster is the only build enviroment that is supported.
 These packages are required:
 
+<!-- Please keep the packages sorted (and in sync with ./tests/build-image.sh): -->
 ```
-	apt install --no-install-recommends --no-install-suggests parted cgpt git \
-	gawk device-tree-compiler vboot-kernel-utils gcc-arm-none-eabi u-boot-tools \
-	gcc make libc-dev wget g++ cmake binfmt-support qemu-user-static debootstrap \
-	lzip libssl-dev libncurses-dev flex bison sudo patch bc texinfo bzip2 ca-certificates \
-    cpio file gpg gpg-agent kmod udev
+        apt install --no-install-recommends --no-install-suggests \
+        bc binfmt-support bison bzip2 ca-certificates cgpt cmake cpio debootstrap \
+        device-tree-compiler file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
+        gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
+        qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 ```
 
 ## Build
