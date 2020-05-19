@@ -23,12 +23,12 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (G)nome, (X)fce4 or (L)xqt, if unsure choose (G)nome: " XL
+    read -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
     case $XL in
         [Gg]* ) DE=gnome; break;;
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
-        * ) echo "Please answer (G)nome, (X)fce4 or (L)xqt";;
+        * ) echo "Please answer (X)fce4, (L)xqt or (G)nome";;
     esac
 done
 
