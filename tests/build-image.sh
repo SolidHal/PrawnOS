@@ -22,12 +22,12 @@ GITHUB_SHA="$1"
 
 cd "$(dirname "$0")/.."
 
-# Get dependencies listed in README.md:
+# Get dependencies
 apt-get update
-apt-get -y install --no-install-recommends --no-install-suggests bc binfmt-support bison cgpt cmake debootstrap device-tree-compiler flex g++ gawk gcc gcc-arm-none-eabi git libc-dev libncurses-dev libssl-dev lzip make parted patch qemu-user-static texinfo u-boot-tools vboot-kernel-utils wget
 
-# And install stuff that is missing from the Debian/buster container:
-apt-get -y install --no-install-recommends --no-install-suggests bzip2 ca-certificates cpio file gpg gpg-agent kmod udev
+# Note: this is a copy/paste from README.md, if you add anything here, also update it!
+apt-get -y install --no-install-recommends --no-install-suggests bc binfmt-support bison bzip2 ca-certificates cgpt cmake cpio debootstrap device-tree-compiler file flex g++ gawk gcc gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+
 
 # Note: there's an error for /proc/modules, but at least building the image works fine:
 # libkmod: ERROR ../libkmod/libkmod-module.c:1657 kmod_module_new_from_loaded: could not open /proc/modules: No such file or directory
