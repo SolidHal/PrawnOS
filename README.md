@@ -42,9 +42,11 @@ If you don't want to or can't build the image, you can find downloads under <rel
 
 ## Dependencies
 
-Building PrawnOS has been tested on Debian 10 Buster (in a VM)
-_stretch doesn't work as the version of gcc-arm-none-eabi is too old_
-This is the only build enviroment that is supported. 
+Building PrawnOS has been tested on Debian 10 Buster (in a VM).
+
+NOTE: _stretch doesn't work as the version of gcc-arm-none-eabi is too old_!
+
+Debian/Buster is the only build enviroment that is supported.
 These packages are required:
 
 <!-- Please keep the packages sorted (and in sync with ./tests/build-image.sh): -->
