@@ -18,7 +18,7 @@ ifeq ($(DEBIAN_SUITE),)
 DEBIAN_SUITE=buster
 endif
 ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=Shiba-gnome-contrib
+PRAWNOS_SUITE=Shiba
 endif
 OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
