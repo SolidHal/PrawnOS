@@ -59,7 +59,7 @@ These packages are required:
 ```
 
 ## Build
-Clone this Git repo. 
+Clone this Git repo: `git clone --recurse-submodules https://github.com/SolidHal/PrawnOS`
 
 Build the `PrawnOS-*-.img` by running `sudo make image`
 
