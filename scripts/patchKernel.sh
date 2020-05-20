@@ -20,8 +20,8 @@ cd build
 cd linux-$KVER
 make clean
 make mrproper
-#Apply the usb and mmc patches if unapplie
-for i in $RESOURCES/patches-tested/DTS/*.patch; do patch -p1 < $i; done
-for i in $RESOURCES/patches-tested/kernel/*.patch; do patch -p1 < $i; done
+#Apply the usb and mmc patches if unapplied
+for i in "$RESOURCES"/patches-tested/DTS/*.patch; do patch -p1 < $i; done
+for i in "$RESOURCES"/patches-tested/kernel/*.patch; do patch -p1 < $i; done
 
 cd $ROOT_DIR
