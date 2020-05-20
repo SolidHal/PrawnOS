@@ -24,7 +24,7 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
+    read -r -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
     case $XL in
         [Gg]* ) DE=gnome; break;;
         [Xx]* ) DE=xfce; break;;
@@ -175,7 +175,7 @@ done
 #Force a safe username
 while true; do
     echo "-----Enter new username:-----"
-    read username
+    read -r username
     #ensure no whitespace
     case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
 done
@@ -183,7 +183,7 @@ until adduser $username --gecos ""
 do
     while true; do
         echo "-----Enter new username:-----"
-        read username
+        read -r username
         #ensure no whitespace
         case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
     done

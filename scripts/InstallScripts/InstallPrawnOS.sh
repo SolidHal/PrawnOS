@@ -37,7 +37,7 @@ main() {
     echo "Expand or Install?: "
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
-        read -p "[I]nstall or [E]xpand?" IE
+        read -r -p "[I]nstall or [E]xpand?" IE
         case $IE in
             [Ii]* ) install; break;;
             [Ee]* ) expand; break;;
@@ -54,7 +54,7 @@ install() {
     echo "Please ensure you have only have the booted device and the desired target device inserted."
     echo "The currently booted device is ${BOOT_DEVICE}"
     while true; do
-        read -p "[I]nternal Emmc, [S]D card, or [U]SB device?: " ISU
+        read -r -p "[I]nternal Emmc, [S]D card, or [U]SB device?: " ISU
         case $ISU in
             [Ii]* ) TARGET=/dev/mmcblk2p; break;;
             [Ss]* ) TARGET=/dev/mmcblk0p; break;;
@@ -87,7 +87,7 @@ install() {
 
     #Now on to the installation, basically copy InstallToInternal.sh
     while true; do
-        read -p "This will ERASE ALL DATA ON ${TARGET_NO_P} and reboot when finished, do you want to continue? [y/N]" yn
+        read -r -p "This will ERASE ALL DATA ON ${TARGET_NO_P} and reboot when finished, do you want to continue? [y/N]" yn
         case $yn in
             [Yy]* ) break;;
             [Nn]* ) exit;;
@@ -160,7 +160,7 @@ install() {
     echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
 
     while true; do
-        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
         case $ins in
             [Yy]* ) install_packages $INSTALL_MOUNT; break;;
             [Nn]* ) break;;
@@ -179,7 +179,7 @@ install() {
     fi
     echo "Please remove the booted device after power off is complete"
     while true; do
-        read -p "Reboot? [y/N]" re
+        read -r -p "Reboot? [y/N]" re
         case $re in
             [Yy]* ) reboot;;
             [Nn]* ) exit;;
@@ -273,7 +273,7 @@ expand() {
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
     while true; do
-        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
         case $ins in
             [Yy]* ) /InstallResources/InstallPackages.sh; reboot;;
             [Nn]* ) exit;;
