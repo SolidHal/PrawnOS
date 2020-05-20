@@ -30,7 +30,7 @@ fi
 KVER=$1
 
 
-ROOT_DIR=`pwd`
+ROOT_DIR="$(pwd)"
 RESOURCES=$ROOT_DIR/resources/BuildResources
 
 [ ! -d build ] && mkdir build

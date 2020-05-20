@@ -32,7 +32,7 @@ fi
 KVER=$1
 OUTNAME=$2
 
-outmnt=$(mktemp -d -p `pwd`)
+outmnt=$(mktemp -d -p "$(pwd)")
 outdev=/dev/loop7
 
 build_resources=resources/BuildResources

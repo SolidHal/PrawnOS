@@ -56,7 +56,7 @@ DEBIAN_SUITE=$2
 BASE=$3
 PRAWNOS_ROOT=$4
 
-outmnt=$(mktemp -d -p `pwd`)
+outmnt=$(mktemp -d -p "$(pwd)")
 
 outdev=/dev/loop5
 
