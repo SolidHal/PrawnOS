@@ -26,10 +26,11 @@ then
     echo "No kernel version supplied"
     exit 1
 fi
+
 KVER=$1
-TEST_PATCHES=false
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
+
 [ ! -d build ] && mkdir build
 cd build
 if [ ! -f PrawnOS-initramfs.cpio.gz ]
