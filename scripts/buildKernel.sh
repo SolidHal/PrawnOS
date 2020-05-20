@@ -3,7 +3,7 @@
 set -x
 set -e
 
-#Build kenerl, wifi firmware
+#Build kernel, wifi firmware
 
 
 # This file is part of PrawnOS (http://www.prawnos.com)
