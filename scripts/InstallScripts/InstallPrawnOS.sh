@@ -221,7 +221,6 @@ external_partition() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
     kernel_size=65536
-    root_start=$(($kernel_start + $kernel_size))
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET
