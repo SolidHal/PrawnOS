@@ -71,7 +71,7 @@ install() {
             TARGET=/dev/sda
         fi
     fi
-    if [[ $TARGET == $BOOT_DEVICE ]]
+    if [[ "$TARGET" == "$BOOT_DEVICE" ]]
     then
         echo "Can't install to booted device, please ensure you have *only* the booted device and target device inserted"
         exit
