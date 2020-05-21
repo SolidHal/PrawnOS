@@ -2,13 +2,12 @@ Branch Readme
 
 Revived Gnome 3 Support
 
-Outline: Release Phases, Summary, Specific Changes, Disclosures:, Added Niceties, Added Extensions, Thanks
 
 Now with disclosure!
 
 Phase One: Post necessary commits to branch. Complete!
 Phase Two: Edit and post readme. Complete!
-Phase Three: Post a build built from publicly accessible repos. To Be Completed! 
+Phase Three: Post a build built from publicly accessible repos. [Completed!](https://github.com/gdallasdye/PrawnOS/releases)
 
 Summary:
 
@@ -18,7 +17,7 @@ The author has spent many months testing the Wayland Gnome desktop environment. 
 
 FUNFACT: This readme was written about two weeks ago. Even the above paragraph? Especially the above paragraph. Even now, more than ever, the above paragraph. Have fun with that math. The initial proof of concept was going to be posted when things broke.
 
-Firstly, kernel building broke. This may have something to do with cmake breaking when building either the ath9k toolset or driver. After getting setup on a workstation’s virtual machine (which wouldn’t need panfrost) cmake was fixed. Cmake may have broken because my native dev environment was using unstable mesa and panfrost. This may affect developers building on their laptops. We do not expect it influence end users much or at all. Testing and public commenting are welcome and expected. 
+Firstly, kernel building broke. This may have something to do with cmake breaking when building either the ath9k toolset or driver. After getting setup on a workstation’s virtual machine (which wouldn’t need panfrost) cmake was fixed. Cmake may have broken because my native dev environment was using unstable mesa and panfrost. This may affect developers building on their laptops. The author does not expect it influence end users much or at all. Testing and public commenting are welcome and expected. 
 
 Another issue popped up then.
 
