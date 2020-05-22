@@ -1,0 +1,18 @@
+#only include specific /debian files
+src/debian/*
+!src/debian/compat
+!src/debian/changelog
+!src/debian/control
+!src/debian/rules
+
+#generic packaging artifacts
+debhelper-build-stamp
+.debhelper
+*.deb
+*.dsc
+*.build
+*.buildinfo
+*.changes
+*.log
+*.substvars
+*.diff.gz
