@@ -139,4 +139,19 @@ under the "Generate a Subkey for Package Signing" section
 
 ### Uploading packages to deb.prawnos.halemmerich.compression
 
-dput or dupload? 
+use dput
+user ~/.dput.cf
+```
+[deb.prawnos.com]
+    fqdn = deb.prawnos.com
+    method = scp
+    login = debian
+    incoming = /var/www/repos/apt/debian/incoming
+    allow_unsigned_uploads = true
+    ssh_config_options = Port=2222
+```
+
+upload the package 
+```
+dput deb.prawnos.com *.changes
+```

@@ -16,3 +16,4 @@ debhelper-build-stamp
 *.log
 *.substvars
 *.diff.gz
+*.upload
