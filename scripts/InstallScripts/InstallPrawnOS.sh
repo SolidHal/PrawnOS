@@ -151,7 +151,8 @@ install() {
     echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
 
     while true; do
-        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        echo "Would you like to install a desktop environment and the supporting packages?"
+        read -r -p "NOTE: this requires a working internet connection: [Y/n]" ins
         case $ins in
             [Yy]* ) install_packages $INSTALL_MOUNT; break;;
             [Nn]* ) break;;
@@ -265,7 +266,8 @@ expand() {
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
     while true; do
-        read -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        echo "Would you like to install a desktop environment and the supporting packages?"
+        read -r -p "NOTE: this requires a working internet connection: [Y/n]" ins
         case $ins in
             [Yy]* ) /InstallResources/InstallPackages.sh; reboot;;
             [Nn]* ) exit;;
