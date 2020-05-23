@@ -5,13 +5,18 @@ When PrawnOS has its own apt repos these will be available there...
 If you want to build them yourself run:
 
 For libinput-gestures:
-sudo apt install -y libinput-tools xdotool build-essential
+sudo apt install -y build-essential libinput-tools xdotool
 git clone http://github.com/bulletmark/libinput-gestures
 cd libinput-gestures
 sudo make install 
 
 For Xfdashboard:
-apt-get install -y xfce4-dev-tools build-essential glib2.0 libglib2.0-dev xorg-dev libwnck-3-dev libclutter-1.0-dev libgarcon-1-0-dev libxfconf-0-dev libxfce4util-dev libxfce4ui-2-dev libxcomposite-dev libxdamage-dev libxinerama-dev
+apt-get install -y build-essential glib2.0
+libclutter-1.0-dev libgarcon-1-0-dev libglib2.0-dev
+libwnck-3-dev libxcomposite-dev libxdamage-dev libxfce4ui-2-dev
+libxfce4util-dev libxfconf-0-dev libxinerama-dev
+xfce4-dev-tools xorg-dev
+
 git clone https://github.com/gmc-holle/xfdashboard
 #get most recent version I've tested
 cd xfdashboard
