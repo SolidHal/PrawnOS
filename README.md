@@ -11,7 +11,7 @@ PrawnOS
 Build Debian filesystem with:
 * No blobs, anywhere. 
 * Sources from only main, not contrib or non-free which keeps Debian libre.
-* Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment.
+* Currently PrawnOS supports xfce and lxqt as choices for the (optional) desktop enviroment (note: this requires internet access).
 * full root filesystem encryption
 
 Build a deblobbed mainline kernel with:
@@ -112,7 +112,7 @@ If you are curious how the initramfs, and root partition encryption work on Praw
 If you run in to any problems please open an issue. 
 _If you install to the internal emmc this will show a bunch of scary red warnings that are a result of the emmc (internal storage) having a few unwritable (bad) blocks at the beginning of the device and the kernel message level being set low for debugging. They don't effect anything long-term. All C201s have these bad blocks at the beginning of the emmc_
 
-After the partitioning and the filesystem copy is complete, it will prompt you to install either the xfce4 or the lxqt desktop environment, sound, trackpad, and Xorg configurations
+After the partitioning and the filesystem copy is complete, it will prompt you to install either the xfce4 or the lxqt desktop environment, sound, trackpad, and Xorg configurations (note: this requires internet access).
 It will also prompt you to make a new user that automatically gets sudo privileges.
 
 After reboot, remove the external media you had booted from originally. If you installed to the internal emmc press `control+d`, if you installed to an external device press `control+u`
@@ -136,7 +136,7 @@ Choose `Expand` at the prompt
 
 If you run in to any problems please open an issue. 
 
-Now you can choose to install the packages, which are either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations.
+Now you can choose to install the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations (note: this requires internet access).
 It will also prompt you to make a new user that automatically gets sudo privileges.
 
 If you choose in install the packages, when installation is complete it will reboot.
