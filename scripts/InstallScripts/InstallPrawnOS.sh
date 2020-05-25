@@ -95,8 +95,17 @@ install() {
         esac
     done
 
-    umount ${TARGET}1 || /bin/true
+    # Only try to unmount if the device is mounted
+    # If it is, try anyway, the dd will (likely) take care of it anyway
+    if findmnt ${TARGET}1 > /dev/null
+    then
+        umount ${TARGET}1 || /bin/true
+    fi
+
+    if findmnt ${TARGET}2 > /dev/null
+    then
     umount ${TARGET}2 || /bin/true
+    fi
 
     if [[ $TARGET == "/dev/mmcblk2p" ]]
     then
@@ -221,7 +230,6 @@ external_partition() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
     kernel_size=65536
-    root_start=$(($kernel_start + $kernel_size))
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET

@@ -69,7 +69,7 @@ This has only been tested on a Debian Buster VM, and borrows some components fro
 Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or SD card device. If you're not familiar with dd, check out Debian's
  how to page https://www.debian.org/CD/faq/#write-usb
 ```
-sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M; sync
+sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M status=progress; sync
 ```
 
 ## Installing
