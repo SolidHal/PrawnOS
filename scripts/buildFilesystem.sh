@@ -66,11 +66,14 @@ cleanup() {
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
 
-  set +e
-
   umount -l $outmnt > /dev/null 2>&1
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
+
+  #delete the base file, we didn't complete our work
+  rm -rf $BASE
+  echo "FILESYSTEM BUILD FAILED"
+  exit 1
 }
 
 trap cleanup INT TERM EXIT
@@ -147,7 +150,8 @@ fi
 
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf $DEBIAN_SUITE --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
+# need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
+qemu-debootstrap --arch armhf $DEBIAN_SUITE --include  openssl,ca-certificates,gnupg,locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
 chroot $outmnt passwd -d root
 
 
@@ -192,12 +196,9 @@ then
 fi
 
 #Bring in the deb.prawnos.com gpg keyring
-# need ca-certs to handle https links
-chroot $outmnt apt install -y ca-certificates gnupg
 cp $build_resources/deb.prawnos.com.gpg.key $outmnt/InstallResources/
 chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
-
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
@@ -205,7 +206,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
+chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
 
 #build and install crossystem/mosys, funky way to call the bash function inside the chroot
 export -f build_install_crossystem
@@ -239,6 +240,7 @@ chroot $outmnt apt-get install -d -y firefox-esr
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
+# do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
 losetup -d $outdev > /dev/null 2>&1
