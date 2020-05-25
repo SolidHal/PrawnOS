@@ -39,7 +39,9 @@ DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support tasksel dpkg lib
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
 DEBIAN_FRONTEND=noninteractive apt install -t unstable -y libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
 
+# Browsers
 DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
+DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
 [ "$DE" = "gnome" ] && apt install -y gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-logs evince gnome-disk-utility gnome-terminal fonts-cantarell gnome-tweaks seahorse papirus-icon-theme materia-gtk-theme
 [ "$DE" = "xfce" ] && apt install -y lightdm mousepad vlc xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme

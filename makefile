@@ -23,6 +23,8 @@ endif
 OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
 
+# Otherwise errors are ignored when output is piped to tee:
+SHELL=/bin/bash -o pipefail
 
 #Usage:
 #run make image
@@ -82,20 +84,20 @@ build_dirs:
 kernel:
 	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
-	bash -x scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
+	./scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
 
 .PHONY: initramfs
 initramfs:
 	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
-	 bash -x scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
+	./scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
 #makes the base filesystem image, no kernel only if the base image isnt present
 .PHONY: filesystem
 filesystem:
 	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
-	[ -f $(BASE) ] || bash -x scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
+	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel

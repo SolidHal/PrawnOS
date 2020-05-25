@@ -1,0 +1,12 @@
+Source: font-source-code-pro
+Section: fonts
+Priority: optional
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: font-source-code-pro
+Architecture: all
+Depends: ${misc:Depends}
+Description: Source Code Pro is a set of ttf monospace fonts

@@ -66,11 +66,14 @@ cleanup() {
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
 
-  set +e
-
   umount -l $outmnt > /dev/null 2>&1
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
+
+  #delete the base file, we didn't complete our work
+  rm -rf $BASE
+  echo "FILESYSTEM BUILD FAILED"
+  exit 1
 }
 
 trap cleanup INT TERM EXIT
@@ -101,7 +104,9 @@ build_install_crossystem() {
     apt install -y vboot-utils
 
     #install clang and pre-reqs
-    apt install -y clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
+    # target unstable for now to work around #173, without breaking libinput-gestures
+    #TODO: when package build system is available, targeting unstable won't be necessary.
+    apt install -y -t unstable clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
 
     flashmap_src=/root/flashmap
     mosys_src=/root/mosys
@@ -146,7 +151,8 @@ fi
 
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
-qemu-debootstrap --arch armhf $DEBIAN_SUITE --include locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
+# need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
+qemu-debootstrap --arch armhf $DEBIAN_SUITE --include  openssl,ca-certificates,gnupg,locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
 chroot $outmnt passwd -d root
 
 
@@ -192,13 +198,18 @@ then
     cp $build_resources/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
+#Bring in the deb.prawnos.com gpg keyring
+cp $build_resources/deb.prawnos.com.gpg.key $outmnt/InstallResources/
+chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
+chroot $outmnt apt update
+
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt vim-tiny less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
+chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
 
 #build and install crossystem/mosys, funky way to call the bash function inside the chroot
 export -f build_install_crossystem
@@ -213,14 +224,14 @@ chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download support for libinput-gestures
-chroot $outmnt apt install -y libinput-tools xdotool build-essential
 #Package is copied into /InstallResources/packages
+chroot $outmnt apt install -y libinput-tools xdotool
 
-#Cleanup libc6-dev from the mosys section, as it "Breaks: libgcc-8-dev (< 8.4.0-2~) but 8.3.0-6 is to be installed" when downloading the packages to be installed by Install.sh:
-#This fixes the xsecurelock install
-chroot $outmnt apt-get purge -y --auto-remove libc6-dev
+# target unstable for now to work around #173, without breaking libinput-gestures
+#TODO: when package build system is available, targeting unstable won't be necessary.
+chroot $outmnt apt install -y -t unstable build-essential
 
-chroot $outmnt apt-get install -y -t testing -d xsecurelock
+chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 
 #Download the packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-logs gnome-disk-utility gnome-terminal epiphany-browser fonts-cantarell gnome-tweaks seahorse materia-gtk-theme
@@ -231,11 +242,13 @@ chroot $outmnt apt-get install -y -t unstable -d libegl-mesa0 libegl1-mesa libgl
 
 chroot $outmnt apt-get install -d -y firefox-esr
 # grab chromium as well, since sound is still broken in firefox for some media
+chroot $outmnt apt-get install -d -y chromium
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
+# do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
 losetup -d $outdev > /dev/null 2>&1
