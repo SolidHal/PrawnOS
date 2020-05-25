@@ -191,6 +191,14 @@ then
     cp $build_resources/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
+#Bring in the deb.prawnos.com gpg keyring
+# need ca-certs to handle https links
+chroot $outmnt apt install -y ca-certificates gnupg
+cp $build_resources/deb.prawnos.com.gpg.key $outmnt/InstallResources/
+chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
+chroot $outmnt apt update
+
+
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
