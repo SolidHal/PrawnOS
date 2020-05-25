@@ -43,7 +43,7 @@ DEBIAN_FRONTEND=noninteractive apt install -t unstable -y libegl-mesa0 libegl1-m
 DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
 DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "gnome" ] && apt install -y gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-logs evince gnome-disk-utility gnome-terminal fonts-cantarell gnome-tweaks seahorse papirus-icon-theme materia-gtk-theme
+[ "$DE" = "gnome" ] && apt install -y gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-logs evince gnome-disk-utility gnome-terminal fonts-cantarell gnome-tweaks seahorse papirus-icon-theme materia-gtk-theme eog
 [ "$DE" = "xfce" ] && apt install -y lightdm mousepad vlc xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
 [ "$DE" = "lxqt" ] && apt install -y lightdm lxqt pavucontrol-qt
 
@@ -69,10 +69,11 @@ then
   #Let's remove xterm vim and emacs, since they clutter up the shell
   apt remove -y xterm vim emacs-common
   apt purge -y xterm vim emacs-common
-
-  #Now add in some useful gnome extensions
-  mkdir -p /etc/skel/.local/share/gnome-shell/extensions/
-  cp -rf $DIR/extensions/* /etc/skel/.local/share/gnome-shell/extensions/
+  
+  #Skip this section for now. If the end user wants to, they can repurpose the lines below to preinstall extensions.
+  #Copy your favorite extensions to /InstallResources/extensions/ and uncomment the two below:
+  #mkdir -p /etc/skel/.local/share/gnome-shell/extensions/
+  #cp -rf $DIR/extensions/* /etc/skel/.local/share/gnome-shell/extensions/
 
   #install firefox-esr default settings
   cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
