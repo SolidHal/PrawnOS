@@ -66,18 +66,18 @@ echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
 
 if [ "$DE" = "gnome" ]
 then
-  #Let's remove xterm vim and emacs, since they clutter up the shell
-  apt remove -y xterm vim emacs-common
-  apt purge -y xterm vim emacs-common
-  
-  #Skip this section for now. If the end user wants to, they can repurpose the lines below to preinstall extensions.
-  #Copy your favorite extensions to /InstallResources/extensions/ and uncomment the two below:
-  #mkdir -p /etc/skel/.local/share/gnome-shell/extensions/
-  #cp -rf $DIR/extensions/* /etc/skel/.local/share/gnome-shell/extensions/
-
   #install firefox-esr default settings
   cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
   cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+
+  #TODO: a config file way to do the following would be nice, so that we can install the configs now instead
+  # of having to run the following commands after login
+  #Natural scrolling is un-natural
+  # gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
+  #Tap to click is natural
+  # gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+
+
 fi
 
 if [ "$DE" = "xfce" ]
