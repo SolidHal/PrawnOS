@@ -55,7 +55,7 @@ These packages are required:
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
         debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
         gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
-        qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+        pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 ```
 
 ## Build
