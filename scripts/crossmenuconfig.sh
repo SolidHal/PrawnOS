@@ -30,7 +30,6 @@ fi
 KVER=$1
 
 
-TEST_PATCHES=false
 ROOT_DIR=`pwd`
 RESOURCES=$ROOT_DIR/resources/BuildResources
 

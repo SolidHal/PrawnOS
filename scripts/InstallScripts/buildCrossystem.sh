@@ -1,4 +1,7 @@
-#!/bin/sh -xe
+#!/bin/bash
+
+set -x
+set -e
 
 #Build mosys, which is required for crossystem
 
