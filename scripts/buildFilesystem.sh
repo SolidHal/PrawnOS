@@ -166,8 +166,6 @@ cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
 chmod +x $outmnt/*.sh
-#Make gnome postinstall executable 
-chmod +x $outmnt/InstallResources/Niceties/*.sh
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -237,7 +235,7 @@ chroot $outmnt apt-get install -y -t unstable -d xsecurelock
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth
 
 #Download the gnome packages
-chroot $outmnt apt-get install -y -d gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-logs gnome-disk-utility gnome-terminal epiphany-browser fonts-cantarell gnome-tweaks seahorse materia-gtk-theme eog
+chroot $outmnt apt-get install -y -d gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-logs gnome-disk-utility gnome-terminal epiphany-browser fonts-cantarell gnome-tweaks seahorse materia-gtk-theme eog libpeas-1.0-0 gir1.2-peas-1.0 libgtk3-perl
 
 #download recent mesa packages from unstable
 chroot $outmnt apt-get install -y -t unstable -d libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
