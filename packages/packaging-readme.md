@@ -43,8 +43,8 @@ make
 the resulting .deb will be in that same folder when the build is complete
 
 ### Uploading packages
-New packages, and package updates can upload to `deb.prawnos.com` by
-first building and then running
+New packages, and package updates can upload to `deb.prawnos.com` by maintainers
+first by building and then running
 ```
 make upload
 ```
