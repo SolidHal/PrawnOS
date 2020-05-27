@@ -110,7 +110,7 @@ patch_kernel:
 .PHONY: initramfs
 initramfs:
 	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
+	rm -rf build/logs/initramfs-log.txt
 	./scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
 #:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
@@ -118,7 +118,7 @@ initramfs:
 .PHONY: filesystem
 filesystem:
 	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
+	rm -rf build/logs/fs-log.txt
 	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
 
