@@ -22,11 +22,12 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (X)fce4 or (L)xqt, if unsure choose (X)fce4: " XL
+    read -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
     case $XL in
+        [Gg]* ) DE=gnome; break;;
         [Xx]* ) DE=xfce; break;;
         [Ll]* ) DE=lxqt; break;;
-        * ) echo "Please answer (X)fce4 or (L)xqt";;
+        * ) echo "Please answer (X)fce4, (L)xqt or (G)nome";;
     esac
 done
 
@@ -34,13 +35,17 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils mousepad vlc dconf-cli dconf-editor sudo dtrx emacs sysfsutils bluetooth
+DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx emacs sysfsutils bluetooth
 DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
+DEBIAN_FRONTEND=noninteractive apt install -y libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
 
+# Browsers
 DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
+DEBIAN_FRONTEND=noninteractive apt install -y chromium
 
-[ "$DE" = "xfce" ] && apt install -y xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
-[ "$DE" = "lxqt" ] && apt install -y lxqt pavucontrol-qt
+[ "$DE" = "gnome" ] && apt install -y gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-logs evince gnome-disk-utility gnome-terminal fonts-cantarell gnome-tweaks seahorse papirus-icon-theme materia-gtk-theme eog
+[ "$DE" = "xfce" ] && apt install -y lightdm mousepad vlc xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
+[ "$DE" = "lxqt" ] && apt install -y lightdm lxqt pavucontrol-qt
 
 #install the keymap by patching xkb, then bindings work for any desktop environment
 cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
@@ -59,6 +64,22 @@ cp  $DIR/xkb/keyboard /etc/default/keyboard
 #disable ertm for csr8510 bluetooth, issue #117
 echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
 
+if [ "$DE" = "gnome" ]
+then
+  #install firefox-esr default settings
+  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+
+  #TODO: a config file way to do the following would be nice, so that we can install the configs now instead
+  # of having to run the following commands after login
+  #Natural scrolling is un-natural
+  # gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
+  #Tap to click is natural
+  # gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+
+
+fi
+
 if [ "$DE" = "xfce" ]
 then
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
@@ -70,7 +91,7 @@ then
   # is told to sleep at lid close, and activate lock
   # gnome-screensaver shows the desktop for a fraction of a second at wakeup
   # xscreensaver works as well, if you prefer that but is less simple
-  DEBIAN_FRONTEND=noninteractive apt install -y -t testing xsecurelock
+  DEBIAN_FRONTEND=noninteractive apt install -y xsecurelock
 
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*

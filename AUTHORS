@@ -2,6 +2,16 @@ Author:
 SolidHal     (hal@halemmerich.com)
 
 Contributors:
+
+Autsin English (austin987)
+- Implelemted CI through github actions
+- makefile and build script linting and typo fixes
+
+G. Dallas Dye (gdallasdye@gmail.com)
+- Support for unstable mesa packages with Panfrost
+- Added section to install Gnome 3 Desktop Environment
+- Post-install quality of life scripts, mostly affecting Gnome 3
+
 JeremyRand (jeremyrand@airmail.cc)
 - Improvement to include the proper dconf packages instead of the transitional dummy package
 - Improvements to support building off of buster instead of stretch

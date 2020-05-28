@@ -24,6 +24,13 @@ OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
 
 
+PRAWNOS_ROOT := $(shell pwd)
+PBUILDER_CHROOT=$(PRAWNOS_ROOT)/build/prawnos-pbuilder-armhf-base.tgz
+PBUILDER_RC=$(PRAWNOS_ROOT)/resources/BuildResources/pbuilder/prawnos-pbuilder.rc
+
+# Otherwise errors are ignored when output is piped to tee:
+SHELL=/bin/bash -o pipefail
+
 #Usage:
 #run make image
 #this will generate two images named OUTNAME and OUTNAME-BASE
@@ -34,7 +41,7 @@ BASE=$(OUTNAME)-BASE
 #run kernel_inject
 
 
-
+#:::::::::::::::::::::::::::::: cleaning ::::::::::::::::::::::::::::::
 .PHONY: clean
 clean:
 	@echo "Enter one of:"
@@ -66,6 +73,10 @@ clean_basefs:
 clean_initramfs:
 	rm -r build/PrawnOS-initramfs.cpio.gz
 
+.PHONY: clean_pbuilder
+clean_pbuilder:
+	rm -r build/prawnos-pbuilder-armhf-base.tgz
+
 .PHONY: clean_all
 clean_all:
 	$(MAKE) clean_kernel
@@ -73,29 +84,46 @@ clean_all:
 	$(MAKE) clean_img
 	$(MAKE) clean_basefs
 	$(MAKE) clean_initramfs
+	$(MAKE) clean_pbuilder
 
+#:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
 .PHONY: build_dirs
 build_dirs:
 	mkdir -p build/logs/
 
+#:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 .PHONY: kernel
 kernel:
 	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
-	bash -x scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
+	./scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
 
+.PHONY: kernel_config
+kernel_config:
+	scripts/crossmenuconfig.sh $(KVER)
+
+.PHONY: patch_kernel
+patch_kernel:
+	scripts/patchKernel.sh
+
+#:::::::::::::::::::::::::::::: initramfs :::::::::::::::::::::::::::::::::
 .PHONY: initramfs
 initramfs:
 	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
-	 bash -x scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
+	rm -rf build/logs/initramfs-log.txt
+	./scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
-#makes the base filesystem image, no kernel only if the base image isnt present
+#:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
+#makes the base filesystem image without kernel. Only make a new one if the base image isnt present
 .PHONY: filesystem
 filesystem:
 	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
-	[ -f $(BASE) ] || bash -x scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
+	rm -rf build/logs/fs-log.txt
+	$(MAKE) pbuilder_create
+	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
+
+
+#:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_inject
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
@@ -103,12 +131,8 @@ kernel_inject: #Targets an already built .img and swaps the old kernel with the 
 
 .PHONY: kernel_update
 kernel_update:
+	$(MAKE) clean_img
 	$(MAKE) initramfs
-	$(MAKE) kernel
-	$(MAKE) kernel_inject
-
-.PHONY: injected_image
-injected_image: #makes a copy of the base image with a new injected kernel
 	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
 	$(MAKE) kernel_inject
@@ -119,18 +143,19 @@ image:
 	$(MAKE) filesystem
 	$(MAKE) initramfs
 	$(MAKE) kernel
-#Make a new copy of the filesystem image
 	cp $(BASE) $(OUTNAME)
-	$MAKE) kernel_inject
+	$(MAKE) kernel_inject
 
-.PHONY: live_image
-live_image:
-	echo "TODO"
 
-.PHONY: kernel_config
-kernel_config:
-	scripts/crossmenuconfig.sh $(KVER)
+#:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
+.PHONY: pbuilder_create
+pbuilder-create:
+	$(MAKE) $(PBUILDER_CHROOT)
 
-.PHONY: patch_kernel
-patch_kernel:
-	scripts/patchKernel.sh
+$(PBUILDER_CHROOT): $(PBUILDER_RC)
+	pbuilder create --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
+
+#TODO: should only update if not updated for a day
+.PHONY: pbuilder_update
+pbuilder-update:
+	pbuilder update --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
