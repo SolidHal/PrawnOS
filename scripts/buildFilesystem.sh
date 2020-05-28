@@ -57,6 +57,13 @@ outdev=/dev/loop5
 install_resources=resources/InstallResources
 build_resources=resources/BuildResources
 
+#HACK XSECURELOCK our usage of stable and unstable packages has caught up to us. We end up carrying conflicting files if
+# we grab build-essential from stable and xsecurelock from unstable. This was fixed by grabbing build-essential from
+# unstable as well, but that conflicts with some of the gnome packages it seems. Luckily, we can now build xsecurelock
+# for buster instead of grabbing it from unstable.
+# I'm rethinking the build system to make (heh) this more elegant, but for now to get the build fixed I'll implement this
+XSECURELOCK_PATH=packages/filesystem/x11/xsecurelock
+
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
 cleanup() {
@@ -104,9 +111,7 @@ build_install_crossystem() {
     apt install -y vboot-utils
 
     #install clang and pre-reqs
-    # target unstable for now to work around #173, without breaking libinput-gestures
-    #TODO: when package build system is available, targeting unstable won't be necessary.
-    apt install -y -t unstable clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
+    apt install -y clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
 
     flashmap_src=/root/flashmap
     mosys_src=/root/mosys
@@ -225,11 +230,22 @@ chroot $outmnt apt-get clean
 #Package is copied into /InstallResources/packages
 chroot $outmnt apt install -y libinput-tools xdotool
 
-# target unstable for now to work around #173, without breaking libinput-gestures
-#TODO: when package build system is available, targeting unstable won't be necessary.
-chroot $outmnt apt install -y -t unstable build-essential
+chroot $outmnt apt install -y  build-essential
 
-chroot $outmnt apt-get install -y -t unstable -d xsecurelock
+# we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
+# if required
+# this gets tricky when we build some of the dependencies. To avoid issues 
+# first, manually cache the deb
+# apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
+# copy into /var/cache/apt/archives to place it in the cache
+#next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
+#HACK XSECURELOCK
+PRAWN_ROOT=$(pwd)
+cd $XSECURELOCK_PATH && make
+cd $PRAWN_ROOT
+cp $XSECURELOCK_PATH/xsecurelock_*_armhf.deb $outmnt/var/cache/apt/archives/
+chroot $outmnt apt install -y -d xsecurelock
+
 
 #Download the packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth
@@ -237,8 +253,8 @@ chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg libr
 #Download the gnome packages
 chroot $outmnt apt-get install -y -d gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-logs gnome-disk-utility gnome-terminal epiphany-browser fonts-cantarell gnome-tweaks seahorse materia-gtk-theme eog libpeas-1.0-0 gir1.2-peas-1.0 libgtk3-perl
 
-#download recent mesa packages from unstable
-chroot $outmnt apt-get install -y -t unstable -d libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
+#download mesa packages
+chroot $outmnt apt-get install -y -d libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
 
 chroot $outmnt apt-get install -d -y firefox-esr
 # grab chromium as well, since sound is still broken in firefox for some media
