@@ -147,10 +147,14 @@ image:
 
 
 #:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
-.PHONY: pbuilder-create
+.PHONY: pbuilder_create
 pbuilder-create:
+	$(MAKE) $(PBUILDER_CHROOT)
+
+$(PBUILDER_CHROOT): $(PBUILDER_RC)
 	pbuilder create --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
 
-.PHONY: pbuilder-update
+#TODO: should only update if not updated for a day
+.PHONY: pbuilder_update
 pbuilder-update:
 	pbuilder update --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
