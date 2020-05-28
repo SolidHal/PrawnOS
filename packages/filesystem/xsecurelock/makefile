@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-PRAWNOS_ROOT := $(shell cd ../../../../; pwd)
+PRAWNOS_ROOT := $(shell cd ../../../; pwd)
 PBUILDER_CHROOT=$(PRAWNOS_ROOT)/build/prawnos-pbuilder-armhf-base.tgz
 PBUILDER_RC=$(PRAWNOS_ROOT)/resources/BuildResources/pbuilder/prawnos-pbuilder.rc
 
