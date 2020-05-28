@@ -1,0 +1,3 @@
+version=4
+  https://github.com/google/xsecurelock/releases \
+  (?:.*?/)xsecurelock-(\d[\d.]*)\.tar\.gz
