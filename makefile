@@ -74,7 +74,7 @@ clean_initramfs:
 	rm -r build/PrawnOS-initramfs.cpio.gz
 
 .PHONY: clean_pbuilder
-clean_initramfs:
+clean_pbuilder:
 	rm -r build/prawnos-pbuilder-armhf-base.tgz
 
 .PHONY: clean_all
@@ -123,13 +123,18 @@ filesystem:
 
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
+
+.PHONY: kernel_inject
+kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
+	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+
 .PHONY: kernel_update
 kernel_update:
 	$(MAKE) clean_img
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
-	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+	$(MAKE) kernel_inject
 
 .PHONY: image
 image:
