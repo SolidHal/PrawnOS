@@ -62,7 +62,7 @@ build_resources=resources/BuildResources
 # unstable as well, but that conflicts with some of the gnome packages it seems. Luckily, we can now build xsecurelock
 # for buster instead of grabbing it from unstable.
 # I'm rethinking the build system to make (heh) this more elegant, but for now to get the build fixed I'll implement this
-XSECURELOCK_PATH=packages/filesystem/x11/xsecurelock
+XSECURELOCK_PATH=packages/filesystem/xsecurelock
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build

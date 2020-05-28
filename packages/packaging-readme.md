@@ -16,7 +16,7 @@ When an existing PrawnOS install has out of date packages, the user can then eit
 build the new version themselves or get the update from the repo using the standard "apt upgrade"
 
 ### Package folder structure
-Packages are stored under component of the final PrawnOS image they belong to, and then for filesystem packages, the component of the filesystem they belong to. 
+Packages are stored under component of the final PrawnOS image they belong to
 Inside the package folder there are the following items:
 - `makefile`
 - source folder called `src`
