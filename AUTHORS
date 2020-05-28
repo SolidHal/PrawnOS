@@ -3,9 +3,10 @@ SolidHal     (hal@halemmerich.com)
 
 Contributors:
 
-Autsin English (austin987)
-- Implelemted CI through github actions
-- makefile and build script linting and typo fixes
+Austin English (austinenglish@gmail.com)
+- Implemented CI through Github actions
+- build system improvements
+- shellscript linting (shellcheck) and typo fixes
 
 G. Dallas Dye (gdallasdye@gmail.com)
 - Support for unstable mesa packages with Panfrost
