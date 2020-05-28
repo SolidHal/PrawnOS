@@ -119,6 +119,7 @@ initramfs:
 filesystem:
 	$(MAKE) build_dirs
 	rm -rf build/logs/fs-log.txt
+	$(MAKE) pbuilder_create
 	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
 
