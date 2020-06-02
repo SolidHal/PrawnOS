@@ -72,6 +72,87 @@ Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the 
 sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M status=progress; sync
 ```
 
+## Enabling Developer Mode
+
+Enabling developer mode is required to install PrawnOS. Note that enabling developer mode WILL ERASE ALL LOCALLY STORED DATA.
+
+### Shut down
+First, shutdown and power off the chromebook. Once powered off, hold the 'ESCAPE' and 'REFRESH' (F3) buttons, and while continuing to hold those two buttons, press and release the 'POWER' button.
+
+### First screen
+The chromebook should power on and show a white screen, with a message saying:
+"Chrome OS is missing or damaged. Please insert a recovery USB stick or SD card."
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode1.png" alt="screen1" data-canonical-src="/resources/DeveloperModeResources/devmode1.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Second screen
+A second screen will appear, saying:
+"To turn OS verification OFF, press ENTER. Your system will reboot and local data will be cleared. To go back, press ESC."
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode2.png" alt="screen2" data-canonical-src="/resources/DeveloperModeResources/devmode2.png" /></p>
+
+As it says, press 'ENTER'.
+
+### Third screen
+The third screen will inform you that OS verification is disabled:
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DeveloperModeResources/devmode3.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Fourth screen
+Your system is now transitioning to developer mode. You have 30 seconds to cancel this by powering off your chromebook:
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode4.png" alt="screen4" data-canonical-src="/resources/DeveloperModeResources/devmode4.png" /></p>
+
+Otherwise, sit back and wait.
+
+### Fifth screen
+Your chromebook is now erasing local data and preparing developer mode:
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode5.png" alt="screen5" data-canonical-src="/resources/DeveloperModeResources/devmode5.png" /></p>
+This takes approximately 10 minutes. The system will reboot on its own.
+
+### Sixth screen
+Your system will again show the 'OS verification is off' screen:
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DeveloperModeResources/devmode3.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Seventh screen
+Your chromebook should now show the welcome screen. You'll notice that 'debugging features' are now possible:
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode7.png" alt="screen7" data-canonical-src="/resources/DeveloperModeResources/devmode7.png" /></p>
+
+Clicking 'Enable debugging features' doesn't actually work here, so don't try. Instead, press 'CTRL' + 'ALT' + 'REFRESH' (F3) to open a vtty.
+
+### Eighth screen
+<p align="center">
+<img src="/resources/DeveloperModeResources/devmode8.png" alt="screen8" data-canonical-src="/resources/DeveloperModeResources/devmode8.png" /></p>
+
+Log in as 'root', there is no password. Finally, enable booting PrawnOS from USB/SD:
+
+To enable booting unsigned media:
+
+`# crosssystem dev_boot_signed_only=0`
+
+To enable USB booting:
+
+`# crosssystem dev_boot_usb=1`
+
+Finally, reboot or shutdown the system:
+
+`# reboot`
+
+On each subsequent boot, you'll see the 'OS verification is off' screen.
+
+## Booting/Installing PrawnOS
+
+Now you can boot your PrawnOS USB/SD card. After rebooting/powering on, at the 'OS verification is off' screen, press 'CTRL' + 'U' to boot from USB/SD. Or 'CTRL' + 'D' to boot from the internal emmc.
+
 ## Installing
 
 There are two ways to use PrawnOS. 
@@ -89,11 +170,10 @@ The second option is to boot from the external USB or SD device you wrote the im
 * Expanding the PrawnOS image allows you to boot PrawnOS from the same USB or SD device that you wrote the image to
 * Expansion does _NOT_ support root encryption. For root encryption the filesystem must be written after the encrypted root is created.
 
-
 ### Install to internal drive (emmc) or to SD card or USB drive
 Now on the C201, insert the drive you wrote the PrawnOS image to. Press `control+u` at boot to boot from the external drive. 
 
-If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting:
 
 At the prompt, login as root. The password is blank. 
 
