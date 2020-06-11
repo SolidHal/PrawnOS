@@ -56,6 +56,11 @@ outdev=/dev/loop5
 
 install_resources=resources/InstallResources
 build_resources=resources/BuildResources
+script_resources=scripts/
+package_lists=$script_resources/package_lists.sh
+
+# Import the package lists
+source $package_lists
 
 #HACK XSECURELOCK our usage of stable and unstable packages has caught up to us. We end up carrying conflicting files if
 # we grab build-essential from stable and xsecurelock from unstable. This was fixed by grabbing build-essential from
@@ -63,6 +68,7 @@ build_resources=resources/BuildResources
 # for buster instead of grabbing it from unstable.
 # I'm rethinking the build system to make (heh) this more elegant, but for now to get the build fixed I'll implement this
 XSECURELOCK_PATH=packages/filesystem/xsecurelock
+
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
@@ -169,6 +175,7 @@ mkdir $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
+cp $package_lists $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
 chmod +x $outmnt/*.sh
 
@@ -212,7 +219,7 @@ chroot $outmnt locale-gen
 
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y udev kmod net-tools inetutils-ping traceroute iproute2 isc-dhcp-client wpasupplicant iw alsa-utils cgpt less psmisc netcat-openbsd ca-certificates bzip2 xz-utils ifupdown nano apt-utils git kpartx gdisk parted rsync busybox-static cryptsetup bash-completion libnss-systemd libpam-cap nftables uuid-runtime libgpg-error-l10n libatm1 laptop-detect e2fsprogs-l10n vim
+chroot $outmnt apt install -y ${base_debs_install[@]}
 
 #build and install crossystem/mosys, funky way to call the bash function inside the chroot
 export -f build_install_crossystem
@@ -228,9 +235,7 @@ chroot $outmnt apt-get clean
 
 #Download support for libinput-gestures
 #Package is copied into /InstallResources/packages
-chroot $outmnt apt install -y libinput-tools xdotool
-
-chroot $outmnt apt install -y  build-essential
+chroot $outmnt apt install -y libinput-tools xdotool build-essential
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
 # if required
@@ -246,19 +251,22 @@ cd $PRAWN_ROOT
 cp $XSECURELOCK_PATH/xsecurelock_*_armhf.deb $outmnt/var/cache/apt/archives/
 chroot $outmnt apt install -y -d xsecurelock
 
+#Download the shared packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d ${base_debs_download[@]}
 
-#Download the packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d xorg acpi-support lightdm tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils lxqt crda xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies mousepad vlc libutempter0 xterm numix-gtk-theme dconf-cli dconf-editor plank network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome dtrx emacs accountsservice sudo pavucontrol-qt papirus-icon-theme sysfsutils bluetooth
+## DEs
+#Download the xfce packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d ${xfce_debs_download[@]}
 
-#Download the gnome packages
-chroot $outmnt apt-get install -y -d gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-clocks evince gnome-logs gnome-disk-utility gnome-terminal epiphany-browser fonts-cantarell gnome-tweaks seahorse materia-gtk-theme eog libpeas-1.0-0 gir1.2-peas-1.0 libgtk3-perl
+#Download the lxqt packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d ${lxqt_debs_download[@]}
 
+#Download the gnome packages to be installed by Install.sh:
+chroot $outmnt apt-get install -y -d ${gnome_debs_download[@]}
+
+## GPU support
 #download mesa packages
-chroot $outmnt apt-get install -y -d libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
-
-chroot $outmnt apt-get install -d -y firefox-esr
-# grab chromium as well, since sound is still broken in firefox for some media
-chroot $outmnt apt-get install -d -y chromium
+chroot $outmnt apt-get install -y -d ${mesa_debs_download[@]}
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
