@@ -83,7 +83,7 @@ First, shutdown and power off the chromebook. Once powered off, hold the 'ESCAPE
 The chromebook should power on and show a white screen, with a message saying:
 "Chrome OS is missing or damaged. Please insert a recovery USB stick or SD card."
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode1.png" alt="screen1" data-canonical-src="/resources/DeveloperModeResources/devmode1.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode1.png" alt="screen1" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode1.png" /></p>
 
 Press 'CTRL' + 'D' to continue.
 
@@ -91,47 +91,47 @@ Press 'CTRL' + 'D' to continue.
 A second screen will appear, saying:
 "To turn OS verification OFF, press ENTER. Your system will reboot and local data will be cleared. To go back, press ESC."
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode2.png" alt="screen2" data-canonical-src="/resources/DeveloperModeResources/devmode2.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode2.png" alt="screen2" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode2.png" /></p>
 
 As it says, press 'ENTER'.
 
 ### Third screen
 The third screen will inform you that OS verification is disabled:
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DeveloperModeResources/devmode3.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" /></p>
 
 Press 'CTRL' + 'D' to continue.
 
 ### Fourth screen
 Your system is now transitioning to developer mode. You have 30 seconds to cancel this by powering off your chromebook:
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode4.png" alt="screen4" data-canonical-src="/resources/DeveloperModeResources/devmode4.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode4.png" alt="screen4" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode4.png" /></p>
 
 Otherwise, sit back and wait.
 
 ### Fifth screen
 Your chromebook is now erasing local data and preparing developer mode:
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode5.png" alt="screen5" data-canonical-src="/resources/DeveloperModeResources/devmode5.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode5.png" alt="screen5" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode5.png" /></p>
 This takes approximately 10 minutes. The system will reboot on its own.
 
 ### Sixth screen
 Your system will again show the 'OS verification is off' screen:
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DeveloperModeResources/devmode3.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" /></p>
 
 Press 'CTRL' + 'D' to continue.
 
 ### Seventh screen
 Your chromebook should now show the welcome screen. You'll notice that 'debugging features' are now possible:
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode7.png" alt="screen7" data-canonical-src="/resources/DeveloperModeResources/devmode7.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode7.png" alt="screen7" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode7.png" /></p>
 
 Clicking 'Enable debugging features' doesn't actually work here, so don't try. Instead, press 'CTRL' + 'ALT' + 'REFRESH' (F3) to open a vtty.
 
 ### Eighth screen
 <p align="center">
-<img src="/resources/DeveloperModeResources/devmode8.png" alt="screen8" data-canonical-src="/resources/DeveloperModeResources/devmode8.png" /></p>
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode8.png" alt="screen8" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode8.png" /></p>
 
 Log in as 'root', there is no password. Finally, enable booting PrawnOS from USB/SD:
 
