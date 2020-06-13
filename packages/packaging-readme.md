@@ -42,6 +42,12 @@ make
 ```
 the resulting .deb will be in that same folder when the build is complete
 
+All packages can be built by running
+```
+make
+```
+from the packages directory
+
 ### Uploading packages
 New packages, and package updates can upload to `deb.prawnos.com` by maintainers
 first by building and then running

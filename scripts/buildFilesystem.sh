@@ -248,6 +248,7 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 PRAWN_ROOT=$(pwd)
 cd $XSECURELOCK_PATH && make
 cd $PRAWN_ROOT
+#TODO: replace with cd packages && make install $outmnt/var/cache/apt/archives/
 cp $XSECURELOCK_PATH/xsecurelock_*_armhf.deb $outmnt/var/cache/apt/archives/
 chroot $outmnt apt install -y -d xsecurelock
 

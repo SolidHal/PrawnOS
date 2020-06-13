@@ -1,12 +1,12 @@
-SHELL := /bin/bash
-PRAWNOS_ROOT := $(shell cd ../../../; pwd)
-PBUILDER_CHROOT=$(PRAWNOS_ROOT)/build/prawnos-pbuilder-armhf-base.tgz
-PBUILDER_RC=$(PRAWNOS_ROOT)/resources/BuildResources/pbuilder/prawnos-pbuilder.rc
+#import all shared make vars
+PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
+include $(PRAWNOS_ROOT)/scripts/common.mk
 
-all: xsecurelock-deb
 
-.PHONY: xsecurelock-deb
-xsecurelock-deb:
+VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
+
+xsecurelock_$(VERSION)_armhf.deb:
+	@echo Building $@
 	cd src/; pdebuild --configfile $(PBUILDER_RC) \
                     --buildresult .. \
                     -- \

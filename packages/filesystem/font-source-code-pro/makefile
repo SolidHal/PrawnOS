@@ -1,7 +1,11 @@
-all: font-source-code-pro-deb
+#import all shared make vars
+PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
+include $(PRAWNOS_ROOT)/scripts/common.mk
 
-.PHONY: font-source-code-pro-deb
-font-source-code-pro-deb:
+VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
+
+font-source-code-pro_$(VERSION)_all.deb:
+	@echo Building $@
 	cd src/; debuild -us -uc
 
 .PHONY: clean

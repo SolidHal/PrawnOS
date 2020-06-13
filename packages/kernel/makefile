@@ -1,0 +1,5 @@
+PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
+include $(PRAWNOS_ROOT)/scripts/common.mk
+
+all:
+	@echo TODO

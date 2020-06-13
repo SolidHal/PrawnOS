@@ -23,13 +23,9 @@ endif
 OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
 
+PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
+include $(PRAWNOS_ROOT)/scripts/common.mk
 
-PRAWNOS_ROOT := $(shell pwd)
-PBUILDER_CHROOT=$(PRAWNOS_ROOT)/build/prawnos-pbuilder-armhf-base.tgz
-PBUILDER_RC=$(PRAWNOS_ROOT)/resources/BuildResources/pbuilder/prawnos-pbuilder.rc
-
-# Otherwise errors are ignored when output is piped to tee:
-SHELL=/bin/bash -o pipefail
 
 #Usage:
 #run make image
@@ -123,6 +119,11 @@ filesystem:
 	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
 
 
+#:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
+.PHONY: packages
+packages:
+	cd packages && $(MAKE)
+
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_inject
@@ -152,7 +153,7 @@ image:
 pbuilder_create:
 	$(MAKE) $(PBUILDER_CHROOT)
 
-$(PBUILDER_CHROOT): $(PBUILDER_RC)
+$(PBUILDER_CHROOT):
 	pbuilder create --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
 
 #TODO: should only update if not updated for a day
