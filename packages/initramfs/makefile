@@ -3,3 +3,11 @@ include $(PRAWNOS_ROOT)/scripts/common.mk
 
 all:
 	@echo TODO
+
+
+clean:
+	@echo TODO
+
+
+install:
+	@echo TODO

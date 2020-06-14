@@ -26,4 +26,9 @@ clean:
 upload:
 	dput deb.prawnos.com *.changes
 
+install:
+ifndef INSTALL_TARGET
+	$(error INSTALL_TARGET is not set)
+endif
+	cp xsecurelock_$(VERSION)_armhf.deb $(INSTALL_TARGET)
 

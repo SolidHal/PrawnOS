@@ -13,3 +13,10 @@ clean:
 	for dir in $(SUBDIRS) ; do \
 		make clean -C  $$dir ; \
 	done
+
+
+install:
+	@echo packages install target is $(INSTALL_TARGET)
+	for dir in $(SUBDIRS) ; do \
+		make install INSTALL_TARGET=$(INSTALL_TARGET) -C  $$dir  ; \
+	done

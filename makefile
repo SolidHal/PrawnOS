@@ -69,6 +69,10 @@ clean_basefs:
 clean_initramfs:
 	rm -r build/PrawnOS-initramfs.cpio.gz
 
+.PHONY: clean_packages
+packages:
+	cd packages && $(MAKE) clean
+
 .PHONY: clean_pbuilder
 clean_pbuilder:
 	rm -r build/prawnos-pbuilder-armhf-base.tgz
@@ -81,6 +85,7 @@ clean_all:
 	$(MAKE) clean_basefs
 	$(MAKE) clean_initramfs
 	$(MAKE) clean_pbuilder
+	$(MAKE) clean_packages
 
 #:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
 .PHONY: build_dirs
@@ -124,6 +129,9 @@ filesystem:
 packages:
 	cd packages && $(MAKE)
 
+.PHONY: packages_install
+install_packages:
+	cd packages && $(MAKE) install INSTALL_TARGET=/tmp/
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_inject

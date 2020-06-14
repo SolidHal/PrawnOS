@@ -13,3 +13,9 @@ clean:
 	for dir in $(SUBDIRS) ; do \
 		make clean -C  $$dir ; \
 	done
+
+install:
+	$(info filesystem install target is $(INSTALL_TARGET))
+	for dir in $(SUBDIRS) ; do \
+		make install INSTALL_TARGET=$(INSTALL_TARGET) -C  $$dir ; \
+	done
