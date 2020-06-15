@@ -4,8 +4,10 @@ include $(PRAWNOS_ROOT)/scripts/common.mk
 
 
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
+PACKAGE_NAME := flashmap_$(VERSION)_armhf
+PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 
-flashmap_$(VERSION)_armhf.deb:
+$(PACKAGE_NAME_DEB):
 	@echo Building $@
 	cd src/; pdebuild --configfile $(PBUILDER_RC) \
                     --buildresult .. \
@@ -31,4 +33,7 @@ install:
 ifndef INSTALL_TARGET
 	$(error INSTALL_TARGET is not set)
 endif
-	cp flashmap_$(VERSION)_armhf.deb $(INSTALL_TARGET)
+ifeq ("$(wildcard $(PACKAGE_NAME_DEB))","")
+	$(error $(PACKAGE_NAME_DEB) must be built first)
+endif
+	cp $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
