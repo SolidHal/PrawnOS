@@ -40,11 +40,11 @@ remote_retries=2
 remote_wait_retry=5
 #
 # The tool to be used to search for updates
-# can only chose between "rsync" and "wget"
+# can only choose between "rsync" and "wget"
 remote_tool="wget"
 #
 # The naming pattern of the actual source archive
-# on as found in ${src_url}/${src_tar_pattern}
+# as found in ${src_url}/${src_tar_pattern}
 # follows the same variable expansion as $src_url
 src_tar_pattern="linux-libre-VER.MAJ.MIN-gnu.tar.lz"
 #
@@ -242,7 +242,7 @@ parse_value_from_template()
 	echo ${BASH_REMATCH[1]}
 }
 
-# function parse_version_from_filname()
+# function parse_version_from_filename()
 # Extract the version string from the given filename
 #   and print it to stdout
 # $1 = filename matching $src_tar_pattern
