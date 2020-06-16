@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 
 # This file is part of PrawnOS (http://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
@@ -74,6 +74,8 @@ get_root_partition()
 
 
 # ------------- BEGIN SCRIPT EXECUTION --------------------
+
+set -e
 
 # Check root or sudo
 [ ! $(id -u) = 0 ] &&

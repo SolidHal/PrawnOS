@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # This file is part of PrawnOS (http://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
