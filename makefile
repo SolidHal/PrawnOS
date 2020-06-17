@@ -70,7 +70,7 @@ clean_initramfs:
 	rm -r build/PrawnOS-initramfs.cpio.gz
 
 .PHONY: clean_packages
-packages:
+clean_packages:
 	cd packages && $(MAKE) clean
 
 .PHONY: clean_pbuilder
@@ -91,6 +91,7 @@ clean_all:
 .PHONY: build_dirs
 build_dirs:
 	mkdir -p build/logs/
+	mkdir -p build/apt-cache/
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 .PHONY: kernel
@@ -121,7 +122,8 @@ filesystem:
 	$(MAKE) build_dirs
 	rm -rf build/logs/fs-log.txt
 	$(MAKE) pbuilder_create
-	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
+	$(MAKE) packages
+	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) $(PRAWNOS_ROOT) 2>&1 | tee build/logs/fs-log.txt
 
 
 #:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
@@ -131,7 +133,11 @@ packages:
 
 .PHONY: packages_install
 install_packages:
-	cd packages && $(MAKE) install INSTALL_TARGET=/tmp/
+ifndef INSTALL_TARGET
+	$(error INSTALL_TARGET is not set)
+endif
+	cd packages && $(MAKE) install INSTALL_TARGET=$(INSTALL_TARGET)
+
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_inject
@@ -154,7 +160,6 @@ image:
 	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
 	$(MAKE) kernel_inject
-
 
 #:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
 .PHONY: pbuilder_create

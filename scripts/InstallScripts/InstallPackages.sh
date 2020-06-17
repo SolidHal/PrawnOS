@@ -39,6 +39,7 @@ dpkg-reconfigure tzdata
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_debs_prebuilt[@]}
 
 [ "$DE" = "gnome" ] && apt install -y ${gnome_debs_download[@]}
 [ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]}

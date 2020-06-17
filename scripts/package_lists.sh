@@ -163,4 +163,13 @@ gnome_debs_download=(
     seahorse
 )
 
+prawnos_debs_prebuilt_download=(
+    font-source-code-pro
+    xsecurelock
+)
+
+prawnos_debs_prebuilt_install=(
+    flashmap
+)
+
 # ====================================== END Package Lists =======================================

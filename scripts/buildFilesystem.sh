@@ -46,9 +46,15 @@ then
     echo "No base file system image filename supplied"
     exit 1
 fi
+if [ -z "$4" ]
+then
+    echo "No prawnos_root path supplied"
+    exit 1
+fi
 KVER=$1
 DEBIAN_SUITE=$2
 BASE=$3
+PRAWNOS_ROOT=$4
 
 outmnt=$(mktemp -d -p `pwd`)
 
@@ -61,13 +67,6 @@ package_lists=$script_resources/package_lists.sh
 
 # Import the package lists
 source $package_lists
-
-#HACK XSECURELOCK our usage of stable and unstable packages has caught up to us. We end up carrying conflicting files if
-# we grab build-essential from stable and xsecurelock from unstable. This was fixed by grabbing build-essential from
-# unstable as well, but that conflicts with some of the gnome packages it seems. Luckily, we can now build xsecurelock
-# for buster instead of grabbing it from unstable.
-# I'm rethinking the build system to make (heh) this more elegant, but for now to get the build fixed I'll implement this
-XSECURELOCK_PATH=packages/filesystem/xsecurelock
 
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
@@ -163,7 +162,7 @@ fi
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
 # need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
-qemu-debootstrap --arch armhf $DEBIAN_SUITE --include  openssl,ca-certificates,gnupg,locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR
+qemu-debootstrap --arch armhf $DEBIAN_SUITE --include  openssl,ca-certificates,gnupg,locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR --cache-dir=$PRAWNOS_ROOT/build/apt-cache/
 chroot $outmnt passwd -d root
 
 
@@ -222,8 +221,9 @@ chroot $outmnt apt update
 chroot $outmnt apt install -y ${base_debs_install[@]}
 
 #build and install crossystem/mosys, funky way to call the bash function inside the chroot
-export -f build_install_crossystem
-chroot $outmnt /bin/bash -ec "build_install_crossystem"
+# TODO!! UNCOMMENT!
+# export -f build_install_crossystem
+# chroot $outmnt /bin/bash -ec "build_install_crossystem"
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
@@ -244,13 +244,10 @@ chroot $outmnt apt install -y libinput-tools xdotool build-essential
 # apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
 # copy into /var/cache/apt/archives to place it in the cache
 #next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
-#HACK XSECURELOCK
-PRAWN_ROOT=$(pwd)
-cd $XSECURELOCK_PATH && make
-cd $PRAWN_ROOT
-#TODO: replace with cd packages && make install $outmnt/var/cache/apt/archives/
-cp $XSECURELOCK_PATH/xsecurelock_*_armhf.deb $outmnt/var/cache/apt/archives/
-chroot $outmnt apt install -y -d xsecurelock
+
+#Copy the built prawnos debs over to the image, and update apts cache
+cd $PRAWNOS_ROOT && make packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
+chroot $outmnt apt install -y -d ${prawnos_debs_prebuilt_download[@]}
 
 #Download the shared packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d ${base_debs_download[@]}

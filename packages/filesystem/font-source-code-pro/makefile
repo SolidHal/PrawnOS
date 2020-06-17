@@ -2,6 +2,7 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/common.mk
 
+#package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME := font-source-code-pro_$(VERSION)_all
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
@@ -9,6 +10,8 @@ PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 $(PACKAGE_NAME_DEB):
 	@echo Building $@
 	cd src/; debuild -us -uc
+	mkdir -p $PRAWNOS_LOCAL_APT_REPO
+	cp $PACKAGE_NAME $PRAWNOS_LOCAL_APT_REPO
 
 .PHONY: clean
 clean:
@@ -21,15 +24,8 @@ clean:
 	rm -rf *.debian.tar.xz
 	rm -rf *.buildinfo
 
-.PHONY: upload
-upload:
-	dput deb.prawnos.com *.changes
-
 install:
-ifndef INSTALL_TARGET
-	$(error INSTALL_TARGET is not set)
-endif
-ifeq ("$(wildcard $(PACKAGE_NAME_DEB))","")
-	$(error $(PACKAGE_NAME_DEB) must be built first)
-endif
-	cp $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL_PACKAGE) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
+
+.PHONY: upload
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD_PACKAGE)

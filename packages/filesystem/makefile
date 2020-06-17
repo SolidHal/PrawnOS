@@ -19,3 +19,11 @@ install:
 	for dir in $(SUBDIRS) ; do \
 		make install INSTALL_TARGET=$(INSTALL_TARGET) -C  $$dir ; \
 	done
+
+#this allows a makefile or script to specifically build one filesystem package
+.PHONY: build_package
+build_package:
+ifndef BUILD_PACKAGE
+	$(error BUILD_PACKAGE is not set)
+endif
+	make -C $(BUILD_PACKAGE)
