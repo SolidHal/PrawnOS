@@ -15,6 +15,7 @@ $(PACKAGE_NAME_DEB):
 
 .PHONY: clean
 clean:
+	rm -rf $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 	rm -rf *.upload
 	rm -rf *.deb
 	rm -rf *.changes
@@ -28,4 +29,5 @@ install:
 	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL_PACKAGE) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
 
 .PHONY: upload
+upload:
 	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD_PACKAGE)
