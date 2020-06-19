@@ -63,7 +63,10 @@ mount -o noatime ${outdev}p2 $outmnt
 
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
-dd if=$build_resources/blank_kernel of=${outdev}p1 conv=notrunc
+kernel_size=65536
+#blank the kernel partition first, with 32MiB of zeros
+dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
+#now write the new kernel
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 
