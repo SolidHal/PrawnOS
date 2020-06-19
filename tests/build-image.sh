@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This file is part of PrawnOS (http://www.prawnos.com)
+# This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2020 Austin English <austinenglish@gmail.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify

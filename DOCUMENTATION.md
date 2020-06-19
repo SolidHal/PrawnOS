@@ -122,7 +122,7 @@ This is the suggested method, as then debugging can be enabled/disabled by plugg
 
 
 ### PrawnOS APT repo
-http://deb.prawnos.com
+https://deb.prawnos.com
 
 
 ### Key management

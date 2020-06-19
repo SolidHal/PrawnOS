@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 
-# This file is part of PrawnOS (http://www.prawnos.com)
+# This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
