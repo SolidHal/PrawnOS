@@ -82,13 +82,6 @@ then
   apt remove -y light-locker
   apt purge -y light-locker
 
-  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
-  # light-locker is outright broken, and xfce4-screensaver crashes if system
-  # is told to sleep at lid close, and activate lock
-  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
-  # xscreensaver works as well, if you prefer that but is less simple
-  DEBIAN_FRONTEND=noninteractive apt install -y xsecurelock
-
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
 
