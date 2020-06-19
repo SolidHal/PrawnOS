@@ -18,6 +18,16 @@
 # ======================================== Package Lists =========================================
 # ================================ KEEP THESE LISTS ALPHABETIZED! ================================
 
+
+debootstrap_debs_install=(
+    build-essential
+    ca-certificates
+    gnupg
+    init
+    locales
+    openssl
+)
+
 base_debs_install=(
     alsa-utils
     apt-utils
@@ -41,6 +51,7 @@ base_debs_install=(
     less
     libatm1
     libgpg-error-l10n
+    libinput-tools
     libnss-systemd
     libpam-cap nftables
     nano
@@ -53,7 +64,9 @@ base_debs_install=(
     udev
     uuid-runtime
     vim
+    vboot-utils
     wpasupplicant
+    xdotool
     xz-utils
 )
 
@@ -163,13 +176,21 @@ gnome_debs_download=(
     seahorse
 )
 
-prawnos_debs_prebuilt_download=(
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# and choosing xfce
+prawnos_xfce_debs_prebuilt_download=(
     font-source-code-pro
     xsecurelock
 )
 
-prawnos_debs_prebuilt_install=(
+# packages built by prawnos, to be installed when running InstallPrawnOS
+prawnos_base_debs_prebuilt_download=(
+)
+
+# packages built by prawnos, to be installed at build time
+prawnos_base_debs_prebuilt_install=(
     flashmap
+    mosys
 )
 
 # ====================================== END Package Lists =======================================

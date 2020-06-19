@@ -70,14 +70,13 @@ PACKAGE_DIR=$PWD
 # only defined if there are build deps we need to satisfy
 PACKAGE_LOCAL_BUILD_DEPS=$7
 
-
-if [ -z "$PACKAGE_LOCAL_BUILD_DEPS" ]
-then
+if [[ $PACKAGE_LOCAL_BUILD_DEPS == "" ]]; then
 	  echo Building $PACKAGE_NAME
     cd src
     pdebuild --configfile $PBUILDER_RC \
                       --buildresult $PACKAGE_DIR \
                       -- \
+                      --hookdir $PBUILDER_HOOKS \
                       --basetgz $PBUILDER_CHROOT
 
 else
@@ -85,6 +84,7 @@ else
 	  for dep in $PACKAGE_LOCAL_BUILD_DEPS ; do \
 		    make build_package BUILD_PACKAGE=$dep -C .. ; \
 	      done
+    rm $PRAWNOS_LOCAL_APT_REPO/Packages
 	  cd $PRAWNOS_LOCAL_APT_REPO && dpkg-scanpackages . /dev/null > Packages
 	  echo $PACKAGE_NAME build deps satisfied
     cd $PACKAGE_DIR

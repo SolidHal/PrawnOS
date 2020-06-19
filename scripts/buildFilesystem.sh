@@ -111,45 +111,6 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-build_install_crossystem() {
-    # install crossystem
-    apt install -y vboot-utils
-
-    #install clang and pre-reqs
-    apt install -y clang uuid-dev meson pkg-config cmake libcmocka-dev cargo
-
-    flashmap_src=/root/flashmap
-    mosys_src=/root/mosys
-    mkdir $flashmap_src
-    mkdir $mosys_src
-    #clone flashmap, need to build libfmap
-    git clone https://github.com/dhendrix/flashmap.git /root/flashmap
-    cd $flashmap_src && make all
-    cd $flashmap_src && make install
-    ldconfig
-
-    #clone mosys. Later releases start depending on the minijail library which we would have to build, and that we don't care about anyway on linux
-    git clone https://chromium.googlesource.com/chromiumos/platform/mosys /root/mosys
-    cd $mosys_src && git checkout release-R69-10895.B
-
-    mkdir $mosys_src/build
-    # compile the c parts
-    cd $mosys_src && CFLAGS="-Wno-error" CC=clang meson -Darch=arm $mosys_src/build
-    cd $mosys_src && ninja -C $mosys_src/build
-
-    # install mosys so crossystem can access it. It EXPECTS it to be right here and fails otherwise...
-    mkdir -p /usr/sbin/
-    cp --verbose $mosys_src/build/mosys /usr/sbin/
-
-    # cleanup the source
-    rm -rf $flashmap_src
-    rm -rf $mosys_src
-
-    # cleanup the unnecessary build packages, need the noninteractive flag as -y is not enough to avoid prompting users on remove for some reason
-    DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove clang meson libcmocka-dev cargo cmake pkg-config
-
-}
-
 # create a 2GB image with the Chrome OS partition layout
 create_image $BASE $outdev 50M 40 $outmnt
 
@@ -162,9 +123,14 @@ fi
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
 # need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
-qemu-debootstrap --arch armhf $DEBIAN_SUITE --include  openssl,ca-certificates,gnupg,locales,init --keyring=$build_resources/debian-archive-keyring.gpg $outmnt $PRAWNOS_DEBOOTSTRAP_MIRROR --cache-dir=$PRAWNOS_ROOT/build/apt-cache/
-chroot $outmnt passwd -d root
+qemu-debootstrap --arch armhf $DEBIAN_SUITE \
+                 --include ${base_debs_download[@]} \
+                 --keyring=$build_resources/debian-archive-keyring.gpg \
+                 $outmnt \
+                 $PRAWNOS_DEBOOTSTRAP_MIRROR \
+                 --cache-dir=$PRAWNOS_ROOT/build/apt-cache/
 
+chroot $outmnt passwd -d root
 
 #Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS > $outmnt/etc/hostname
@@ -220,11 +186,6 @@ chroot $outmnt locale-gen
 chroot $outmnt apt update
 chroot $outmnt apt install -y ${base_debs_install[@]}
 
-#build and install crossystem/mosys, funky way to call the bash function inside the chroot
-# TODO!! UNCOMMENT!
-# export -f build_install_crossystem
-# chroot $outmnt /bin/bash -ec "build_install_crossystem"
-
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
 chmod 644 $outmnt/etc/fstab
@@ -232,22 +193,6 @@ chmod 644 $outmnt/etc/fstab
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
-
-#Download support for libinput-gestures
-#Package is copied into /InstallResources/packages
-chroot $outmnt apt install -y libinput-tools xdotool build-essential
-
-# we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
-# if required
-# this gets tricky when we build some of the dependencies. To avoid issues 
-# first, manually cache the deb
-# apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
-# copy into /var/cache/apt/archives to place it in the cache
-#next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
-
-#Copy the built prawnos debs over to the image, and update apts cache
-cd $PRAWNOS_ROOT && make packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
-chroot $outmnt apt install -y -d ${prawnos_debs_prebuilt_download[@]}
 
 #Download the shared packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d ${base_debs_download[@]}
@@ -261,6 +206,21 @@ chroot $outmnt apt-get install -y -d ${lxqt_debs_download[@]}
 
 #Download the gnome packages to be installed by Install.sh:
 chroot $outmnt apt-get install -y -d ${gnome_debs_download[@]}
+
+
+# we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
+# if required
+# this gets tricky when we build some of the dependencies. To avoid issues
+# first, manually cache the deb
+# apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
+# copy into /var/cache/apt/archives to place it in the cache
+#next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
+
+#Copy the built prawnos debs over to the image, and update apts cache
+cd $PRAWNOS_ROOT && make packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
+chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
+chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
+chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
 
 ## GPU support
 #download mesa packages

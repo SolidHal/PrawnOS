@@ -132,7 +132,7 @@ packages:
 	cd packages && $(MAKE)
 
 .PHONY: packages_install
-install_packages:
+packages_install:
 ifndef INSTALL_TARGET
 	$(error INSTALL_TARGET is not set)
 endif
