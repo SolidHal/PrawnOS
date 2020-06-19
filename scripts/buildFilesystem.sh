@@ -123,8 +123,9 @@ fi
 # install Debian on it
 export DEBIAN_FRONTEND=noninteractive
 # need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
+printf -v debootstrap_debs_install_joined '%s,' "${debootstrap_debs_install[@]}"
 qemu-debootstrap --arch armhf $DEBIAN_SUITE \
-                 --include ${base_debs_download[@]} \
+                 --include ${debootstrap_debs_install_joined%,} \
                  --keyring=$build_resources/debian-archive-keyring.gpg \
                  $outmnt \
                  $PRAWNOS_DEBOOTSTRAP_MIRROR \

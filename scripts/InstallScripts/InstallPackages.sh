@@ -39,10 +39,10 @@ dpkg-reconfigure tzdata
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]}
-DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_debs_prebuilt[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
 [ "$DE" = "gnome" ] && apt install -y ${gnome_debs_download[@]}
-[ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]}
+[ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]} ${prawnos_base_debs_prebuilt_install[@]}
 [ "$DE" = "lxqt" ] && apt install -y ${lxqt_debs_download[@]}
 
 #install the keymap by patching xkb, then bindings work for any desktop environment
