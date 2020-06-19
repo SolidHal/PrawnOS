@@ -23,9 +23,6 @@
 # eMMC device name
 emmc_devname=mmcblk2
 #
-# Blank kernel image
-blnk=./blank_kernel
-#
 # Actual kernel image (.kpart)
 kimg=./vmlinux.kpart
 #
@@ -134,7 +131,10 @@ read ans
        die "Aborted by user. Kernel untouched." 1
 
 # put the kernel in the kernel partition
-dd if="$blnk" of="$kpart" conv=notrunc ||
+#blank the kernel partition first, with 32MiB of zeros
+kernel_size=65536
+block_size=512
+dd if=/dev/zero of="$kpart" conv=notrunc bs=512 count=$kernel_size ||
     die "FAILED to flash blank kernel on $kpart!" 255
 
 dd if="$kimg" of="$kpart" conv=notrunc ||
