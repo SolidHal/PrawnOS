@@ -1,6 +1,6 @@
 #import all shared make vars
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
-include $(PRAWNOS_ROOT)/scripts/common.mk
+include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
@@ -10,7 +10,7 @@ PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 PACKAGE_LOCAL_BUILD_DEPS :=
 
 $(PACKAGE_NAME_DEB):
-	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD_PACKAGE) $(PACKAGE_NAME_DEB) \
+	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD) $(PACKAGE_NAME_DEB) \
                                             $(PBUILDER_VARS) \
                                             $(PRAWNOS_LOCAL_APT_VARS) \
                                             $(PACKAGE_LOCAL_BUILD_DEPS)
@@ -28,9 +28,9 @@ clean:
 	rm -rf *.buildinfo
 
 install:
-	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL_PACKAGE) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
 
 .PHONY: upload
 upload:
-	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD_PACKAGE)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD)
 

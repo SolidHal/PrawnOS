@@ -51,10 +51,17 @@ then
     echo "No prawnos_root path supplied"
     exit 1
 fi
+if [ -z "$5" ]
+then
+    echo "No shared scripts path supplied"
+    exit 1
+fi
+
 KVER=$1
 DEBIAN_SUITE=$2
 BASE=$3
 PRAWNOS_ROOT=$4
+PRAWNOS_SHARED_SCRIPTS=$5
 
 outmnt=$(mktemp -d -p "$(pwd)")
 
@@ -62,11 +69,9 @@ outdev=/dev/loop5
 
 install_resources=resources/InstallResources
 build_resources=resources/BuildResources
-script_resources=scripts/
-package_lists=$script_resources/package_lists.sh
 
-# Import the package lists
-source $package_lists
+# Import the package lists, shared scripts
+source $PRAWNOS_SHARED_SCRIPTS/*
 
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
@@ -141,7 +146,7 @@ mkdir $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
 cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
 cp scripts/InstallScripts/* $outmnt/InstallResources/
-cp $package_lists $outmnt/InstallResources/
+cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $outmnt/InstallResources/
 cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
 chmod +x $outmnt/*.sh
 

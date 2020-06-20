@@ -1,5 +1,5 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
-include $(PRAWNOS_ROOT)/scripts/common.mk
+include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 SUBDIRS = $(shell ls -d */)
 
@@ -16,7 +16,7 @@ clean:
 
 
 install:
-	@echo packages install target is $(INSTALL_TARGET)
+	$(info packages install target is $(INSTALL_TARGET))
 	for dir in $(SUBDIRS) ; do \
 		make install INSTALL_TARGET=$(INSTALL_TARGET) -C  $$dir  ; \
 	done

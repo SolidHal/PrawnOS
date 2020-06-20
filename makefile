@@ -24,7 +24,7 @@ OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
 BASE=$(OUTNAME)-BASE
 
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
-include $(PRAWNOS_ROOT)/scripts/common.mk
+include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 
 #Usage:
@@ -98,22 +98,22 @@ build_dirs:
 kernel:
 	$(MAKE) build_dirs
 	rm -rf build/logs/kernel-log.txt
-	./scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
+	$(PRAWNOS_KERNEL_SCRIPTS_BUILD) $(KVER) 2>&1 | tee build/logs/kernel-log.txt
 
 .PHONY: kernel_config
 kernel_config:
-	scripts/crossmenuconfig.sh $(KVER)
+	$(PRAWNOS_KERNEL_SCRIPTS_MENUCONFIG) $(KVER)
 
 .PHONY: patch_kernel
 patch_kernel:
-	scripts/patchKernel.sh
+	$(PRAWNOS_KERNEL_SCRIPTS_PATCH)
 
 #:::::::::::::::::::::::::::::: initramfs :::::::::::::::::::::::::::::::::
 .PHONY: initramfs
 initramfs:
 	$(MAKE) build_dirs
 	rm -rf build/logs/initramfs-log.txt
-	./scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
+	$(PRAWNOS_INITRAMFS_SCRIPTS_BUILD) $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
 
 #:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
 #makes the base filesystem image without kernel. Only make a new one if the base image isnt present
@@ -123,8 +123,7 @@ filesystem:
 	rm -rf build/logs/fs-log.txt
 	$(MAKE) pbuilder_create
 	$(MAKE) packages
-	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) $(PRAWNOS_ROOT) 2>&1 | tee build/logs/fs-log.txt
-
+	[ -f $(BASE) ] || $(PRAWNOS_FILESYSTEM_SCRIPTS_BUILD) $(KVER) $(DEBIAN_SUITE) $(BASE) $(PRAWNOS_ROOT) $(PRAWNOS_SHARED_SCRIPTS) 2>&1 | tee build/logs/fs-log.txt
 
 #:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
 .PHONY: packages
@@ -140,9 +139,9 @@ endif
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
-.PHONY: kernel_inject
+.PHONY: kernel_install
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(OUTNAME)
 
 .PHONY: kernel_update
 kernel_update:
@@ -150,7 +149,7 @@ kernel_update:
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
-	$(MAKE) kernel_inject
+	$(MAKE) kernel_install
 
 .PHONY: image
 image:
@@ -159,7 +158,7 @@ image:
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(BASE) $(OUTNAME)
-	$(MAKE) kernel_inject
+	$(MAKE) kernel_install
 
 #:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
 .PHONY: pbuilder_create
