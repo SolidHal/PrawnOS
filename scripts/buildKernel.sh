@@ -28,7 +28,7 @@ then
 fi
 
 KVER=$1
-ROOT_DIR=`pwd`
+ROOT_DIR="$(pwd)"
 RESOURCES=$ROOT_DIR/resources/BuildResources
 
 [ ! -d build ] && mkdir build
@@ -59,14 +59,14 @@ cd linux-$KVER
 make clean
 make mrproper
 #Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/DTS/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in $RESOURCES/patches-tested/kernel/*.patch; do echo $i; patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/DTS/*.patch; do echo $i; patch -p1 < $i; done
+[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/*.patch; do echo $i; patch -p1 < $i; done
 
 #copy in the initramfs and kernel config
 cp $ROOT_DIR/build/PrawnOS-initramfs.cpio.gz .
 cp $RESOURCES/config .config
-make -j $((`nproc` +1))  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
+make -j $(($(nproc) +1))  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
 [ ! -h kernel.its ] && ln -s $RESOURCES/kernel.its .
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1

@@ -22,7 +22,7 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
-outmnt=$(mktemp -d -p `pwd`)
+outmnt=$(mktemp -d -p "$(pwd)")
 outdev=/dev/loop7
 if [ -z "$1" ]
 then
@@ -30,7 +30,7 @@ then
     exit 1
 fi
 BASE=$1
-ROOT_DIR=`pwd`
+ROOT_DIR="$(pwd)"
 build_resources=$ROOT_DIR/resources/BuildResources
 
 if [ ! -f $ROOT_DIR/$BASE ]
