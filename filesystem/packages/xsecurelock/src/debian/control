@@ -1,0 +1,40 @@
+Source: xsecurelock
+Section: x11
+Priority: optional
+Maintainer: Markus Teich <mteich@google.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10),
+               libc6,
+               libpam-dev,
+               libx11-dev,
+               libxcomposite-dev,
+               libxext-dev,
+               libxfixes-dev,
+               libxft-dev,
+               libxmuu-dev,
+               libxrandr-dev,
+               libxss-dev,
+               pandoc,
+               x11proto-core-dev
+Standards-Version: 4.3.0
+Homepage: https://github.com/google/xsecurelock
+Vcs-Browser: https://github.com/google/xsecurelock/tree/debian
+Vcs-Git: https://github.com/google/xsecurelock.git -b debian
+
+Package: xsecurelock
+Architecture: any
+Depends: dash, x11-xserver-utils, ${misc:Depends}, ${shlibs:Depends}
+Suggests: mplayer,
+          mpv,
+          xscreensaver-data,
+          xscreensaver-data-extra,
+          xscreensaver-gl,
+          xscreensaver-gl-extra
+Description: X11 screen lock utility with the primary goal of security
+ Screen lock utilities are widespread. However, in the past they often had
+ security issues regarding authentication bypass (a crashing screen locker
+ would unlock the screen), information disclosure (notifications may appear on
+ top of the screen saver), or sometimes even worse.
+ .
+ In XSecureLock, security is achieved using a modular design to avoid the usual
+ pitfalls of screen locking utility design on X11.

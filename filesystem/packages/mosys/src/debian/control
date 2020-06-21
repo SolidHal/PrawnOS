@@ -1,0 +1,23 @@
+Source: mosys
+Section: admin
+Priority: optional
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10),
+               clang,
+               uuid-dev,
+               meson,
+               pkg-config,
+               cmake,
+               libcmocka-dev,
+               cargo,
+               flashmap
+Standards-Version: 4.3.0
+Homepage: https://chromium.googlesource.com/chromiumos/platform/mosys
+Vcs-Browser: https://chromium.googlesource.com/chromiumos/platform/mosys
+Vcs-Git: https://chromium.googlesource.com/chromiumos/platform/mosys
+
+Package: mosys
+Architecture: any
+Depends: flashmap, ${misc:Depends}, ${shlibs:Depends}
+Description: mosys util for use with crosystem from vboot-utils

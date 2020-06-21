@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+index 48c222d..f8f9ae6 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+@@ -845,7 +845,7 @@ static int vop_crtc_enable_vblank(struct drm_crtc *crtc)
+ 	struct vop *vop = to_vop(crtc);
+ 	unsigned long flags;
+ 
++	if (!vop->is_enabled)
+-	if (WARN_ON(!vop->is_enabled))
+ 		return -EPERM;
+ 
+ 	spin_lock_irqsave(&vop->irq_lock, flags);

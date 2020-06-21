@@ -1,0 +1,50 @@
+From 9d630b9cde28dc261cdfc608ed68ef5487404422 Mon Sep 17 00:00:00 2001
+From: Grigor Tovmasyan <Grigor.Tovmasyan@synopsys.com>
+Date: Wed, 29 Aug 2018 21:00:03 +0400
+Subject: [PATCH 08/53] usb: dwc2: Add dwc2_gadget_dec_frame_num_by_one()
+ function
+
+Added dwc2_gadget_dec_frame_num_by_one() function in gadget.c.
+This function will be used to calculate descriptor frame number field
+value. For service interval mode frame number in descriptor should point
+to last (u)frame in the interval.
+
+Acked-by: Minas Harutyunyan <hminas@synopsys.com>
+Signed-off-by: Grigor Tovmasyan <tovmasya@synopsys.com>
+Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+---
+ drivers/usb/dwc2/gadget.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
+index 12032f0488d8..71f097d89001 100644
+--- a/drivers/usb/dwc2/gadget.c
++++ b/drivers/usb/dwc2/gadget.c
+@@ -123,6 +123,24 @@ static inline void dwc2_gadget_incr_frame_num(struct dwc2_hsotg_ep *hs_ep)
+ }
+ 
+ /**
++ * dwc2_gadget_dec_frame_num_by_one - Decrements the targeted frame number
++ *                                    by one.
++ * @hs_ep: The endpoint.
++ *
++ * This function used in service interval based scheduling flow to calculate
++ * descriptor frame number filed value. For service interval mode frame
++ * number in descriptor should point to last (u)frame in the interval.
++ *
++ */
++static inline void dwc2_gadget_dec_frame_num_by_one(struct dwc2_hsotg_ep *hs_ep)
++{
++	if (hs_ep->target_frame)
++		hs_ep->target_frame -= 1;
++	else
++		hs_ep->target_frame = DSTS_SOFFN_LIMIT;
++}
++
++/**
+  * dwc2_hsotg_en_gsint - enable one or more of the general interrupt
+  * @hsotg: The device state
+  * @ints: A bitmask of the interrupts to enable
+-- 
+2.11.0
+

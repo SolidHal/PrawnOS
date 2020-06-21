@@ -1,0 +1,41 @@
+From e4f737ba76eedeb9c924f46fe6a66520485b2bc6 Mon Sep 17 00:00:00 2001
+From: SolidHal <hal@halemmerich.com>
+Date: Mon, 22 Oct 2018 19:19:13 -0500
+Subject: [PATCH] Don't try to flush cache on reset
+
+A hardware reset is called for two situations. The first is on init
+and the second is if the driver encounters an error with the card.
+Flushing the cache when the emmc is already in a bad state causes a ~10
+minute long hang.
+
+ Not only does the cache flush fail after
+a long hang, it causes a cmd write during the bus init in mmc_power_cycle
+to fail, leaving the card potentially incorrectly configured.
+
+The effects specifically the skHynix emmc with designware controller
+used in the c201 chromebook (veyron-speedy), but could causes issues
+with other emmcs as well.
+---
+ drivers/mmc/core/mmc.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6f8ebd6c..186cf61b 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2121,12 +2121,6 @@ static int mmc_reset(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
+ 
+-	/*
+-	 * In the case of recovery, we can't expect flushing the cache to work
+-	 * always, but we have a go and ignore errors.
+-	 */
+-	mmc_flush_cache(host->card);
+-
+ 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
+ 	     mmc_can_reset(card)) {
+ 		/* If the card accept RST_n signal, send it. */
+-- 
+2.11.0
+

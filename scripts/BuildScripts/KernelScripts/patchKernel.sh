@@ -8,20 +8,22 @@ then
     echo "No kernel version supplied"
     exit 1
 fi
+if [ -z "$2" ]
+then
+    echo "No patches directory"
+    exit 1
+fi
+if [ -z "$3" ]
+then
+    echo "No build directory supplied"
+    exit 1
+fi
 KVER=$1
+PATCHES=$2
+BUILD_DIR=$3
 
-ROOT_DIR="$(pwd)"
-RESOURCES=$ROOT_DIR/resources/BuildResources
-
-
-[ ! -d build ] && mkdir build
-cd build
-# build Linux-libre, with ath9k_htc
-cd linux-$KVER
-make clean
+cd $BUILD_DIR
 make mrproper
-#Apply the usb and mmc patches if unapplied
-for i in "$RESOURCES"/patches-tested/DTS/*.patch; do patch -p1 < $i; done
-for i in "$RESOURCES"/patches-tested/kernel/*.patch; do patch -p1 < $i; done
-
-cd $ROOT_DIR
+#Apply the usb and mmc patches
+for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
+for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done

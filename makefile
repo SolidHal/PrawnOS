@@ -13,23 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=5.4.29
-ifeq ($(DEBIAN_SUITE),)
-DEBIAN_SUITE=buster
-endif
-ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=Shiba
-endif
-OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
-BASE=$(OUTNAME)-BASE
-
+.DEFAULT_GOAL := image
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
-
+include $(PRAWNOS_ROOT)/initramfs/makefile
+include $(PRAWNOS_ROOT)/kernel/makefile
 
 #Usage:
 #run make image
-#this will generate two images named OUTNAME and OUTNAME-BASE
+#this will generate two images named PRAWNOS_IMAGE and PRAWNOS_IMAGE-BASE
 #-BASE is only the filesystem with no kernel.
 
 
@@ -41,79 +33,34 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 .PHONY: clean
 clean:
 	@echo "Enter one of:"
-	@echo "	clean_kernel - which deletes the untar'd kernel folder from build"
-	@echo "	clean_ath - which deletes the untar'd ath9k driver folder from build"
-	@echo "	clean_img - which deletes the built PrawnOS image, this is ran when make image is ran"
-	@echo " clean_basefs - which deletes the built PrawnOS base image"
-	@echo " clean_initramfs - which deletes the built PrawnOS initramfs image that gets injected into the kernel"
-	@echo "	clean_all - which does all of the above"
-	@echo "	in most cases none of these need to be used manually as most cleanup steps are handled automatically"
+#TODO
 
-.PHONY: clean_kernel
-clean_kernel:
-	rm -rf build/linux-$(KVER)
-
-.PHONY: clean_ath
-clean_ath:
-	rm -rf build/open-ath9k-htc-firmware
-
-.PHONY: clean_img
+.PHONY: clean_image
 clean_img:
-	rm -f $(OUTNAME)
+	rm -f $(PRAWNOS_IMAGE)
 
 .PHONY: clean_basefs
 clean_basefs:
-	rm -r $(BASE)
-
-.PHONY: clean_initramfs
-clean_initramfs:
-	rm -r build/PrawnOS-initramfs.cpio.gz
-
-.PHONY: clean_packages
-clean_packages:
-	cd packages && $(MAKE) clean
+	rm -f $(PRAWNOS_IMAGE_BASE)
 
 .PHONY: clean_pbuilder
 clean_pbuilder:
 	rm -r build/prawnos-pbuilder-armhf-base.tgz
 
 .PHONY: clean_all
-clean_all:
-	$(MAKE) clean_kernel
-	$(MAKE) clean_ath
-	$(MAKE) clean_img
-	$(MAKE) clean_basefs
-	$(MAKE) clean_initramfs
-	$(MAKE) clean_pbuilder
-	$(MAKE) clean_packages
+clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs clean_pbuilder
 
 #:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
 .PHONY: build_dirs
-build_dirs:
-	mkdir -p build/logs/
-	mkdir -p build/apt-cache/
+build_dirs: $(PRAWNOS_BUILD)
+
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
-.PHONY: kernel
-kernel:
-	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
-	$(PRAWNOS_KERNEL_SCRIPTS_BUILD) $(KVER) 2>&1 | tee build/logs/kernel-log.txt
+#included from kernel/makefile
 
-.PHONY: kernel_config
-kernel_config:
-	$(PRAWNOS_KERNEL_SCRIPTS_MENUCONFIG) $(KVER)
-
-.PHONY: patch_kernel
-patch_kernel:
-	$(PRAWNOS_KERNEL_SCRIPTS_PATCH)
 
 #:::::::::::::::::::::::::::::: initramfs :::::::::::::::::::::::::::::::::
-.PHONY: initramfs
-initramfs:
-	$(MAKE) build_dirs
-	rm -rf build/logs/initramfs-log.txt
-	$(PRAWNOS_INITRAMFS_SCRIPTS_BUILD) $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
+#included from initramfs/makefile
 
 #:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
 #makes the base filesystem image without kernel. Only make a new one if the base image isnt present
@@ -122,33 +69,33 @@ filesystem:
 	$(MAKE) build_dirs
 	rm -rf build/logs/fs-log.txt
 	$(MAKE) pbuilder_create
-	$(MAKE) packages
-	[ -f $(BASE) ] || $(PRAWNOS_FILESYSTEM_SCRIPTS_BUILD) $(KVER) $(DEBIAN_SUITE) $(BASE) $(PRAWNOS_ROOT) $(PRAWNOS_SHARED_SCRIPTS) 2>&1 | tee build/logs/fs-log.txt
+	$(MAKE) filesystem_packages
+	[ -f $(PRAWNOS_IMAGE_BASE) ] || $(PRAWNOS_FILESYSTEM_SCRIPTS_BUILD) $(KVER) $(DEBIAN_SUITE) $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_ROOT) $(PRAWNOS_SHARED_SCRIPTS) 2>&1 | tee build/logs/fs-log.txt
 
 #:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
-.PHONY: packages
-packages:
-	cd packages && $(MAKE)
+.PHONY: filesystem_packages
+filesystem_packages:
+	$(MAKE) filesystem_packages -C packages
 
-.PHONY: packages_install
-packages_install:
+.PHONY: filesystem_packages_install
+filesystem_packages_install:
 ifndef INSTALL_TARGET
 	$(error INSTALL_TARGET is not set)
 endif
-	cd packages && $(MAKE) install INSTALL_TARGET=$(INSTALL_TARGET)
+	$(MAKE) filesystem_packages_install INSTALL_TARGET=$(INSTALL_TARGET) -C filesystem
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_install
 kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(OUTNAME)
+	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE)
 
 .PHONY: kernel_update
 kernel_update:
 	$(MAKE) clean_img
 	$(MAKE) initramfs
 	$(MAKE) kernel
-	cp $(BASE) $(OUTNAME)
+	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
 .PHONY: image
@@ -157,7 +104,7 @@ image:
 	$(MAKE) filesystem
 	$(MAKE) initramfs
 	$(MAKE) kernel
-	cp $(BASE) $(OUTNAME)
+	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
 #:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::

@@ -22,18 +22,29 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
-outmnt=$(mktemp -d -p "$(pwd)")
-outdev=/dev/loop7
 if [ -z "$1" ]
 then
-    echo "No base file system image filename supplied"
+    echo "No base file system image supplied"
+    exit 1
+fi
+if [ -z "$2" ]
+then
+    echo "No initramfs resources dir supplied"
+    exit 1
+fi
+if [ -z "$3" ]
+then
+    echo "No output location supplied"
     exit 1
 fi
 BASE=$1
-ROOT_DIR="$(pwd)"
-build_resources=$ROOT_DIR/resources/BuildResources
+RESOURCES=$2
+OUT_DIR=$3
 
-if [ ! -f $ROOT_DIR/$BASE ]
+outmnt=$(mktemp -d -p "$(pwd)")
+outdev=/dev/loop7
+
+if [ ! -f $BASE ]
 then
     echo "No base filesystem, run 'make filesystem' first"
     exit 1
@@ -59,7 +70,7 @@ trap cleanup INT TERM EXIT
 
 [ ! -d build ] && mkdir build
 
-losetup -P $outdev $ROOT_DIR/$BASE
+losetup -P $outdev $$BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 
@@ -113,7 +124,7 @@ cp $outmnt/lib/arm-linux-gnueabihf/libpthread.so.0 $initramfs_src/lib/arm-linux-
 cp $outmnt/lib/arm-linux-gnueabihf/libpcre.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libpcre.so.3
 cp $outmnt/lib/arm-linux-gnueabihf/libgcc_s.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libgcc_s.so.1
 #add the init script
-cp $build_resources/initramfs-init $initramfs_src/init
+cp $RESOURCES/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
 cp $initramfs_src/init $initramfs_src/sbin/init
 
@@ -127,5 +138,5 @@ ln -s busybox bin/switch_root
 ln -s busybox bin/umount
 
 # store for kernel building
-find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $ROOT_DIR/build/PrawnOS-initramfs.cpio.gz
+find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
 
