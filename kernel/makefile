@@ -61,14 +61,14 @@ update_ath9k_tar:
 	cd tmp && tar czvf $(ATH9K_SOURCE) $(ATH9K)
 	rm -rf tmp/
 
-.PHONY: update_kernel_tar
-update_kernel_tar:
-	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz -O $(KERNEL_TAR)
-	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$(KVER)-gnu.tar.lz.sign -O $(KERNEL_TAR_SIGNATURE)
+.PHONY: update_kernel_sig
+update_kernel_sig:
+	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz.sign -O $(KERNEL_TAR_SIGNATURE)
 
 ### REAL TARGETS
 
 $(KERNEL_EXTRACTED): $(PRAWNOS_BUILD)
+	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz -O $(KERNEL_TAR)
 	gpg --import $(KERNEL_RESOURCES)/linux-libre-signing-key.gpg
 	gpg --verify $(KERNEL_TAR_SIGNATURE) $(KERNEL_TAR)
 	tar --lzip -xvf $(KERNEL_TAR) -C $(PRAWNOS_BUILD)
