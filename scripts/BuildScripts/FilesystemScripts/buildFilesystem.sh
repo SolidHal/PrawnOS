@@ -154,7 +154,9 @@ chmod +x $outmnt/*.sh
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
 cp $build_resources/sources.list $outmnt/etc/apt/sources.list
+cp $build_resources/prawnos.list $outmnt/etc/apt/sources.list.d/
 sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
+sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/prawnos.list
 if [ "$DEBIAN_SUITE" != "sid" ]
 then
     # sid doesn't have updates or security; they're present for all other suites
