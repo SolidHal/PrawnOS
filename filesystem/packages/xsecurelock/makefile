@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := default
 #import all shared make vars
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
@@ -8,6 +9,8 @@ PACKAGE_NAME := xsecurelock_$(VERSION)_armhf
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 
 PACKAGE_LOCAL_BUILD_DEPS :=
+
+default: $(PACKAGE_NAME_DEB)
 
 $(PACKAGE_NAME_DEB):
 	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD) $(PACKAGE_NAME_DEB) \

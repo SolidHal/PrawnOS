@@ -56,23 +56,29 @@ then
     echo "No shared scripts path supplied"
     exit 1
 fi
+if [ -z "$6" ]
+then
+    echo "No Filesystem resources path supplied"
+    exit 1
+fi
 
 KVER=$1
 DEBIAN_SUITE=$2
 BASE=$3
 PRAWNOS_ROOT=$4
 PRAWNOS_SHARED_SCRIPTS=$5
+PRAWNOS_FILESYSTEM_RESOURCES=$6
 
 outmnt=$(mktemp -d -p "$(pwd)")
 
 outdev=/dev/loop5
 
-install_resources=resources/InstallResources
-build_resources=resources/BuildResources
+install_resources=$PRAWNOS_FILESYSTEM_RESOURCES/InstallResources
+build_resources=$PRAWNOS_FILESYSTEM_RESOURCES
+build_resources_apt=$build_resources/apt
 
 # Import the package lists, shared scripts
 source $PRAWNOS_SHARED_SCRIPTS/*
-
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
@@ -94,6 +100,26 @@ cleanup() {
 }
 
 trap cleanup INT TERM EXIT
+
+# Download, cache externally, and optionally install the specified packages
+# 2: mount of the chroot
+# 3: list of packages in install
+# 4: if true, download, cache, and install. If false just download and cache
+apt_install() {
+  PRAWNOS_ROOT=$1
+  shift
+  outmnt=$1
+  shift
+  install=$1
+  shift
+  package_list=("$@")
+
+  chroot $outmnt apt install -y -d ${package_list[@]}
+  cp "$outmnt/var/cache/apt/archives/"* "$PRAWNOS_ROOT/build/chroot-apt-cache/" || true
+  if [ "$install" = true ]; then
+      chroot $outmnt apt install -y ${package_list[@]}
+  fi
+}
 
 #layout the partitons and write filesystem information
 create_image() {
@@ -131,10 +157,10 @@ export DEBIAN_FRONTEND=noninteractive
 printf -v debootstrap_debs_install_joined '%s,' "${debootstrap_debs_install[@]}"
 qemu-debootstrap --arch armhf $DEBIAN_SUITE \
                  --include ${debootstrap_debs_install_joined%,} \
-                 --keyring=$build_resources/debian-archive-keyring.gpg \
+                 --keyring=$build_resources_apt/debian-archive-keyring.gpg \
                  $outmnt \
                  $PRAWNOS_DEBOOTSTRAP_MIRROR \
-                 --cache-dir=$PRAWNOS_ROOT/build/apt-cache/
+                 --cache-dir=$PRAWNOS_ROOT/build/debootstrap-apt-cache/
 
 chroot $outmnt passwd -d root
 
@@ -153,34 +179,34 @@ chmod +x $outmnt/*.sh
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 cp /etc/hosts $outmnt/etc/
-cp $build_resources/sources.list $outmnt/etc/apt/sources.list
+cp $build_resources_apt/sources.list $outmnt/etc/apt/sources.list
 sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
 if [ "$DEBIAN_SUITE" != "sid" ]
 then
     # sid doesn't have updates or security; they're present for all other suites
-    cat $build_resources/updates.list >> $outmnt/etc/apt/sources.list
+    cat $build_resources_apt/updates.list >> $outmnt/etc/apt/sources.list
     sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
     # sid doesn't have backports; it's present for all other suites
-    cp $build_resources/backports.list $outmnt/etc/apt/sources.list.d/
+    cp $build_resources_apt/backports.list $outmnt/etc/apt/sources.list.d/
     sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
     #setup apt pinning
-    cp $build_resources/backports.pref $outmnt/etc/apt/preferences.d/
+    cp $build_resources_apt/backports.pref $outmnt/etc/apt/preferences.d/
     sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
     # Install sid (unstable) as an additional source for bleeding edge packages.
-    cp $build_resources/sid.list $outmnt/etc/apt/sources.list.d/
+    cp $build_resources_apt/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
-    cp $build_resources/sid.pref $outmnt/etc/apt/preferences.d/
+    cp $build_resources_apt/sid.pref $outmnt/etc/apt/preferences.d/
 fi
 if [ "$DEBIAN_SUITE" = "buster" ]
 then
     # Install bullseye (testing) as an additional source
-    cp $build_resources/bullseye.list $outmnt/etc/apt/sources.list.d/
+    cp $build_resources_apt/bullseye.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
-    cp $build_resources/bullseye.pref $outmnt/etc/apt/preferences.d/
+    cp $build_resources_apt/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
 #Bring in the deb.prawnos.com gpg keyring
-cp $build_resources/deb.prawnos.com.gpg.key $outmnt/InstallResources/
+cp $build_resources_apt/deb.prawnos.com.gpg.key $outmnt/InstallResources/
 chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
@@ -188,9 +214,18 @@ chroot $outmnt apt update
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
 
+#Copy in the apt cache
+cp "$PRAWNOS_ROOT/build/chroot-apt-cache/"* "$outmnt/var/cache/apt/archives/" || true
+
+echo IMAGE SIZE
+df -h
+
+#Make apt retry on download failure
+chroot $outmnt echo "APT::Acquire::Retries \"3\";" > /etc/apt/apt.conf.d/80-retries
+
 #Install the base packages
 chroot $outmnt apt update
-chroot $outmnt apt install -y ${base_debs_install[@]}
+apt_install $PRAWNOS_ROOT $outmnt true ${base_debs_install[@]}
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
@@ -201,17 +236,17 @@ chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download the shared packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d ${base_debs_download[@]}
+apt_install $PRAWNOS_ROOT $outmnt false ${base_debs_download[@]}
 
 ## DEs
 #Download the xfce packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d ${xfce_debs_download[@]}
+apt_install $PRAWNOS_ROOT $outmnt false ${xfce_debs_download[@]}
 
 #Download the lxqt packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d ${lxqt_debs_download[@]}
+apt_install $PRAWNOS_ROOT $outmnt false ${lxqt_debs_download[@]}
 
 #Download the gnome packages to be installed by Install.sh:
-chroot $outmnt apt-get install -y -d ${gnome_debs_download[@]}
+apt_install $PRAWNOS_ROOT $outmnt false ${gnome_debs_download[@]}
 
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
@@ -223,18 +258,21 @@ chroot $outmnt apt-get install -y -d ${gnome_debs_download[@]}
 #next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
 
 #Copy the built prawnos debs over to the image, and update apts cache
-cd $PRAWNOS_ROOT && make packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
+cd $PRAWNOS_ROOT && make filesystem_packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
 chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
 chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
 
 ## GPU support
 #download mesa packages
-chroot $outmnt apt-get install -y -d ${mesa_debs_download[@]}
+apt_install $PRAWNOS_ROOT $outmnt false ${mesa_debs_download[@]}
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
 echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
+
+#Cleanup apt retry
+chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
 
 # do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1

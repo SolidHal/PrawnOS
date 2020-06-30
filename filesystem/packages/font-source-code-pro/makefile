@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := default
 #import all shared make vars
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
@@ -6,6 +7,8 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME := font-source-code-pro_$(VERSION)_all
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
+
+default: $(PACKAGE_NAME_DEB)
 
 $(PACKAGE_NAME_DEB):
 	@echo Building $@

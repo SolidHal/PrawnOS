@@ -70,7 +70,7 @@ trap cleanup INT TERM EXIT
 
 [ ! -d build ] && mkdir build
 
-losetup -P $outdev $$BASE
+losetup -P $outdev $BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 

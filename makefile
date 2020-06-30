@@ -18,6 +18,7 @@ PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 include $(PRAWNOS_ROOT)/initramfs/makefile
 include $(PRAWNOS_ROOT)/kernel/makefile
+include $(PRAWNOS_ROOT)/filesystem/makefile
 
 #Usage:
 #run make image
@@ -36,7 +37,7 @@ clean:
 #TODO
 
 .PHONY: clean_image
-clean_img:
+clean_image:
 	rm -f $(PRAWNOS_IMAGE)
 
 .PHONY: clean_basefs
@@ -54,7 +55,6 @@ clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs cle
 .PHONY: build_dirs
 build_dirs: $(PRAWNOS_BUILD)
 
-
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 #included from kernel/makefile
 
@@ -64,25 +64,10 @@ build_dirs: $(PRAWNOS_BUILD)
 
 #:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
 #makes the base filesystem image without kernel. Only make a new one if the base image isnt present
-.PHONY: filesystem
-filesystem:
-	$(MAKE) build_dirs
-	rm -rf build/logs/fs-log.txt
-	$(MAKE) pbuilder_create
-	$(MAKE) filesystem_packages
-	[ -f $(PRAWNOS_IMAGE_BASE) ] || $(PRAWNOS_FILESYSTEM_SCRIPTS_BUILD) $(KVER) $(DEBIAN_SUITE) $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_ROOT) $(PRAWNOS_SHARED_SCRIPTS) 2>&1 | tee build/logs/fs-log.txt
+#included from filesystem/makefile
 
 #:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
-.PHONY: filesystem_packages
-filesystem_packages:
-	$(MAKE) filesystem_packages -C packages
-
-.PHONY: filesystem_packages_install
-filesystem_packages_install:
-ifndef INSTALL_TARGET
-	$(error INSTALL_TARGET is not set)
-endif
-	$(MAKE) filesystem_packages_install INSTALL_TARGET=$(INSTALL_TARGET) -C filesystem
+#included from filesystem/makefile
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
@@ -92,7 +77,7 @@ kernel_inject: #Targets an already built .img and swaps the old kernel with the 
 
 .PHONY: kernel_update
 kernel_update:
-	$(MAKE) clean_img
+	$(MAKE) clean_image
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
@@ -100,22 +85,9 @@ kernel_update:
 
 .PHONY: image
 image:
-	$(MAKE) clean_img
+	$(MAKE) clean_image
 	$(MAKE) filesystem
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
-
-#:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
-.PHONY: pbuilder_create
-pbuilder_create:
-	$(MAKE) $(PBUILDER_CHROOT)
-
-$(PBUILDER_CHROOT):
-	pbuilder create --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
-
-#TODO: should only update if not updated for a day
-.PHONY: pbuilder_update
-pbuilder_update:
-	pbuilder update --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
