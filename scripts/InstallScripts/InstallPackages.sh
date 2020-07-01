@@ -123,11 +123,6 @@ then
   cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
   cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
-  #Install the source code pro font for spacemacs
-  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
-  cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
-  fc-cache
-
   #Install inputrc
   cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
 
