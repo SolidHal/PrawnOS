@@ -1,0 +1,3 @@
+#Add sid to grab bleeding edge software
+# /etc/apt/preferences prevents this from updating the whole system
+deb http://deb.debian.org/debian/ unstable main

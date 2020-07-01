@@ -1,0 +1,2 @@
+event=jack/*
+action=/etc/acpi/sound.sh %e

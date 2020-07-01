@@ -3,11 +3,11 @@
 set -x
 set -e
 
-#Build kernel, wifi firmware
+# build Linux-libre, with ath9k_htc firmware and initramfs built in
 
 
 # This file is part of PrawnOS (https://www.prawnos.com)
-# Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
+# Copyright (c) 2018-2020 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
@@ -26,48 +26,35 @@ then
     echo "No kernel version supplied"
     exit 1
 fi
-
-KVER=$1
-ROOT_DIR="$(pwd)"
-RESOURCES=$ROOT_DIR/resources/BuildResources
-
-[ ! -d build ] && mkdir build
-cd build
-if [ ! -f PrawnOS-initramfs.cpio.gz ]
+if [ -z "$2" ]
 then
-    echo "No initramfs image, run 'make initramfs' first"
-    cd $ROOT_DIR
+    echo "No resources directory"
     exit 1
 fi
-# build AR9271 firmware
-[ ! -d open-ath9k-htc-firmware ] && git clone --depth 1 https://github.com/qca/open-ath9k-htc-firmware.git
-cd open-ath9k-htc-firmware
-make toolchain
-make -C target_firmware
-cd ..
+if [ -z "$3" ]
+then
+    echo "No build directory supplied"
+    exit 1
+fi
+if [ -z "$4" ]
+then
+    echo "No PrawnOS initramfs supplied"
+    exit 1
+fi
 
-# build Linux-libre, with ath9k_htc
-[ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
-[ ! -f linux-libre-$KVER-gnu.tar.lz.sign ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz.sign
+KVER=$1
+RESOURCES=$2
+BUILD_DIR=$3
+INITRAMFS=$4
 
-#verify the signature
-gpg --import $RESOURCES/linux-libre-signing-key.gpg
-gpg --verify linux-libre-$KVER-gnu.tar.lz.sign linux-libre-$KVER-gnu.tar.lz
-
-[ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
-cd linux-$KVER
-make clean
+cd $BUILD_DIR
 make mrproper
-#Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/DTS/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/*.patch; do echo $i; patch -p1 < $i; done
 
-#copy in the initramfs and kernel config
-cp $ROOT_DIR/build/PrawnOS-initramfs.cpio.gz .
+#copy in the resources, initramfs
+cp $INITRAMFS .
 cp $RESOURCES/config .config
+cp $RESOURCES/kernel.its .
 make -j $(($(nproc) +1))  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
-[ ! -h kernel.its ] && ln -s $RESOURCES/kernel.its .
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 vbutil_kernel --pack vmlinux.kpart \
@@ -78,5 +65,8 @@ vbutil_kernel --pack vmlinux.kpart \
               --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
               --config $RESOURCES/cmdline \
               --bootloader bootloader.bin
-cd ..
-cd $ROOT_DIR
+
+RESULT=$?
+if [ ! $RESULT -eq 0 ]; then
+    rm -f vmlinux.kpart
+fi

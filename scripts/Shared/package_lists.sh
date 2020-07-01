@@ -167,10 +167,7 @@ gnome_debs_download=(
     nautilus
     nautilus-admin
     network-manager-gnome
-    network-manager-gnome
     network-manager-openvpn
-    network-manager-openvpn
-    network-manager-openvpn-gnome
     network-manager-openvpn-gnome
     pavucontrol-qt
     seahorse

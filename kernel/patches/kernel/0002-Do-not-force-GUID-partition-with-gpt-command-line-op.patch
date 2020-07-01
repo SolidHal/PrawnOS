@@ -1,0 +1,34 @@
+From 7d49850b0a41f6db81dfeb0a829d4b7e66ddb473 Mon Sep 17 00:00:00 2001
+From: SolidHal <hal@halemmerich.com>
+Date: Fri, 24 Aug 2018 11:31:45 -0500
+Subject: [PATCH] Do not force GUID partition with 'gpt' command line option.
+
+Fixes a bug where left over partition tables that aren't over written are read
+instead of the proper partition table.
+Described here: https://bugs.chromium.org/p/chromium/issues/detail?id=260040
+
+Signed-off-by: SolidHal <hal@halemmerich.com>
+---
+ block/partitions/efi.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index aa08380..ffcdc16 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -112,7 +112,11 @@ static int force_gpt;
+ static int __init
+ force_gpt_fn(char *str)
+ {
+-	force_gpt = 1;
++	/* Do not force GPT even if 'gpt' command line option is
++	 * specified for ChromeOS kernel.
++	 */
++	force_gpt = 0;
++	pr_warn("Not forcing GPT even though 'gpt' specified on cmd line.\n");
+ 	return 1;
+ }
+ __setup("gpt", force_gpt_fn);
+-- 
+2.11.0
+

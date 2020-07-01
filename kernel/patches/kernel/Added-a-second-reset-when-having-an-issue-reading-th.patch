@@ -1,0 +1,41 @@
+From 30914ed56a766f15162c3bf106797a45857d98f1 Mon Sep 17 00:00:00 2001
+From: SolidHal <hal@halemmerich.com>
+Date: Sun, 21 Oct 2018 16:40:15 -0500
+Subject: [PATCH] Added a second reset when having an issue reading the emmc.
+
+The c201 emmc can be... touchy. Sometimes one full reset isn't
+enough to get it into a wokring state if it found it's way into
+a really bad state. Note that in my testing WITHOUT this patch,
+this only happens about once in just over 1600 reboots.
+
+Signed-off-by: SolidHal <hal@halemmerich.com>
+---
+ drivers/mmc/core/block.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 5bc585e8..39e16e48 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1033,6 +1033,7 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 		return -EEXIST;
+   }
+ 	md->reset_done |= type;
++retry:
+ 	err = mmc_hw_reset(host);
+ 	/* Ensure we switch back to the correct partition */
+ 	if (err != -EOPNOTSUPP) {
+@@ -1050,6 +1051,10 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			return -ENODEV;
+ 		}
+ 	}
++  if (err){
++    /* Try one last time, just in case. The emmc can be touchy */
++    goto retry;
++  }
+ 	return err;
+ }
+ 
+-- 
+2.11.0
+

@@ -84,7 +84,7 @@ else
 	  for dep in $PACKAGE_LOCAL_BUILD_DEPS ; do \
 		    make build_package BUILD_PACKAGE=$dep -C .. ; \
 	      done
-    rm $PRAWNOS_LOCAL_APT_REPO/Packages
+    rm -f $PRAWNOS_LOCAL_APT_REPO/Packages
 	  cd $PRAWNOS_LOCAL_APT_REPO && dpkg-scanpackages . /dev/null > Packages
 	  echo $PACKAGE_NAME build deps satisfied
     cd $PACKAGE_DIR

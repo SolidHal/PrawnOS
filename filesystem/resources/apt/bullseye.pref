@@ -1,0 +1,5 @@
+#Stable defaults to 500, and higher priorities are used over lower
+
+Package: *
+Pin: release a=testing
+Pin-Priority: 400

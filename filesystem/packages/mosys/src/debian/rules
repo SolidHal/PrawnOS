@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Use already defined upstream version as DEB_VERSION_UPSTREAM.
+include /usr/share/dpkg/pkg-info.mk
+
+export DH_VERBOSE=1
+
+export DEB_CFLAGS_MAINT_APPEND=-Wno-error
+export CC=clang
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- -Darch=arm

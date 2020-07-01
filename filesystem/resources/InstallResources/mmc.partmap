@@ -1,0 +1,9 @@
+label: gpt
+label-id: EBA5A923-2F33-7C4E-AC9A-1555FD600D19
+device: /dev/mmcblk2
+unit: sectors
+first-lba: 34
+last-lba: 30785502
+
+/dev/mmcblk2p1 : start=       20480, size=       65536, type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, uuid=89B31CDB-1147-5241-8271-C1ADBB9BBB44, name="Kernel", attrs="GUID:49,51,52,54,56"
+/dev/mmcblk2p2 : start=       86016, size=    30699486, type=EBD0A0A2-B9E5-4433-87C0-68B6B72699C7, uuid=63DB8E49-63C4-984E-90A0-8AC3222C4771, name="Root"

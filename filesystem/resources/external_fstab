@@ -1,0 +1,3 @@
+#try both the sdcard and the usb as root
+/dev/mmcblk1p2 / ext4 nofail,x-systemd.device-timeout=5s,defaults,noatime 0 1
+/dev/sda2 / ext4 nofail,x-systemd.device-timeout=5s,defaults,noatime 0 1
