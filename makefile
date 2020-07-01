@@ -72,7 +72,7 @@ build_dirs: $(PRAWNOS_BUILD)
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_install
-kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
+kernel_install: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
 	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE)
 
 .PHONY: kernel_update
