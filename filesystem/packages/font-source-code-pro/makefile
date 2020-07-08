@@ -13,6 +13,8 @@ default: $(PACKAGE_NAME_DEB)
 $(PACKAGE_NAME_DEB):
 	@echo Building $@
 	cd src/; debuild -us -uc
+	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
+	cp $(PACKAGE_NAME) $(PRAWNOS_LOCAL_APT_REPO)
 
 .PHONY: clean
 clean:
