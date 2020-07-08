@@ -16,14 +16,13 @@ default: $(PACKAGE_NAME_DEB)
 $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 	@echo Building $@
 	cd src/; debuild -us -uc
-	mkdir -p $PRAWNOS_LOCAL_APT_REPO
-	cp $PACKAGE_NAME $PRAWNOS_LOCAL_APT_REPO
+	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
+	cp $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_ORIG_TAR):
-#TODO: Have dependancy on kernel build
-#copy the vmlinux here and zip it up with a makefile
 	make -C $(PRAWNOS_KERNEL)/makefile kernel
 	cp $(PRAWNOS_KERNEL_BUILT) $(ORIG)
+	tar -czf $(PACKAGE_NAME_ORIG_TAR) $(ORIG)/
 
 .PHONY: clean
 clean:
