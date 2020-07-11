@@ -8,6 +8,7 @@ default: $(all)
 
 all:
 #nothing special to do to make, as we already have all of the necessary components
+	touch $(KERNEL_IMAGE)
 	@echo done!
 
 install:

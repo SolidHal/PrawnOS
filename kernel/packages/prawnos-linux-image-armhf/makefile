@@ -24,7 +24,7 @@ $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 $(PACKAGE_NAME_ORIG_TAR):
 	make -f $(PRAWNOS_KERNEL)/makefile kernel
 	cp $(PRAWNOS_KERNEL_BUILT) $(ORIG)/$(PACKAGE_NAME)
-	tar -czf $(PACKAGE_NAME_ORIG_TAR) $(ORIG)/
+	tar -czf $(PACKAGE_NAME_ORIG_TAR) -C $(ORIG)/ .
 
 .PHONY: clean
 clean:
@@ -40,6 +40,7 @@ clean:
 	rm -f src/debian/debhelper-build-stamp
 	rm -rf src/debian/prawnos-linux-image-armhf*
 	rm -f src/debian/files
+	rm -rf src/debian/.debhelper
 # kernel package specific
 	rm -f orig/prawnos-linux-image-armhf_$(VERSION)
 	rm -f prawnos-linux-image-armhf_$(KVER).orig.tar.gz
