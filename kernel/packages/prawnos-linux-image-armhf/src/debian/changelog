@@ -1,0 +1,5 @@
+prawnos-linux-image-armhf (5.4.29-1) stable; urgency=medium
+
+  * Initial packaged release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 10 Jul 2020 22:29:42 -0700

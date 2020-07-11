@@ -5,6 +5,9 @@ BUILD_COMMON_MK := 1
 #=========================================================================================
 ### MISC GLOBALS
 KVER=5.4.29
+# the number of prawnos specific releases made of the above kver. Used for the kernel deb packages
+PRAWNOS_KERNEL_RELEASE=1
+DEBKVER=$(KVER)-$(PRAWNOS_KERNEL_RELEASE)
 # Otherwise errors are ignored when output is piped to tee:
 SHELL := /bin/bash -o pipefail
 
@@ -49,6 +52,7 @@ PRAWNOS_KERNEL_SCRIPTS_BUILD := $(PRAWNOS_KERNEL_SCRIPTS)/buildKernel.sh
 PRAWNOS_KERNEL_SCRIPTS_MENUCONFIG := $(PRAWNOS_KERNEL_SCRIPTS)/crossMenuConfig.sh
 PRAWNOS_KERNEL_SCRIPTS_PATCH := $(PRAWNOS_KERNEL_SCRIPTS)/patchKernel.sh
 PRAWNOS_KERNEL_SCRIPTS_BUILD_ATH9K := $(PRAWNOS_KERNEL_SCRIPTS)/buildAth9k.sh
+PRAWNOS_KERNEL_SCRIPTS_UPDATE_DEB_FILES := $(PRAWNOS_KERNEL_SCRIPTS)/updateKernelDebfiles.sh
 
 PRAWNOS_IMAGE_SCRIPTS := $(PRAWNOS_BUILD_SCRIPTS)/ImageScripts
 PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL := $(PRAWNOS_IMAGE_SCRIPTS)/installKernelToFs.sh

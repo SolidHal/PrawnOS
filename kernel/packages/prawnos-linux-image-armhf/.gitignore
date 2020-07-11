@@ -17,3 +17,6 @@ debhelper-build-stamp
 *.substvars
 *.diff.gz
 *.upload
+
+#kernel image specific ignores
+prawnos-linux-*-image-armhf*

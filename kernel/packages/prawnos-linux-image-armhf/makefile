@@ -15,13 +15,15 @@ default: $(PACKAGE_NAME_DEB)
 
 $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 	@echo Building $@
+# keep the /debian files up to date with the current kernel version
+	$(PRAWNOS_KERNEL_SCRIPTS_UPDATE_DEB_FILES) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/src $(DEBKVER)
 	cd src/; debuild -us -uc
 	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
 	cp $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_ORIG_TAR):
 	make -C $(PRAWNOS_KERNEL)/makefile kernel
-	cp $(PRAWNOS_KERNEL_BUILT) $(ORIG)
+	cp $(PRAWNOS_KERNEL_BUILT) $(ORIG)/$(PACKAGE_NAME)
 	tar -czf $(PACKAGE_NAME_ORIG_TAR) $(ORIG)/
 
 .PHONY: clean
