@@ -7,7 +7,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME :=  prawnos-linux-$(VERSION)-image-armhf
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
-PACKAGE_NAME_ORIG_TAR := $(PACKAGE_NAME).orig.tar.gz
+PACKAGE_NAME_ORIG_TAR := prawnos-linux-image-armhf_$(KVER).orig.tar.gz
 
 ORIG := $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/orig
 
