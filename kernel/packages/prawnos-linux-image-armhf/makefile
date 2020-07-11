@@ -5,7 +5,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
-PACKAGE_NAME :=  prawnos-linux-$(VERSION)-image-armhf
+PACKAGE_NAME :=  prawnos-linux-image-armhf_$(VERSION)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 PACKAGE_NAME_ORIG_TAR := prawnos-linux-image-armhf_$(KVER).orig.tar.gz
 
@@ -37,6 +37,12 @@ clean:
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
 	rm -rf *.buildinfo
+	rm -f src/debian/debhelper-build-stamp
+	rm -rf src/debian/prawnos-linux-image-armhf*
+	rm -f src/debian/files
+# kernel package specific
+	rm -f orig/prawnos-linux-image-armhf_$(VERSION)
+	rm -f prawnos-linux-image-armhf_$(KVER).orig.tar.gz
 
 .PHONY: upload
 upload:

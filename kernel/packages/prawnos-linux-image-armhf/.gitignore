@@ -19,4 +19,5 @@ debhelper-build-stamp
 *.upload
 
 #kernel image specific ignores
-prawnos-linux-*-image-armhf*
+prawnos-linux-image-armhf_*.orig.tar.gz
+orig/prawnos-linux-image-armhf_*

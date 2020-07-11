@@ -7,6 +7,6 @@ Standards-Version: 4.5.0
 
 
 Package: prawnos-linux-image-armhf
-Architecture: all
+Architecture: armhf
 Depends: ${misc:Depends} coreutils
 Description: the PrawnOS linux kernel distribution. Made up of linux-libre, ath9k firmware, PrawnOS initramfs, and varying numbers of patches

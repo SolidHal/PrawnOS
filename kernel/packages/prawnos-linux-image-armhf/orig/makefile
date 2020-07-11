@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := default
 
 
-KERNEL_IMAGE := prawnos-linux-*-image-armhf
+KERNEL_IMAGE := prawnos-linux-image-armhf_*
 KERNEL_INSTALL_SCRIPT := install-prawnos-kernel.sh
 
 default: $(all)
