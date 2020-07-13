@@ -21,4 +21,14 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#example ~/.dput.cf
+# [deb.prawnos.com]
+# fqdn = deb.prawnos.com
+# method = scp
+# login = debian
+# incoming = /var/www/repos/apt/debian/incoming
+# allow_unsigned_uploads = true
+# ssh_config_options = Port=2222
+
+
 dput deb.prawnos.com *.changes

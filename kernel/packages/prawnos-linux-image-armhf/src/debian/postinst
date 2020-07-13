@@ -2,7 +2,7 @@
 
 
 VERSION=__DEB_VERSION__
-KERNEL_IMAGE := /boot/prawnos-linux-image-armhf_$VERSION_armhf
+KERNEL_IMAGE=/boot/prawnos-linux-image-armhf_$VERSION_armhf
 
 set -e
 

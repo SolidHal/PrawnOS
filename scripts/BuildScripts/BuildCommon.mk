@@ -6,7 +6,7 @@ BUILD_COMMON_MK := 1
 ### MISC GLOBALS
 KVER=5.4.29
 # the number of prawnos specific releases made of the above kver. Used for the kernel deb packages
-PRAWNOS_KERNEL_RELEASE=1
+PRAWNOS_KERNEL_RELEASE=2
 DEBKVER=$(KVER)-$(PRAWNOS_KERNEL_RELEASE)
 # Otherwise errors are ignored when output is piped to tee:
 SHELL := /bin/bash -o pipefail
