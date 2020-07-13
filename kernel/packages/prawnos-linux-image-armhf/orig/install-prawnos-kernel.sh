@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+#installs the specified kernel image onto the currently booted device
+
 
 # This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2020 Hal Emmerich <hal@halemmerich.com>
@@ -22,9 +25,6 @@
 #
 # eMMC device name
 emmc_devname=mmcblk2
-#
-# Actual kernel image (.kpart)
-kimg=./vmlinux.kpart
 #
 # GPT partition type UUID for "ChromeOS kernel"
 ptype_kernel="FE3A2A5D-4F32-41A7-B725-ACCC3285A309"
@@ -77,6 +77,14 @@ set -e
 # Check root or sudo
 [ ! $(id -u) = 0 ] &&
     die "Please run this script with sudo, or as root" 1
+
+if [ -z "$1" ]
+then
+    echo "No kernel image supplied"
+    exit 1
+fi
+
+kimg=$1
 
 rootfs=$(get_root_partition)
 devname=$(lsblk -no pkname $rootfs | head -n 1)

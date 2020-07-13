@@ -3,7 +3,11 @@ src/debian/*
 !src/debian/compat
 !src/debian/changelog
 !src/debian/control
+!src/debian/copyright
 !src/debian/rules
+!src/debian/install
+!src/debian/postinst
+!src/debian/source
 
 #generic packaging artifacts
 debhelper-build-stamp
@@ -20,4 +24,5 @@ debhelper-build-stamp
 
 #kernel image specific ignores
 prawnos-linux-image-armhf_*.orig.tar.gz
+prawnos-linux-image-armhf_*.debian.tar.xz
 orig/prawnos-linux-image-armhf_*

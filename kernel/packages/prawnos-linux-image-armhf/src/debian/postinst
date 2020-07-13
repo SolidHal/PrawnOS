@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+VERSION=__DEB_VERSION__
+KERNEL_IMAGE := /boot/prawnos-linux-image-armhf_$VERSION_armhf
+
+set -e
+
+case "$1" in
+    configure)
+        /bin/install-prawnos-kernel.sh $KERNEL_IMAGE
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Do nothing
+        ;;
+    *)
+        echo "Unrecognized postinst argument '$1'"
+        ;;
+esac
