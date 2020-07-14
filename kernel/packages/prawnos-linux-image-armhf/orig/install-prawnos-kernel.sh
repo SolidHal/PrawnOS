@@ -117,9 +117,6 @@ ptype=$(get_partition_type_uuid /dev/$devname $pnum_kernel)
 [ ! -e "$kimg" ] &&
     die "ERROR: cannot find kernel image at $kimg !" 127
 
-[ ! -e "$blnk" ] &&
-    die "ERROR: cannot find blank image at $blnk !" 127
-
 
 # Prompt for user's confirmation
 echo "

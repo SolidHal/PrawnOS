@@ -3,13 +3,28 @@ BUILD_COMMON_MK := 1
 
 #Place all shared make vars below
 #=========================================================================================
-### MISC GLOBALS
-KVER=5.4.29
-# the number of prawnos specific releases made of the above kver. Used for the kernel deb packages
-PRAWNOS_KERNEL_RELEASE=2
-DEBKVER=$(KVER)-$(PRAWNOS_KERNEL_RELEASE)
+### GLOBALS
+# upstream kernel version
+# when this is changed, PRAWNOS_KERNEL_VER, PRAWNOS_KERNEL_HEADERS_DEBVER, and PRAWNOS_KERNEL_IMAGE_DEBVER should be reset to 1
+KVER := 5.4.29
+# the version of the prawnos linux kernel. This is incremented whenever changes to the config or patches are made, but the KVER stays the same
+# when this is incremented, PRAWNOS_KERNEL_IMAGE_DEBVER, and PRAWNOS_KERNEL_HEADERS_DEBVER should be reset to 1
+PRAWNOS_KERNEL_VER := 3
+
+# the version of the prawnos image deb package. This should be incremented with each rebuild/upload of the same KVER and PRAWNOS_KERNEL_IMAGE_VER
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+
+PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)
+
+# the version of the prawnos headers deb package. This should be incremented with each rebuild/upload of the same KVER and PRAWNOS_KERNEL_IMAGE_VER
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+
+PRAWNOS_KERNEL_HEADERS_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_HEADERS_DEBVER)
+
 # Otherwise errors are ignored when output is piped to tee:
 SHELL := /bin/bash -o pipefail
+
+
 
 ### PRAWNOS CORE DIRECTORIES
 PRAWNOS_BUILD := $(PRAWNOS_ROOT)/build

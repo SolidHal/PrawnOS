@@ -4,6 +4,7 @@ set -x
 set -e
 
 # update the debian/changelog of the kernel packages when the kernel version changes
+# returns the current version
 
 # This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2020 Hal Emmerich <hal@halemmerich.com>
