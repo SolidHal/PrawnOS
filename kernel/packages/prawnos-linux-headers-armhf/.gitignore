@@ -3,7 +3,11 @@ src/debian/*
 !src/debian/compat
 !src/debian/changelog
 !src/debian/control
+!src/debian/copyright
 !src/debian/rules
+!src/debian/install
+!src/debian/postinst
+!src/debian/source
 
 #generic packaging artifacts
 debhelper-build-stamp
@@ -17,3 +21,7 @@ debhelper-build-stamp
 *.substvars
 *.diff.gz
 *.upload
+
+#kernel image specific ignores
+prawnos-linux-headers-armhf_*.orig.tar.gz
+prawnos-linux-headers-armhf_*.debian.tar.xz

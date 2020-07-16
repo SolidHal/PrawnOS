@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+srctree ?= .
+
+build:
+	$(MAKE) KERNELRELEASE=5.4.29-gnu ARCH=arm 	KBUILD_BUILD_VERSION=1 -f $(srctree)/Makefile
+
+binary-arch:
+	$(MAKE) KERNELRELEASE=5.4.29-gnu ARCH=arm 	KBUILD_BUILD_VERSION=1 -f $(srctree)/Makefile intdeb-pkg
+
+clean:
+	rm -rf debian/*tmp debian/files
+
+binary: binary-arch
