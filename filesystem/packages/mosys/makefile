@@ -5,7 +5,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
-PACKAGE_NAME := mosys_$(VERSION)_armhf
+PACKAGE_NAME := mosys_$(VERSION)_$(TARGET)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 
 PACKAGE_LOCAL_BUILD_DEPS := flashmap
@@ -35,4 +35,4 @@ install:
 
 .PHONY: upload
 upload:
-	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD) $(PACKAGE_NAME).changes

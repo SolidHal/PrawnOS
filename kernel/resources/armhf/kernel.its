@@ -1,7 +1,7 @@
 /dts-v1/;
 
 / {
-	description = "Linux-libre kernel image with one or more FDT blobs";
+	description = "Linux-libre kernel image with one or more FDT blobs for armhf";
 	#address-cells = <1>;
 	images {
 		kernel@1 {

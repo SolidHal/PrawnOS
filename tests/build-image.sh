@@ -40,4 +40,4 @@ apt install --no-install-recommends --no-install-suggests \
 make image
 
 # rename the image to include git sha:
-mv PrawnOS-Shiba-c201.img "PrawnOS-Shiba-c201-git-${GITHUB_SHA}.img"
+mv PrawnOS-Shiba-c201.img "PrawnOS-Shiba-$TARGET-git-${GITHUB_SHA}.img"

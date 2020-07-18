@@ -1,6 +1,25 @@
 ifndef BUILD_COMMON_MK
 BUILD_COMMON_MK := 1
 
+### PRAWNOS TARGET ARCHS
+PRAWNOS_ARMHF := armhf
+PRAWNOS_ARM64 := arm64
+
+# validate that target is set to something we support
+ifeq ($(TARGET),$(PRAWNOS_ARMHF))
+$(info TARGET is $(PRAWNOS_ARMHF))
+else ifeq ($(TARGET),$(PRAWNOS_ARM64))
+$(info TARGET is $(PRAWNOS_ARM64))
+else
+$(info TARGET is invalid)
+$(info Must specify a TARGET. Valid TARGETS are)
+$(info TARGET=armhf (Asus c201 aka veyron speedy, Asus c100 aka veyron minnie))
+$(info TARGET=arm64 (Asus c101 aka gru bob, Samsung Chromebook Plus aka gru kevin))
+$(error Set a valid TARGET)
+endif
+
+export $(TARGET)
+
 #Place all shared make vars below
 #=========================================================================================
 ### GLOBALS
@@ -25,9 +44,8 @@ PRAWNOS_KERNEL_HEADERS_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_HE
 SHELL := /bin/bash -o pipefail
 
 
-
 ### PRAWNOS CORE DIRECTORIES
-PRAWNOS_BUILD := $(PRAWNOS_ROOT)/build
+PRAWNOS_BUILD := $(PRAWNOS_ROOT)/build/$(TARGET)
 
 PRAWNOS_SCRIPTS := $(PRAWNOS_ROOT)/scripts
 
@@ -53,8 +71,8 @@ ifeq ($(PRAWNOS_SUITE),)
 PRAWNOS_SUITE := Shiba
 endif
 
-PRAWNOS_IMAGE := $(PRAWNOS_ROOT)/PrawnOS-$(PRAWNOS_SUITE)-c201.img
-PRAWNOS_IMAGE_BASE := $(PRAWNOS_IMAGE)-BASE
+PRAWNOS_IMAGE := $(PRAWNOS_ROOT)/PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img
+PRAWNOS_IMAGE_BASE := $(PRAWNOS_IMAGE)-$(TARGET)-BASE
 
 ### BUILD SCRIPTS
 PRAWNOS_BUILD_SCRIPTS := $(PRAWNOS_SCRIPTS)/BuildScripts
@@ -94,9 +112,9 @@ PRAWNOS_FILESYSTEM_PACKAGES := $(PRAWNOS_FILESYSTEM)/packages
 
 
 ### PBUILDER RESOURCES
-PBUILDER_DIR := $(PRAWNOS_FILESYSTEM_RESOURCES)//pbuilder
-PBUILDER_CHROOT := $(PRAWNOS_BUILD)/prawnos-pbuilder-armhf-base.tgz
-PBUILDER_RC := $(PBUILDER_DIR)/prawnos-pbuilder.rc
+PBUILDER_DIR := $(PRAWNOS_FILESYSTEM_RESOURCES)/pbuilder
+PBUILDER_CHROOT := $(PRAWNOS_BUILD)/prawnos-pbuilder-$(TARGET)-base.tgz
+PBUILDER_RC := $(PBUILDER_DIR)/prawnos-pbuilder-$(TARGET).rc
 PBUILDER_HOOKS := $(PBUILDER_DIR)/hooks
 
 PBUILDER_VARS := $(PBUILDER_CHROOT) $(PBUILDER_RC) $(PBUILDER_HOOKS)
@@ -107,13 +125,14 @@ PRAWNOS_LOCAL_APT_SOURCE := "deb [trusted=yes] file://$(PRAWNOS_LOCAL_APT_REPO) 
 
 PRAWNOS_LOCAL_APT_VARS := $(PRAWNOS_LOCAL_APT_REPO) $(PRAWNOS_LOCAL_APT_SOURCE)
 
-### KERNEL
+### KERNEL UNIVERSAL
+PRAWNOS_KERNEL_PACKAGE := $(PRAWNOS_KERNEL)/packages
+
+## KERNEL TARGETED (paths partially defined by $TARGET)
 PRAWNOS_KERNEL_BUILD := $(PRAWNOS_BUILD)/linux-$(KVER)
 PRAWNOS_KERNEL_BUILT := $(PRAWNOS_KERNEL_BUILD)/vmlinux.kpart
-
-PRAWNOS_KERNEL_PACKAGE := $(PRAWNOS_KERNEL)/packages
-PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-image-armhf
-PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-headers-armhf
+PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-image-$(TARGET)
+PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-headers-$(TARGET)
 
 ### INITRAMFS
 PRAWNOS_INITRAMFS_IMAGE := $(PRAWNOS_BUILD)/PrawnOS-initramfs.cpio.gz
@@ -126,6 +145,12 @@ PRAWNOS_ATH9K_BUILD := $(PRAWNOS_BUILD)/open-ath9k-htc-firmware
 
 #Place all shared make rules below
 #=========================================================================================
+
+#=========================================================================================
+
+#Place all shared make functions below
+#=========================================================================================
+
 
 #=========================================================================================
 

@@ -61,6 +61,16 @@ then
     echo "No Filesystem resources path supplied"
     exit 1
 fi
+if [ -z "$7" ]
+then
+    echo "No TARGET arch supplied"
+    exit 1
+fi
+if [ -z "$8" ]
+then
+    echo "No Prawnos build directory supplied"
+    exit 1
+fi
 
 KVER=$1
 DEBIAN_SUITE=$2
@@ -68,6 +78,8 @@ BASE=$3
 PRAWNOS_ROOT=$4
 PRAWNOS_SHARED_SCRIPTS=$5
 PRAWNOS_FILESYSTEM_RESOURCES=$6
+TARGET_ARCH=$7
+PRAWNOS_BUILD=$8
 
 outmnt=$(mktemp -d -p "$(pwd)")
 
@@ -106,7 +118,7 @@ trap cleanup INT TERM EXIT
 # 3: list of packages in install
 # 4: if true, download, cache, and install. If false just download and cache
 apt_install() {
-  PRAWNOS_ROOT=$1
+  PRAWNOS_BUILD=$1
   shift
   outmnt=$1
   shift
@@ -115,7 +127,7 @@ apt_install() {
   package_list=("$@")
 
   chroot $outmnt apt install -y -d ${package_list[@]}
-  cp "$outmnt/var/cache/apt/archives/"* "$PRAWNOS_ROOT/build/chroot-apt-cache/" || true
+  cp "$outmnt/var/cache/apt/archives/"* "$PRAWNOS_BUILD/chroot-apt-cache/" || true
   if [ "$install" = true ]; then
       chroot $outmnt apt install -y ${package_list[@]}
   fi
@@ -155,12 +167,12 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 # need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
 printf -v debootstrap_debs_install_joined '%s,' "${debootstrap_debs_install[@]}"
-qemu-debootstrap --arch armhf $DEBIAN_SUITE \
+qemu-debootstrap --arch $TARGET_ARCH $DEBIAN_SUITE \
                  --include ${debootstrap_debs_install_joined%,} \
                  --keyring=$build_resources_apt/debian-archive-keyring.gpg \
                  $outmnt \
                  $PRAWNOS_DEBOOTSTRAP_MIRROR \
-                 --cache-dir=$PRAWNOS_ROOT/build/debootstrap-apt-cache/
+                 --cache-dir=$PRAWNOS_BUILD/debootstrap-apt-cache/
 
 chroot $outmnt passwd -d root
 
@@ -217,7 +229,7 @@ cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
 
 #Copy in the apt cache
-cp "$PRAWNOS_ROOT/build/chroot-apt-cache/"* "$outmnt/var/cache/apt/archives/" || true
+cp "$PRAWNOS_BUILD/chroot-apt-cache/"* "$outmnt/var/cache/apt/archives/" || true
 
 echo IMAGE SIZE
 df -h
@@ -227,7 +239,7 @@ chroot $outmnt echo "APT::Acquire::Retries \"3\";" > /etc/apt/apt.conf.d/80-retr
 
 #Install the base packages
 chroot $outmnt apt update
-apt_install $PRAWNOS_ROOT $outmnt true ${base_debs_install[@]}
+apt_install $PRAWNOS_BUILD $outmnt true ${base_debs_install[@]}
 
 #add the live-boot fstab
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
@@ -238,17 +250,17 @@ chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download the shared packages to be installed by Install.sh:
-apt_install $PRAWNOS_ROOT $outmnt false ${base_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
 ## DEs
 #Download the xfce packages to be installed by Install.sh:
-apt_install $PRAWNOS_ROOT $outmnt false ${xfce_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
 #Download the lxqt packages to be installed by Install.sh:
-apt_install $PRAWNOS_ROOT $outmnt false ${lxqt_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
 
 #Download the gnome packages to be installed by Install.sh:
-apt_install $PRAWNOS_ROOT $outmnt false ${gnome_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
@@ -260,14 +272,14 @@ apt_install $PRAWNOS_ROOT $outmnt false ${gnome_debs_download[@]}
 #next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
 
 #Copy the built prawnos debs over to the image, and update apts cache
-cd $PRAWNOS_ROOT && make filesystem_packages_install INSTALL_TARGET=$outmnt/var/cache/apt/archives/
+cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
 chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
 chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
 
 ## GPU support
 #download mesa packages
-apt_install $PRAWNOS_ROOT $outmnt false ${mesa_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${mesa_debs_download[@]}
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests

@@ -31,4 +31,11 @@ set -e
 # ssh_config_options = Port=2222
 
 
-dput deb.prawnos.com *.changes
+
+if [ -z "$1" ]
+then
+    echo "No .changes file supplied"
+    exit 1
+fi
+
+dput deb.prawnos.com $1
