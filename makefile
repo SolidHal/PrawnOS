@@ -80,7 +80,7 @@ kernel_install: #Targets an already built .img and swaps the old kernel with the
 kernel_update:
 	$(MAKE) clean_image
 	$(MAKE) initramfs
-	$(MAKE) kernel
+	$(MAKE) kernel TARGET=armhf
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
@@ -89,6 +89,6 @@ image:
 	$(MAKE) clean_image
 	$(MAKE) filesystem
 	$(MAKE) initramfs
-	$(MAKE) kernel
+	$(MAKE) kernel TARGET=armhf
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install

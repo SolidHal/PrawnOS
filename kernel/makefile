@@ -24,7 +24,21 @@ ATH9K_BUILT := $(PRAWNOS_ATH9K_BUILD)/target_firmware/htc_9271.fw
 
 ### PHONY TARGETS
 .PHONY: kernel
-kernel: $(PRAWNOS_KERNEL_BUILT)
+kernel:
+ifeq ($(TARGET),)
+	@echo Must specify a TARGET. Valid TARGETS are
+	@echo TARGET=armhf (Asus c201 aka veyron speedy, Asus c100 aka veyron minnie)
+	@echo TARGET=arm64 (Asus c101 aka gru bob, Samsung Chromebook Plus aka gru kevin)
+endif
+
+ifeq ($(TARGET),$(PRAWNOS_KERNEL_TARGET_ARMHF))
+	@echo Building kernel for armhf
+	make -f $(PRAWNOS_KERNEL) kernel_armhf TARGET=armhf
+endif
+ifeq ($(TARGET),$(PRAWNOS_KERNEL_TARGET_ARM64))
+	@echo Building kernel for armhf
+	make -f $(PRAWNOS_KERNEL) kernel_arm64 TARGET=arm64
+endif
 
 .PHONY: ath9k
 ath9k: $(ATH9K_BUILT)
@@ -53,6 +67,13 @@ clean_ath9k:
 	rm -rf $(PRAWNOS_ATH9K_BUILD)
 
 ### DEVELOPER TARGETS
+
+.PHONY: kernel_armhf
+kernel_armhf: $(PRAWNOS_KERNEL_BUILT)
+
+.PHONY: kernel_arm64
+kernel_armhf:
+	@echo WIP
 
 .PHONY: update_ath9k_tar
 update_ath9k_tar:

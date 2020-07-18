@@ -1,4 +1,4 @@
-Source: prawnos-linux
+Source: prawnos-linux-headers-armhf
 Section: kernel
 Priority: optional
 Maintainer: Hal Emmerich <hal@halemmerich.com>
