@@ -92,3 +92,15 @@ image:
 	$(MAKE) kernel TARGET=armhf
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
+
+
+#:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
+
+.PHONY: install_dependencies
+install_dependencies:
+	apt install --no-install-recommends --no-install-suggests \
+    bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
+    debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
+    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+    parted patch pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+
