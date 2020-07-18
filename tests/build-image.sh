@@ -25,15 +25,10 @@ cd "$(dirname "$0")/.."
 # Get dependencies
 apt-get update
 
-# Note: this is a copy/paste from README.md, if you add anything here, also update it!
-# Please make note of the "-y" that is not in the readme command. Not keeping it will break CI :)
-apt install --no-install-recommends --no-install-suggests \
-    -y \
-    bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
-    debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
-    gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
-    pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+##TODO break out into two tests, one for ARMHF and another for ARM64
+## even farther future TODO: break into tests for each package, step in build process
 
+make install_dependencies_yes
 
 # Note: there's an error for /proc/modules, but at least building the image works fine:
 # libkmod: ERROR ../libkmod/libkmod-module.c:1657 kmod_module_new_from_loaded: could not open /proc/modules: No such file or directory
