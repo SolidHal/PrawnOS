@@ -28,6 +28,8 @@ apt-get update
 ##TODO break out into two tests, one for ARMHF and another for ARM64
 ## even farther future TODO: break into tests for each package, step in build process
 
+apt install make
+
 make install_dependencies_yes
 
 # Note: there's an error for /proc/modules, but at least building the image works fine:
