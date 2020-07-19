@@ -1,4 +1,4 @@
-prawnos-linux (5.4.29-3-1) buster; urgency=low
+prawnos-linux-headers-armhf (5.4.29-3-1) buster; urgency=low
 
   * Initial prawnos linux kernel headers, glibc
 

@@ -93,6 +93,8 @@ image:
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
+#:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
+
 .PHONY: install_dependencies
 install_dependencies:
 	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
