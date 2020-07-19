@@ -9,7 +9,7 @@ FS_BUILD_LOG := $(PRAWNOS_BUILD_LOGS)/fs-log-$(TARGET).txt
 
 PRAWNOS_FILESYSTEM_PACKAGES := $(PRAWNOS_FILESYSTEM)/packages
 
-PACKAGES_BUILT := $(PRAWNOS_FILESYSTEM_PACKAGES)/.packages_built
+PACKAGES_BUILT := $(PRAWNOS_LOCAL_APT_REPO)/.packages_built
 
 .PHONY: filesystem \
 				pbuilder_create \

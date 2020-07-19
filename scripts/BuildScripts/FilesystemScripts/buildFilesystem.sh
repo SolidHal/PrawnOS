@@ -256,11 +256,15 @@ apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 #Download the xfce packages to be installed by Install.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
-#Download the lxqt packages to be installed by Install.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
+#TODO: exclude these packages, image gets too full
+if [ "$TARGET_ARCH" = "arm64" ]
+then
+    #Download the lxqt packages to be installed by Install.sh:
+    apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
 
-#Download the gnome packages to be installed by Install.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
+    #Download the gnome packages to be installed by Install.sh:
+    apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
+fi
 
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
