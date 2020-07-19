@@ -147,4 +147,4 @@ It's now safe to reboot."
 # TODO: install modules. -----------------------------------
 # Right now, there's no easy way to do that on the running machine
 # -----------------------------------------------------------------
-# make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
+# make -C build/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install

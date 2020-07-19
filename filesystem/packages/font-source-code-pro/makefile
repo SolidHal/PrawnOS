@@ -8,7 +8,11 @@ VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME := font-source-code-pro_$(VERSION)_all
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 
-default: $(PACKAGE_NAME_DEB)
+default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
+
+$(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB): $(PACKAGE_NAME_DEB)
+	mkdir -p $(PRAWNOS_BUILD_DIRS)
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_DEB):
 	@echo Building $@

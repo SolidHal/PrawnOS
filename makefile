@@ -80,7 +80,7 @@ kernel_install: #Targets an already built .img and swaps the old kernel with the
 kernel_update:
 	$(MAKE) clean_image
 	$(MAKE) initramfs
-	$(MAKE) kernel TARGET=armhf
+	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
@@ -89,18 +89,20 @@ image:
 	$(MAKE) clean_image
 	$(MAKE) filesystem
 	$(MAKE) initramfs
-	$(MAKE) kernel TARGET=armhf
+	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
-
 
 #:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
 .PHONY: install_dependencies
 install_dependencies:
-	apt install --no-install-recommends --no-install-suggests \
+	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
     bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
     debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
     gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
     parted patch pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 
+.PHONY: install_dependencies_yes
+install_dependencies_yes:
+	$(MAKE) AUTO_YES="-y" install_dependencies

@@ -24,28 +24,40 @@ set -e
 
 if [ -z "$1" ]
 then
-    echo "No kernel version supplied"
+    echo "No resources directory"
     exit 1
 fi
-KVER=$1
+if [ -z "$2" ]
+then
+    echo "No build directory supplied"
+    exit 1
+fi
+if [ -z "$3" ]
+then
+    echo "No TARGET supplied"
+    exit 1
+fi
 
+RESOURCES=$1
+BUILD_DIR=$2
+TARGET=$3
 
-ROOT_DIR="$(pwd)"
-RESOURCES=$ROOT_DIR/resources/BuildResources
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
 
-[ ! -d build ] && mkdir build
-cd build
-# build Linux-libre, with ath9k_htc
-[ ! -f linux-libre-$KVER-gnu.tar.lz ] && wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$KVER-gnu/linux-libre-$KVER-gnu.tar.lz
-[ ! -d linux-$KVER ] && tar --lzip -xvf linux-libre-$KVER-gnu.tar.lz && FRESH=true
-cd linux-$KVER
-make clean
-make mrproper
-#Apply the usb and mmc patches if unapplied
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/5.x-dwc2/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/DTS/*.patch; do echo $i; patch -p1 < $i; done
-[ "$FRESH" = true ] && for i in "$RESOURCES"/patches-tested/kernel/*.patch; do echo $i; patch -p1 < $i; done
+cd $BUILD_DIR
+
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    CROSS_COMPILER=arm-none-eabi-
+    # kernel doesn't differentiate between arm and armhf
+    ARCH=arm
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
+else
+    echo "no valid target arch specified"
+fi
 
 cp $RESOURCES/config .config
-make menuconfig ARCH=arm CROSS_COMPILE=arm-none-eabi- .config
+make menuconfig ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILER .config
 cp .config $RESOURCES/config
