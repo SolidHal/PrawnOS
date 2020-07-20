@@ -67,7 +67,7 @@ mount -n -t devtmpfs devtmpfs  /dev
 UNPARSED=$(cmdline root)
 ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
 echo ${ROOT_PARTUUID} > /dev/tty1
-BLKID=$(/bin/blkid | grep $ROOT_PARTUUID )
+BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
 echo ${BLKID} > /dev/tty1
 #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
 #Just want everything before the 1
