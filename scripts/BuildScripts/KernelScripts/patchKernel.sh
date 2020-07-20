@@ -18,12 +18,31 @@ then
     echo "No build directory supplied"
     exit 1
 fi
+if [ -z "$4" ]
+then
+    echo "No target arch supplied"
+    exit 1
+fi
+
 KVER=$1
 PATCHES=$2
 BUILD_DIR=$3
+TARGET=$4
+
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
 
 cd $BUILD_DIR
 make mrproper
-#Apply the usb and mmc patches
-for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
-for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+
+
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    #Apply the usb and mmc patches
+    for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
+    for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+else
+    echo "no valid target arch specified"
+    exit 1
+fi
