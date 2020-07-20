@@ -3,6 +3,10 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
+ifeq ($(TARGET),$(PRAWNOS_ARM64))
+$(error Cant built armhf kernel package with arm64 target)
+endif
+
 #package specific vars
 VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_VER)
 PACKAGE := prawnos-linux-image-armhf
@@ -60,6 +64,10 @@ clean:
 .PHONY: clean_orig
 clean_orig:
 	rm -f $(PACKAGE)_*-*.orig.tar.gz
+
+.PHONY: install
+install:
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
 
 .PHONY: upload
 upload:

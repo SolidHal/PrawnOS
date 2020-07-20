@@ -257,7 +257,7 @@ apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
 #TODO: exclude these packages, image gets too full
-if [ "$TARGET_ARCH" = "arm64" ]
+if [ "$TARGET_ARCH" != "arm64" ]
 then
     #Download the lxqt packages to be installed by Install.sh:
     apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}

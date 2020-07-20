@@ -74,6 +74,7 @@ losetup -P $outdev $BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 
+
 #make a skeleton filesystem
 initramfs_src=$outmnt/InstallResources/initramfs_src
 rm -rf $initramfs_src*
@@ -93,6 +94,8 @@ mkdir $initramfs_src/lib/arm-linux-gnueabihf
 
 mknod -m 622 $initramfs_src/dev/console c 5 1
 mknod -m 622 $initramfs_src/dev/tty c 4 0
+
+#:TODO: really we can automagically get all of these required dependencies instead of having to spell every one out. we should do that instead as this method is brittle
 
 #install the few tools we need, and the supporting libs
 cp $outmnt/bin/busybox $outmnt/sbin/cryptsetup $initramfs_src/bin/

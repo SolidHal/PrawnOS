@@ -23,21 +23,37 @@ export $(TARGET)
 #Place all shared make vars below
 #=========================================================================================
 ### GLOBALS
+
+#KVER
 # upstream kernel version
 # when this is changed, PRAWNOS_KERNEL_VER, PRAWNOS_KERNEL_HEADERS_DEBVER, and PRAWNOS_KERNEL_IMAGE_DEBVER should be reset to 1
-KVER := 5.4.29
+
+#PRAWNOS_KERNEL_VER
 # the version of the prawnos linux kernel. This is incremented whenever changes to the config or patches are made, but the KVER stays the same
 # when this is incremented, PRAWNOS_KERNEL_IMAGE_DEBVER, and PRAWNOS_KERNEL_HEADERS_DEBVER should be reset to 1
-PRAWNOS_KERNEL_VER := 3
 
+#PRAWNOS_KERNEL_IMAGE_DEBVER
 # the version of the prawnos image deb package. This should be incremented with each rebuild/upload of the same KVER and PRAWNOS_KERNEL_IMAGE_VER
-PRAWNOS_KERNEL_IMAGE_DEBVER := 1
 
-PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)
-
+#PRAWNOS_KERNEL_HEADERS_DEBVER
 # the version of the prawnos headers deb package. This should be incremented with each rebuild/upload of the same KVER and PRAWNOS_KERNEL_IMAGE_VER
+
+## ARMHF KERNEL VERSIONS
+ifeq ($(TARGET),$(PRAWNOS_ARMHF))
+KVER := 5.4.29
+PRAWNOS_KERNEL_VER := 3
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
 PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 
+## ARM64 KERNEL VERSIONS
+else ifeq ($(TARGET),$(PRAWNOS_ARM64))
+KVER := 5.4.29
+PRAWNOS_KERNEL_VER := 1
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+endif
+
+PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)
 PRAWNOS_KERNEL_HEADERS_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_HEADERS_DEBVER)
 
 # Otherwise errors are ignored when output is piped to tee:
@@ -128,13 +144,13 @@ PRAWNOS_LOCAL_APT_SOURCE := "deb [trusted=yes] file://$(PRAWNOS_LOCAL_APT_REPO) 
 PRAWNOS_LOCAL_APT_VARS := $(PRAWNOS_LOCAL_APT_REPO) $(PRAWNOS_LOCAL_APT_SOURCE)
 
 ### KERNEL UNIVERSAL
-PRAWNOS_KERNEL_PACKAGE := $(PRAWNOS_KERNEL)/packages
+PRAWNOS_KERNEL_PACKAGES := $(PRAWNOS_KERNEL)/packages
 
 ## KERNEL TARGETED (paths partially defined by $TARGET)
 PRAWNOS_KERNEL_BUILD := $(PRAWNOS_BUILD)/linux-$(KVER)
 PRAWNOS_KERNEL_BUILT := $(PRAWNOS_KERNEL_BUILD)/vmlinux.kpart
-PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-image-$(TARGET)
-PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGE)/prawnos-linux-headers-$(TARGET)
+PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-image-$(TARGET)
+PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-headers-$(TARGET)
 
 ### INITRAMFS
 PRAWNOS_INITRAMFS_IMAGE := $(PRAWNOS_BUILD)/PrawnOS-initramfs.cpio.gz

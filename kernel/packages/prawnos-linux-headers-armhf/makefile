@@ -3,6 +3,11 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
+
+ifeq ($(TARGET),$(PRAWNOS_ARM64))
+$(error Cant built armhf kernel package with arm64 target)
+endif
+
 #package specific vars
 VERSION := $(PRAWNOS_KERNEL_HEADERS_CAT_VER)
 PACKAGE := prawnos-linux-headers-armhf

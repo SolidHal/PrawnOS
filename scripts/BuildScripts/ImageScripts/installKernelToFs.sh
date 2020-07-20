@@ -31,6 +31,9 @@ fi
 
 KVER=$1
 OUTNAME=$2
+TARGET=$3
+KERNEL_PACKAGE_PATH=$4
+KERNEL_PACKAGE=$5
 
 outmnt=$(mktemp -d -p "$(pwd)")
 outdev=/dev/loop7
@@ -68,7 +71,15 @@ dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 
-# the ath9k firmware is built into the kernel image, so nothing else must be done
+#install the kernel image package to the chroot so it can be updated by apt later
+#need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
+#maybe it would make more sense to run this on install?
+cp $KERNEL_PACKAGE_PATH $outmnt/
+chroot $outmnt dpkg --unpack $KERNEL_PACKAGE
+chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE.postinst -f
+chroot $outmnt dpkg --configure $KERNEL_PACKAGE
+
+# the ath9k firmware and initramfs is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
