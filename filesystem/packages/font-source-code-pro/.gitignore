@@ -14,7 +14,6 @@ src/debian/*
 debhelper-build-stamp
 .debhelper
 *.deb
-*.dsc
 *.build
 *.buildinfo
 *.changes

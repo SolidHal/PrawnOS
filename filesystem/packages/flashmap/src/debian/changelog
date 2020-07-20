@@ -1,3 +1,9 @@
+flashmap (0.3-1) stable; urgency=medium
+
+  * rebuild for arm64 support, need to keep .dsc to make uploads properly
+
+ -- Hal Emmerich <hal@halemmerich.com>  Sun, 19 Jul 2020 16:03:09 -0500
+
 flashmap (0.3) stable; urgency=medium
 
   * Initial release.

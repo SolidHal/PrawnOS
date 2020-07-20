@@ -26,7 +26,6 @@ clean:
 	rm -rf *.upload
 	rm -rf *.deb
 	rm -rf *.changes
-	rm -rf *.dsc
 	rm -rf *.build
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
@@ -37,4 +36,4 @@ install:
 
 .PHONY: upload
 upload:
-	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD) font-source-code-pro_$(VERSION)_*.changes

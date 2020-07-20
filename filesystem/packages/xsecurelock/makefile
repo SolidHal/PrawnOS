@@ -27,7 +27,6 @@ clean:
 	rm -rf *.upload
 	rm -rf *.deb
 	rm -rf *.changes
-	rm -rf *.dsc
 	rm -rf *.build
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
