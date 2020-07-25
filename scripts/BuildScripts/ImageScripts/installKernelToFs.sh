@@ -68,16 +68,18 @@ kernel_size=65536
 #blank the kernel partition first, with 32MiB of zeros
 dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 #now write the new kernel
-dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
-make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
+dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
+# don't install modules for now
+#make -C build/$TARGET/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 
 #install the kernel image package to the chroot so it can be updated by apt later
 #need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
-#maybe it would make more sense to run this on install?
-cp $KERNEL_PACKAGE_PATH $outmnt/
-chroot $outmnt dpkg --unpack $KERNEL_PACKAGE
-chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE.postinst -f
-chroot $outmnt dpkg --configure $KERNEL_PACKAGE
+#maybe it would make more sense to run this on install, but then a usb booting device couldn't upgrade its kernel
+#TODO uncomment and test once arm64 is done
+# cp $KERNEL_PACKAGE_PATH $outmnt/
+# chroot $outmnt dpkg --unpack $KERNEL_PACKAGE
+# chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE.postinst -f
+# chroot $outmnt dpkg --configure $KERNEL_PACKAGE
 
 # the ath9k firmware and initramfs is built into the kernel image, so nothing else must be done
 

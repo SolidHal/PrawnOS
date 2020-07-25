@@ -74,7 +74,8 @@ build_dirs:
 
 .PHONY: kernel_install
 kernel_install: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	$(MAKE) kernel_image_package
+#TODO: uncomment when we have an arm64 bit kernel image
+# $(MAKE) kernel_image_package
 	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE) $(TARGET) $(PRAWNOS_BUILD) prawnos-linux-image-$(TARGET)*.deb
 
 .PHONY: kernel_update
