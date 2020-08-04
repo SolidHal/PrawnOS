@@ -155,3 +155,24 @@ upload the package
 ```
 dput deb.prawnos.com *.changes
 ```
+
+
+### MMC and SD mapping
+veyron-speedy:
+/dev/mmcblk0 : sd
+/dev/mmcblk1 : ???
+/dev/mmcblk2 : emmc
+
+gru-kevin:
+/dev/mmcblk0 : sd
+/dev/mmcblk1 : emmc
+
+gru-bob:
+/dev/mmcblk0 :
+/dev/mmcblk1 : 
+
+### device identification
+cat /sys/firmware/devicetree/base/model
+
+veyron-speedy: "Google Speedy"
+gru-kevin:     "Google Kevin"
