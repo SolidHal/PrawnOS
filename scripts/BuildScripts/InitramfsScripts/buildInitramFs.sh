@@ -40,6 +40,12 @@ fi
 BASE=$1
 RESOURCES=$2
 OUT_DIR=$3
+TARGET=$4
+
+
+
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
 
 outmnt=$(mktemp -d -p "$(pwd)")
 outdev=/dev/loop7
@@ -105,8 +111,6 @@ losetup -P $outdev $BASE
 mount -o noatime ${outdev}p2 $outmnt
 
 
-#armhf libs: arm-linux-gnueabihf
-#arm64 libs: aarch64-linux-gnu
 
 
 #make a skeleton filesystem
@@ -125,8 +129,13 @@ mkdir $initramfs_src/run
 mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 
-mknod -m 622 $initramfs_src/dev/console c 5 1
-mknod -m 622 $initramfs_src/dev/tty c 4 0
+mknod $initramfs_src/dev/console c 5 1
+mknod $initramfs_src/dev/null c 1 3
+mknod $initramfs_src/dev/tty c 5 0
+mknod $initramfs_src/dev/urandom c 1 9
+mknod $initramfs_src/dev/random c 1 8
+mknod $initramfs_src/dev/zero c 1 5
+
 
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
@@ -134,7 +143,21 @@ initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
 #do so **automatigically**
 export -f chroot_get_libs
 export initramfs_binaries
+
 chroot $outmnt /bin/bash -c "chroot_get_libs /InstallResources/initramfs_src $initramfs_binaries"
+
+#have to add libgcc manually since ldd doesn't see it as a requirement :/
+armhf_libs=arm-linux-gnueabihf
+arm64_libs=aarch64-linux-gnu
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    LIBS_DIR=$armhf_libs
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    LIBS_DIR=$arm64_libs
+else
+    echo "no valid target arch specified"
+    exit 1
+fi
+cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/
 
 #add the init script
 cp $RESOURCES/initramfs-init $initramfs_src/init

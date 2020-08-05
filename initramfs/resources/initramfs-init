@@ -82,6 +82,7 @@ then
     rescue_shell debug
 fi
 
+
 if [ -n "$(blkid ${ROOT_DEV}2 | grep crypto_LUKS)" ]
 then
     #decrypt and mount the root filesystem, disable kernel log messages to avoid clashing with the prompt
