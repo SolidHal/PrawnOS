@@ -36,7 +36,7 @@ KERNEL_PACKAGE_PATH=$4
 KERNEL_PACKAGE=$5
 
 outmnt=$(mktemp -d -p "$(pwd)")
-outdev=/dev/loop7
+outdev=$(losetup -f)
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
 #Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build

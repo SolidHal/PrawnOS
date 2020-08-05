@@ -48,7 +48,7 @@ ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
 
 outmnt=$(mktemp -d -p "$(pwd)")
-outdev=/dev/loop7
+outdev=$(losetup -f)
 
 if [ ! -f $BASE ]
 then

@@ -83,7 +83,7 @@ PRAWNOS_BUILD=$8
 
 outmnt=$(mktemp -d -p "$(pwd)")
 
-outdev=/dev/loop5
+outdev=$(losetup -f)
 
 install_resources=$PRAWNOS_FILESYSTEM_RESOURCES/InstallResources
 build_resources=$PRAWNOS_FILESYSTEM_RESOURCES
