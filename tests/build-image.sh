@@ -28,7 +28,8 @@ apt-get update
 ##TODO break out into two tests, one for ARMHF and another for ARM64
 ## even farther future TODO: break into tests for each package, step in build process
 
-apt install make
+#required basic dependencies for build system
+apt install make git
 
 make install_dependencies_yes
 
