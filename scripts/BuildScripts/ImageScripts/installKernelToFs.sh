@@ -69,7 +69,7 @@ dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 #now write the new kernel
 dd if=build/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
-
+make -C build/linux-$KVER ARCH=arm INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
 # the ath9k firmware is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1
