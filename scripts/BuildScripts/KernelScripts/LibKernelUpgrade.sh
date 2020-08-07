@@ -21,6 +21,9 @@
 #                 STATIC CONFIGURATION
 # ------------------------------------------------------
 #
+# Get the project's root, to help define paths
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+#
 # Upstream url to be checked for source updates
 # Gets variable-expanded by filling in the version string "w.x.y"
 # through funcion expand_version_pattern()
@@ -53,6 +56,18 @@ src_tar_sig_pattern="${src_tar_pattern}.sign"
 #
 # The log file path (leave empty to disable logging)
 logfile=
+#
+# The file containing the KVER variable definition
+# that's used for the kernel building process
+kver_file=$PRAWNOS_ROOT/scripts/BuildScripts/BuildCommon.mk
+#
+sed_versnum_pattern='[0-9]\+.[0-9]\+.[0-9]\+'
+#
+# Controls the behaviour of build_latest_kernel()
+# Set to 0 (zero) to skip building the kernel
+# if it's already at the newest version.
+# Set to 1 (one) to build it anyway.
+rebuild_kernel_if_latest=0
 # ------------------------------------------------------
 
 log()
@@ -119,16 +134,11 @@ get_running_kver()
 # $1 = version string in the 'w.x.y' format
 split_version_string()
 {
-#    ver=$1
-#    IFS='.' read -ra vscheme <<< "$ver"
-#    PRAWNOS_KVER_VER=${vscheme[0]}
-#    PRAWNOS_KVER_MAJ=${vscheme[1]}
-#    PRAWNOS_KVER_MIN=${vscheme[2]}
-
+    target=$1
     anynum="[0-9]{1,}"
     match_ver="($anynum)\.($anynum)\.($anynum)"
 
-    if [[ $target =~ $search_fmt ]];then
+    if [[ $target =~ $match_ver ]];then
 	PRAWNOS_KVER_VER=${BASH_REMATCH[1]}
 	PRAWNOS_KVER_MAJ=${BASH_REMATCH[2]}
 	PRAWNOS_KVER_MIN=${BASH_REMATCH[3]}
@@ -255,7 +265,6 @@ parse_version_from_filename()
 
     anynum="[0-9]{1,}"
 
-    set -x
     template_ver=$(expand_version_pattern "$src_tar_pattern" "VER" "$anynum" "$anynum")
     template_maj=$(expand_version_pattern "$src_tar_pattern" "$anynum" "MAJ" "$anynum")
     template_min=$(expand_version_pattern "$src_tar_pattern" "$anynum" "$anynum" "MIN")
@@ -286,8 +295,86 @@ get_latest_src_kver()
 	     return 1
     esac
 
-    echo $fname
-
     parse_version_from_filename "$fname"
 }
 
+# function set_makefile_kver()
+# Replace the KVER variable in the given file
+# with the given value, so that next kernel build
+# uses the given kernel version
+# $1 = full version string
+# $2 = target file
+set_build_kver()
+{
+    sed -i -e "s/KVER=$sed_versnum_pattern\$/KVER=$1/g" "$2"
+    return $?
+}
+
+# function get_build_kver()
+# Extract the current value of $KVER in the given file.
+# Print the version number to stdout.
+# Split the value into "ver" "maj" "min".
+# Set $PRAWNOS_KVER_VER with the main version number ('w').
+# Set $PRAWNOS_KVER_MAJ wiht the major revision number ('x').
+# Set $PRAWNOS_KVER_MIN with the minor revision number ('y').
+# $1 = target file
+get_build_kver()
+{
+    kver=$(sed -n "/KVER=$sed_versnum_pattern\$/p" "$1" \
+	       | sed 's/KVER=//') ||
+	return 1
+
+    echo "$kver"
+
+    split_version_string "$kver"
+    return $?
+}
+
+build_latest_kernel()
+{
+    currver=$(get_build_kver "$kver_file") ||
+	die "FAILED to fetch current KVER version from $kver_file"
+    
+    ver=$(get_latest_src_kver "$PRAWNOS_KVER_VER" "$PRAWNOS_KVER_MAJ") ||
+	die "FAILED to retrieve latest kernel version."
+
+    print_msg "Latest upstream version is $ver"
+
+    if [ "$currver" = "$ver" ]
+    then
+	print_warn "Current KVER is already the latest version!"
+
+	if [ $rebuild_kernel_if_latest = 0 ]
+	then
+	    print_msg "Settings prevent kernel rebuilding. Stopping."
+	    exit 0
+	fi
+	
+	print_warn "Proceeding to build anyway."
+    fi
+
+    print_msg "Beginning kernel build for version $ver..."
+
+    # ------------------------------------------------------------------
+    # explicitly inject the desired version to buildKernel.sh
+    # so that we don't depend upon the hard-coded KVER in BuildCommon.mk
+    # ------------------------------------------------------------------
+    export PRAWNOS_KVER=$ver
+
+    # ------------------------------------------------------------------
+    # alternatively, we can overwrite KVER in BuildCommon.mk
+    #  (uncomment the following lines to do so)
+    # -----------------------------------------------------------------
+    # set_build_kver "$ver" "$kver_file" ||
+    # 	die "FAILED to replace KVER in $kver_file"
+    # print_msg "Replaced KVER=$ver in $kver_file"
+    
+    print_msg "cd'ing into project root..."
+
+    cd "$PRAWNOS_ROOT" ||
+	die "FAILED to cd into $PRAWNOS_ROOT"
+
+    make kernel
+
+    return $?
+}
