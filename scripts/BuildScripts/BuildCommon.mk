@@ -5,6 +5,15 @@ BUILD_COMMON_MK := 1
 #=========================================================================================
 ### MISC GLOBALS
 KVER=5.4.29
+
+ifdef PRAWNOS_KVER
+# Override KVER with the value of global $PRAWNOS_KVER if it's set.
+# This allows the caller to explicitly select the desired KVER
+# by injecting it via "export PRAWNOS_KVER=w.x.y".
+# and not depending on the hard-coded version number here above.
+KVER := $(PRAWNOS_KVER)
+endif
+
 # Otherwise errors are ignored when output is piped to tee:
 SHELL := /bin/bash -o pipefail
 
