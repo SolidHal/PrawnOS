@@ -68,14 +68,19 @@ update_kernel_sig:
 
 ### REAL TARGETS
 
-$(KERNEL_EXTRACTED): $(PRAWNOS_BUILD)
+$(KERNEL_TAR_SIGNATURE): | $(KERNEL_SOURCES)
+	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz.sign -O $(KERNEL_TAR_SIGNATURE)
+
+$(KERNEL_TAR): | $(KERNEL_SOURCES)
 	wget https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz -O $(KERNEL_TAR)
+
+$(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE) | $(PRAWNOS_BUILD)
 	gpg --import $(KERNEL_RESOURCES)/linux-libre-signing-key.gpg
 	gpg --verify $(KERNEL_TAR_SIGNATURE) $(KERNEL_TAR)
 	tar --lzip -xvf $(KERNEL_TAR) -C $(PRAWNOS_BUILD)
 	touch $(KERNEL_EXTRACTED)
 
-$(ATH9K_EXTRACTED): $(PRAWNOS_BUILD)
+$(ATH9K_EXTRACTED): | $(PRAWNOS_BUILD)
 	tar -xvf $(ATH9K_TAR) -C $(PRAWNOS_BUILD)
 	touch $(ATH9K_EXTRACTED)
 
