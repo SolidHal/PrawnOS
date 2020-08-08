@@ -80,6 +80,7 @@ base_debs_download=(
     crda
     dbus-user-session
     dpkg
+    dkms
     dtrx
     eject
     emacs

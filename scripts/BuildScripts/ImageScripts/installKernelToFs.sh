@@ -69,8 +69,6 @@ kernel_size=65536
 dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 #now write the new kernel
 dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
-# don't install modules for now
-#make -C build/$TARGET/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
 
 #install the kernel image package to the chroot so it can be updated by apt later
 #need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
@@ -81,7 +79,10 @@ dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 # chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE.postinst -f
 # chroot $outmnt dpkg --configure $KERNEL_PACKAGE
 
-# the ath9k firmware and initramfs is built into the kernel image, so nothing else must be done
+#install the kernel modules and headers
+make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install
+make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
+# the ath9k firmware is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
