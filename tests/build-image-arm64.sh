@@ -2,6 +2,7 @@
 
 # This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2020 Austin English <austinenglish@gmail.com>
+# Copyright (c) 2020 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
