@@ -1,0 +1,174 @@
+From 2fe0287891216d0479f6236a6ddbf8430f94b10c Mon Sep 17 00:00:00 2001
+From: Addy Ke <addy.ke@rock-chips.com>
+Date: Tue, 11 Jul 2017 17:38:37 +0800
+Subject: [PATCH] BACKPORT: mmc: dw_mmc: introduce timer for broken command
+ transfer over scheme
+
+Per the databook of designware mmc controller 2.70a, table 3-2, cmd
+done interrupt should be fired as soon as the the cmd is sent via
+cmd line. And the response timeout interrupt should be generated
+unconditioinally as well if the controller doesn't receive the resp.
+However that doesn't seem to meet the fact of rockchip specified Soc
+platforms using dwmmc. We have continuously found the the cmd done or
+response timeout interrupt missed somehow which took us a long time to
+understand what was happening. Finally we narrow down the root to
+the reconstruction of sample circuit for dwmmc IP introduced by
+rockchip and the buggy design sweeps over all the existing rockchip
+Socs using dwmmc disastrously.
+
+It seems no way to work around this bug without the proper break-out
+mechanism so that we seek for a parallel pair the same as the handling
+for missing data response timeout, namely dto timer. Adding this cto
+timer seems easily to handle this bug but it's hard to restrict the code
+under the rockchip specified context. So after merging this patch, it
+sets up the cto timer for all the platforms using dwmmc IP which isn't
+ideal but at least we don't advertise new quirk here. Fortunately, no
+obvious performance regression was found by test and the pre-existing
+similar catch-all timer for sdhci has proved it's an acceptant way to
+make the code as robust as possible.
+
+CQ-DEPEND=CL:688511
+BUG=b:35580203
+TEST=Test with problematic SD card
+
+Conflicts:
+	drivers/mmc/host/dw_mmc.c
+	include/linux/mmc/dw_mmc.h
+...due to code reorganization that would be a pain to pick back.
+
+Change-Id: I1a2fde814d5758ada79e7bf5e5d437fc2fe62b56
+Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=196321
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+[shawn.lin: rewrite the code and the commit msg throughout]
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+(cherry picked from commit 03de19212ea3bce221e0e79dba8752ddc5b350cb)
+Reviewed-on: https://chromium-review.googlesource.com/438285
+Reviewed-by: Alexandru M Stan <amstan@chromium.org>
+(cherry picked from commit 560f93e74ae3d0c2d63054de61fd56ed5d4a877f)
+Reviewed-on: https://chromium-review.googlesource.com/699161
+---
+ drivers/mmc/host/dw_mmc.c  | 48 ++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/dw_mmc.h |  2 ++
+ 2 files changed, 50 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ead50f16e79a..4cb7c1c770ae 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -360,6 +360,21 @@ static void dw_mci_wait_while_busy(struct dw_mci *host, u32 cmd_flags)
+ 	}
+ }
+ 
++static inline void dw_mci_set_cto(struct dw_mci *host)
++{
++	unsigned int cto_clks;
++	unsigned int cto_ms;
++
++	cto_clks = mci_readl(host, TMOUT) & 0xff;
++	cto_ms = DIV_ROUND_UP(cto_clks, host->bus_hz / 1000);
++
++	/* add a bit spare time */
++	cto_ms += 10;
++
++	mod_timer(&host->cto_timer,
++		  jiffies + msecs_to_jiffies(cto_ms) + 1);
++}
++
+ static void dw_mci_start_command(struct dw_mci *host,
+ 				 struct mmc_command *cmd, u32 cmd_flags)
+ {
+@@ -372,6 +387,10 @@ static void dw_mci_start_command(struct dw_mci *host,
+ 	wmb(); /* drain writebuffer */
+ 	dw_mci_wait_while_busy(host, cmd_flags);
+ 
++	/* response expected command only */
++	if (cmd_flags & SDMMC_CMD_RESP_EXP)
++		dw_mci_set_cto(host);
++
+ 	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
+ }
+ 
+@@ -2392,6 +2411,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
++			del_timer(&host->cto_timer);
+ 			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+ 			host->cmd_status = pending;
+ 			smp_wmb(); /* drain writebuffer */
+@@ -2435,6 +2455,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & SDMMC_INT_CMD_DONE) {
++			del_timer(&host->cto_timer);
+ 			mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
+ 			dw_mci_cmd_interrupt(host, pending);
+ 		}
+@@ -2838,6 +2859,30 @@ static void dw_mci_cmd11_timer(unsigned long arg)
+ 	tasklet_schedule(&host->tasklet);
+ }
+ 
++static void dw_mci_cto_timer(unsigned long arg)
++{
++	struct dw_mci *host = (struct dw_mci *)arg;
++
++	switch (host->state) {
++	case STATE_SENDING_CMD11:
++	case STATE_SENDING_CMD:
++	case STATE_SENDING_STOP:
++		/*
++		 * If CMD_DONE interrupt does NOT come in sending command
++		 * state, we should notify the driver to terminate current
++		 * transfer and report a command timeout to the core.
++		 */
++		host->cmd_status = SDMMC_INT_RTO;
++		set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
++		tasklet_schedule(&host->tasklet);
++		break;
++	default:
++		dev_warn(host->dev, "Unexpected command timeout, state %d\n",
++			 host->state);
++		break;
++	}
++}
++
+ static void dw_mci_dto_timer(unsigned long arg)
+ {
+ 	struct dw_mci *host = (struct dw_mci *)arg;
+@@ -3017,6 +3062,9 @@ int dw_mci_probe(struct dw_mci *host)
+ 	setup_timer(&host->cmd11_timer,
+ 		    dw_mci_cmd11_timer, (unsigned long)host);
+ 
++	setup_timer(&host->cto_timer,
++		    dw_mci_cto_timer, (unsigned long)host);
++
+ 	setup_timer(&host->dto_timer,
+ 		    dw_mci_dto_timer, (unsigned long)host);
+ 
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index b30e606ae0bf..fdb294e30838 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -125,6 +125,7 @@ struct dw_mci_dma_slave {
+  * @irq: The irq value to be passed to request_irq.
+  * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+  * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
++ * @cto_timer: Timer for broken command transfer over scheme.
+  * @dto_timer: Timer for broken data transfer over scheme.
+  *
+  * Locking
+@@ -232,6 +233,7 @@ struct dw_mci {
+ 	int			sdio_id0;
+ 
+ 	struct timer_list       cmd11_timer;
++	struct timer_list	cto_timer;
+ 	struct timer_list       dto_timer;
+ };
+ 
+-- 
+2.20.1
+

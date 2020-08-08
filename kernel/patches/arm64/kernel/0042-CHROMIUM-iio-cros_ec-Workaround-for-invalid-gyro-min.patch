@@ -1,0 +1,68 @@
+From a74b0b803e6d62de3b7fff8a22b736ede1e0f680 Mon Sep 17 00:00:00 2001
+From: Gwendal Grignou <gwendal@chromium.org>
+Date: Wed, 20 Sep 2017 09:42:23 -0700
+Subject: [PATCH] CHROMIUM: iio: cros_ec: Workaround for invalid gyro min_freq
+
+Until CL:674003, EC indicates the minimal frequency of BMI160 gyro to be
+25mHz (AKA 0.025Hz) instead of 25Hz.
+To prevent CTS testGyroscope_5hz and testGyroscope_10hz to expect gyro
+to work at frequencies less than 25Hz, force the gyro minimal frequency
+at 25Hz when absurdly low.
+
+BUG=b:65000611
+TEST=On Eve, check gyro min_frequency is 25Hz instead of 25mHz.
+Check other frequencies are correct.
+
+Change-Id: I18df3fe6d5c659a59af6d13f484c92e1649eeb26
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+Reviewed-on: https://chromium-review.googlesource.com/676140
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Nick Vaccaro <nvaccaro@google.com>
+Reviewed-by: Nick Vaccaro <nvaccaro@chromium.org>
+(cherry picked from commit b0fe96772284c9c3dca65684fe4862c5c1727580)
+Reviewed-on: https://chromium-review.googlesource.com/680496
+---
+ drivers/iio/common/cros_ec_sensors/cros_ec_sensors.c      | 7 +++++++
+ drivers/iio/common/cros_ec_sensors/cros_ec_sensors_core.c | 5 ++++-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/iio/common/cros_ec_sensors/cros_ec_sensors.c b/drivers/iio/common/cros_ec_sensors/cros_ec_sensors.c
+index 28dd8b7a9b4e..a9a400ffeb4b 100644
+--- a/drivers/iio/common/cros_ec_sensors/cros_ec_sensors.c
++++ b/drivers/iio/common/cros_ec_sensors/cros_ec_sensors.c
+@@ -241,6 +241,13 @@ static int cros_ec_sensors_probe(struct platform_device *pdev)
+ 			break;
+ 		case MOTIONSENSE_TYPE_GYRO:
+ 			channel->type = IIO_ANGL_VEL;
++			/*
++			 * Workaround for b:65000611:
++			 * The BMI160 gyro EC code may report minimal frequency
++			 * at 25mHz instead of 25Hz.
++			 */
++			if (state->core.min_freq < 1000)
++				state->core.min_freq = 25000;
+ 			break;
+ 		case MOTIONSENSE_TYPE_MAG:
+ 			channel->type = IIO_MAGN;
+diff --git a/drivers/iio/common/cros_ec_sensors/cros_ec_sensors_core.c b/drivers/iio/common/cros_ec_sensors/cros_ec_sensors_core.c
+index c9362d0cfcff..87faabe390e4 100644
+--- a/drivers/iio/common/cros_ec_sensors/cros_ec_sensors_core.c
++++ b/drivers/iio/common/cros_ec_sensors/cros_ec_sensors_core.c
+@@ -53,10 +53,13 @@ static void get_default_min_max_freq_and_fifo_size(enum motionsensor_type type,
+ 
+ 	switch (type) {
+ 	case MOTIONSENSE_TYPE_ACCEL:
+-	case MOTIONSENSE_TYPE_GYRO:
+ 		*min_freq = 12500;
+ 		*max_freq = 100000;
+ 		break;
++	case MOTIONSENSE_TYPE_GYRO:
++		*min_freq = 25000;
++		*max_freq = 100000;
++		break;
+ 	case MOTIONSENSE_TYPE_MAG:
+ 		*min_freq = 5000;
+ 		*max_freq = 25000;
+-- 
+2.20.1
+

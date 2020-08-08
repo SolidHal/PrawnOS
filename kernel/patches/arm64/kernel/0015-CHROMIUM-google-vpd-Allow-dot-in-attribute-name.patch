@@ -1,0 +1,51 @@
+From 957fe325ab67745223fbaf3462952d9f3ed1db45 Mon Sep 17 00:00:00 2001
+From: Hung-Te Lin <hungte@chromium.org>
+Date: Tue, 15 Aug 2017 12:24:12 +0800
+Subject: [PATCH] CHROMIUM: google: vpd: Allow 'dot' in attribute name.
+
+During the manufacturing process, the 'dot' (.) is needed for VPD key
+names.  The VPD specification for shipping products will still not allow
+names with dot to be approved, but there is no harm for VPD driver to
+export these attributes.
+
+BUG=chromium:698362
+TEST=Add a VPD entry "factory.end_SMT" and find it in sysfs path:
+    /sys/firmware/rw/factory.end_SMT
+
+Change-Id: I579fc5551df1716c32eff56ce8e3f08ae9f3bdcd
+Signed-off-by: Hung-Te Lin <hungte@chromium.org>
+Reviewed-on: https://chromium-review.googlesource.com/614935
+Reviewed-by: Shen-En Shih <petershih@chromium.org>
+Reviewed-by: Wei-Ning Huang <wnhuang@chromium.org>
+---
+ drivers/firmware/google/vpd.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/google/vpd.c b/drivers/firmware/google/vpd.c
+index 619f4bae474f..bff7d26bdced 100644
+--- a/drivers/firmware/google/vpd.c
++++ b/drivers/firmware/google/vpd.c
+@@ -78,8 +78,9 @@ static ssize_t vpd_attrib_read(struct file *filp, struct kobject *kobp,
+  *
+  * The VPD specification supports only [a-zA-Z0-9_]+ characters in key names but
+  * old firmware versions may have entries like "S/N" which are problematic when
+- * exporting them as sysfs attributes. These keys present in old firmwares are
+- * ignored.
++ * exporting them as sysfs attributes. These keys present in old firmware images
++ * are ignored. Meanwhile, during manufacturing some intermediate VPD values
++ * with "." in name may be created and we do want to export them as well.
+  *
+  * Returns VPD_OK for a valid key name, VPD_FAIL otherwise.
+  *
+@@ -93,7 +94,7 @@ static int vpd_section_check_key_name(const u8 *key, s32 key_len)
+ 	while (key_len-- > 0) {
+ 		c = *key++;
+ 
+-		if (!isalnum(c) && c != '_')
++		if (!isalnum(c) && c != '_' && c != '.')
+ 			return VPD_FAIL;
+ 	}
+ 
+-- 
+2.20.1
+

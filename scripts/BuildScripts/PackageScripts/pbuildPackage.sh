@@ -100,5 +100,3 @@ else
                       --othermirror "$PRAWNOS_LOCAL_APT_SOURCE"
 fi
 
-mkdir -p $PRAWNOS_LOCAL_APT_REPO
-cp $PACKAGE_DIR/$PACKAGE_NAME $PRAWNOS_LOCAL_APT_REPO

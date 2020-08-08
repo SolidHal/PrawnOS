@@ -1,0 +1,50 @@
+Source: prawnos-linux-headers-armhf
+Section: kernel
+Priority: optional
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: bc, rsync, kmod, cpio, bison, flex | flex:native , , libssl-dev:native
+
+Package: linux-headers-5.4.29-3
+Architecture: armhf
+Section: devel
+Description: PrawnOS Linux-libre headers
+ This package provides kernel header files
+ .
+ This is useful for people who need to build external modules
+
+Package: prawnos-linux-headers-armhf
+Architecture: armhf
+Section: devel
+Depends: linux-headers-5.4.29-3
+Description: PrawnOS Linux-libre headers for armhf
+ This package provides kernel header files for armhf
+ .
+ This is useful for people who need to build external modules
+
+Package: prawnos-linux-libc-dev-armhf
+Architecture: armhf
+Section: devel
+Depends: linus-libc-dev
+Description: Linux support headers for userspace development
+ This package provides userspaces headers from the GNU Linux-libre.  These headers
+ are used by the installed headers for GNU glibc and other system libraries.
+Multi-Arch: same
+
+Package: linux-libc-dev
+Section: devel
+Provides: linux-kernel-headers
+Architecture: armhf
+Description: Linux support headers for userspace development
+ This package provides userspaces headers from the GNU Linux-libre.  These headers
+ are used by the installed headers for GNU glibc and other system libraries.
+Multi-Arch: same
+
+
+#### ignored packages
+Package: linux-image-5.4.29-3
+Architecture: armhf
+Section: devel
+Description: PrawnOS Linux-libre headers
+ This package provides kernel header files
+ .
+ This is useful for people who need to build external modules

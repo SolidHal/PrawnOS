@@ -5,12 +5,15 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
-PACKAGE_NAME := mosys_$(VERSION)_armhf
+PACKAGE_NAME := mosys_$(VERSION)_$(TARGET)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 
 PACKAGE_LOCAL_BUILD_DEPS := flashmap
 
-default: $(PACKAGE_NAME_DEB)
+default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
+
+$(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB): $(PRAWNOS_BUILD_DIRS) $(PACKAGE_NAME_DEB)
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_DEB):
 	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD) $(PACKAGE_NAME_DEB) \
@@ -24,7 +27,6 @@ clean:
 	rm -rf *.upload
 	rm -rf *.deb
 	rm -rf *.changes
-	rm -rf *.dsc
 	rm -rf *.build
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
@@ -35,4 +37,4 @@ install:
 
 .PHONY: upload
 upload:
-	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD) $(PACKAGE_NAME).changes

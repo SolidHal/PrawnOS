@@ -41,26 +41,55 @@ then
     echo "No PrawnOS initramfs supplied"
     exit 1
 fi
+if [ -z "$" ]
+then
+    echo "No PrawnOS target arch supplied"
+    exit 1
+fi
 
 KVER=$1
 RESOURCES=$2
 BUILD_DIR=$3
 INITRAMFS=$4
+TARGET=$5
+
+
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
 
 cd $BUILD_DIR
 make mrproper
+
+#this arch nonsense is obnoxious.
+# armhf is just "arm" to the kernel and vbutil,
+# arm64 is what the kernel uses, but aarch64 is what vbutil uses
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    CROSS_COMPILER=arm-none-eabi-
+    # kernel doesn't differentiate between arm and armhf
+    KERNEL_ARCH=arm
+    VBUTIL_ARCH=$KERNEL_ARCH
+    IMAGE=zImage
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    KERNEL_ARCH=$ARCH_ARM64
+    VBUTIL_ARCH=aarch64
+    IMAGE=Image
+else
+    echo "no valid target arch specified"
+fi
 
 #copy in the resources, initramfs
 cp $INITRAMFS .
 cp $RESOURCES/config .config
 cp $RESOURCES/kernel.its .
-make -j $(($(nproc) +1))  CROSS_COMPILE=arm-none-eabi- ARCH=arm zImage modules dtbs
+make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
+make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 vbutil_kernel --pack vmlinux.kpart \
               --version 1 \
               --vmlinuz vmlinux.uimg \
-              --arch arm \
+              --arch $VBUTIL_ARCH \
               --keyblock /usr/share/vboot/devkeys/kernel.keyblock \
               --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
               --config $RESOURCES/cmdline \

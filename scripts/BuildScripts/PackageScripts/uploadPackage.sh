@@ -21,4 +21,21 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
-dput deb.prawnos.com *.changes
+#example ~/.dput.cf
+# [deb.prawnos.com]
+# fqdn = deb.prawnos.com
+# method = scp
+# login = debian
+# incoming = /var/www/repos/apt/debian/incoming
+# allow_unsigned_uploads = true
+# ssh_config_options = Port=2222
+
+
+
+if [ -z "$1" ]
+then
+    echo "No .changes file supplied"
+    exit 1
+fi
+
+dput deb.prawnos.com $1

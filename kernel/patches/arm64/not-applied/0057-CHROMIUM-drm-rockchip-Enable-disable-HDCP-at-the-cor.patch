@@ -1,0 +1,305 @@
+From 81cdba7fa278824565dd40c7b5748dd214ee2942 Mon Sep 17 00:00:00 2001
+From: Sean Paul <seanpaul@chromium.org>
+Date: Tue, 26 Sep 2017 13:48:56 -0400
+Subject: [PATCH] CHROMIUM: drm/rockchip: Enable/disable HDCP at the correct
+ times
+
+This patch adds new calls for HDCP disable/enable such that HDCP is
+properly disabled/restored across hotplugs (both dongle and cable) and
+power on/off.
+
+BUG=b:63816472
+TEST=Use hdcp test script below:
+	attr=/sys/class/drm/card1-DP-1/content_protection
+	printf "Testing HDCP...\n"
+	while [ 1 ]; do
+            printf "\rSetting state to desired...  "
+            echo "Desired" > $attr
+            sleep $(perl -e 'printf("%.1f\n", rand() * 3)')
+            printf "\rSetting state to undesired..."
+            echo "Undesired" > $attr
+            sleep $(perl -e 'printf("%.1f\n", rand() * 3)')
+	done
+
+Change-Id: I4bcc7decc43f7b648054d841efbade7315e785fe
+Signed-off-by: Sean Paul <seanpaul@chromium.org>
+Reviewed-on: https://chromium-review.googlesource.com/657941
+Commit-Ready: Sean Paul <seanpaul@google.com>
+Tested-by: Sean Paul <seanpaul@google.com>
+Reviewed-by: Kristian H. Kristensen <hoegsberg@chromium.org>
+(cherry picked from commit 39b7f62b683ae23a9193ff3a0e006311a98a1ddf)
+Reviewed-on: https://chromium-review.googlesource.com/740583
+Reviewed-by: Philip Chen <philipchen@chromium.org>
+Commit-Queue: Philip Chen <philipchen@chromium.org>
+Tested-by: Philip Chen <philipchen@chromium.org>
+---
+ drivers/gpu/drm/rockchip/cdn-dp-core.c | 141 ++++++++++++++++++-------
+ drivers/gpu/drm/rockchip/cdn-dp-core.h |   1 +
+ 2 files changed, 103 insertions(+), 39 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/cdn-dp-core.c b/drivers/gpu/drm/rockchip/cdn-dp-core.c
+index 82f76caad385..9f20b5cabcf0 100644
+--- a/drivers/gpu/drm/rockchip/cdn-dp-core.c
++++ b/drivers/gpu/drm/rockchip/cdn-dp-core.c
+@@ -245,6 +245,49 @@ static int cdn_dp_start_hdcp1x_auth(struct cdn_dp_device *dp)
+ 	return ret;
+ }
+ 
++static int cdn_dp_set_hdcp_drm_property(struct cdn_dp_device *dp, uint64_t val)
++{
++	struct drm_connector *connector = &dp->connector;
++	struct drm_mode_config *mc = &connector->dev->mode_config;
++	int ret;
++
++	ret = drm_object_property_set_value(&connector->base,
++					    mc->content_protection_property,
++					    val);
++	if (ret)
++		DRM_DEV_ERROR(dp->dev, "Failed to set CP prop to %lld/%d\n",
++			      val, ret);
++	return ret;
++}
++
++static int cdn_dp_stop_hdcp1x_auth(struct cdn_dp_device *dp)
++{
++	int ret;
++
++	if (!dp->active)
++		return 0;
++
++	ret = cdn_dp_hdcp_tx_configuration(dp, HDCP_TX_1, false);
++	if (!ret)
++		DRM_DEV_INFO(dp->dev, "HDCP has been disabled\n");
++	else
++		DRM_DEV_ERROR(dp->dev, "Disable HDCP failed %d\n", ret);
++
++	if (!dp->hdcp_desired)
++		return ret;
++	/*
++	 * In the case where we're disabling hdcp while it's still desired,
++	 * set the property value back to DESIRED to reflect that hdcp is
++	 * no longer enabled
++	 */
++	ret = cdn_dp_set_hdcp_drm_property(dp,
++			DRM_MODE_CONTENT_PROTECTION_DESIRED);
++	if (ret)
++		DRM_DEV_ERROR(dp->dev, "Failed set CP property to DESIRED %d\n",
++				ret);
++	return ret;
++}
++
+ static struct cdn_dp_port *cdn_dp_connected_port(struct cdn_dp_device *dp)
+ {
+ 	struct cdn_dp_port *port;
+@@ -312,34 +355,36 @@ static void cdn_dp_connector_destroy(struct drm_connector *connector)
+ 	drm_connector_cleanup(connector);
+ }
+ 
+-static int cdn_dp_set_content_protection(struct cdn_dp_device *dp,
+-					  struct drm_mode_object *obj,
+-					  struct drm_property *property,
++static int cdn_dp_set_content_protection(struct drm_connector *connector,
+ 					  uint64_t val)
+ {
++	struct cdn_dp_device *dp = connector_to_dp(connector);
++	struct drm_property *property;
++	struct drm_mode_config *mode_config = &connector->dev->mode_config;
+ 	int ret;
+ 
+-	/* Only the driver can set to enabled */
+-	if (val == DRM_MODE_CONTENT_PROTECTION_ENABLED)
+-		return -EINVAL;
++	property = mode_config->content_protection_property;
+ 
+ 	/* If we're in a state transition already, wait for it to finish */
+ 	cancel_delayed_work_sync(&dp->hdcp_event_work);
+ 
+ 	mutex_lock(&dp->lock);
+ 
+-	if (val == DRM_MODE_CONTENT_PROTECTION_DESIRED) {
++	ret = cdn_dp_set_hdcp_drm_property(dp, val);
++	if (ret)
++		goto out;
++
++	dp->hdcp_desired = val == DRM_MODE_CONTENT_PROTECTION_DESIRED;
++	if (val == DRM_MODE_CONTENT_PROTECTION_DESIRED)
+ 		ret = cdn_dp_start_hdcp1x_auth(dp);
+-		if (ret)
+-			DRM_DEV_ERROR(dp->dev, "Enable HDCP failed %d\n", ret);
+-	} else {
+-		ret = cdn_dp_hdcp_tx_configuration(dp, HDCP_TX_1, false);
+-		if (!ret)
+-			DRM_DEV_INFO(dp->dev, "HDCP has been disabled\n");
+-		else
+-			DRM_DEV_ERROR(dp->dev, "Disable HDCP failed %d\n", ret);
+-	}
++	else
++		ret = cdn_dp_stop_hdcp1x_auth(dp);
++
++	if (ret)
++		DRM_DEV_ERROR(dp->dev, "%s HDCP failed %d\n",
++				dp->hdcp_desired ? "Enable" : "Disable", ret);
+ 
++out:
+ 	mutex_unlock(&dp->lock);
+ 
+ 	return ret;
+@@ -349,14 +394,14 @@ static int cdn_dp_connector_set_property(struct drm_connector *connector,
+ 						struct drm_property *property,
+ 						uint64_t val)
+ {
+-	struct cdn_dp_device *dp = connector_to_dp(connector);
+-	int ret = 0;
+-
+-	if (strcmp(property->name, "Content Protection") == 0)
+-		ret = cdn_dp_set_content_protection(dp, &connector->base,
+-						    property, val);
++	if (strcmp(property->name, "Content Protection") == 0) {
++		/* Only the driver can set to enabled */
++		if (val == DRM_MODE_CONTENT_PROTECTION_ENABLED)
++			return -EINVAL;
+ 
+-	return ret;
++		return cdn_dp_set_content_protection(connector, val);
++	}
++	return 0;
+ }
+ 
+ static int cdn_dp_connector_atomic_get_property(
+@@ -612,9 +657,17 @@ static int cdn_dp_disable(struct cdn_dp_device *dp)
+ {
+ 	int ret, i;
+ 
++	WARN_ON(!mutex_is_locked(&dp->lock));
++
+ 	if (!dp->active)
+ 		return 0;
+ 
++	if (dp->hdcp_desired) {
++		ret = cdn_dp_stop_hdcp1x_auth(dp);
++		if (ret)
++			DRM_DEV_ERROR(dp->dev, "Failed to stop hdcp%d\n", ret);
++	}
++
+ 	for (i = 0; i < dp->ports; i++)
+ 		cdn_dp_disable_phy(dp, dp->port[i]);
+ 
+@@ -796,6 +849,12 @@ static void cdn_dp_encoder_enable(struct drm_encoder *encoder)
+ 		DRM_DEV_ERROR(dp->dev, "Failed to valid video %d\n", ret);
+ 		goto out;
+ 	}
++
++	if (dp->hdcp_desired) {
++		ret = cdn_dp_start_hdcp1x_auth(dp);
++		if (ret)
++			DRM_DEV_ERROR(dp->dev, "hdcp start failed %d\n", ret);
++	}
+ out:
+ 	mutex_unlock(&dp->lock);
+ 	if (!ret)
+@@ -1096,6 +1155,8 @@ static void cdn_dp_pd_event_work(struct work_struct *work)
+ 	if (!cdn_dp_connected_port(dp)) {
+ 		DRM_DEV_INFO(dp->dev, "Not connected. Disabling cdn\n");
+ 		dp->connected = false;
++		if (dp->hdcp_desired)
++			cdn_dp_stop_hdcp1x_auth(dp);
+ 
+ 	/* Connected but not enabled, enable the block */
+ 	} else if (!dp->active) {
+@@ -1104,12 +1165,16 @@ static void cdn_dp_pd_event_work(struct work_struct *work)
+ 		if (ret) {
+ 			DRM_DEV_ERROR(dp->dev, "Enable dp failed %d\n", ret);
+ 			dp->connected = false;
++			if (dp->hdcp_desired)
++				cdn_dp_stop_hdcp1x_auth(dp);
+ 		}
+ 
+ 	/* Enabled and connected to a dongle without a sink, notify userspace */
+ 	} else if (!cdn_dp_check_sink_connection(dp)) {
+ 		DRM_DEV_INFO(dp->dev, "Connected without sink. Assert hpd\n");
+ 		dp->connected = false;
++		if (dp->hdcp_desired)
++			cdn_dp_stop_hdcp1x_auth(dp);
+ 
+ 	/* Enabled and connected with a sink, re-train if requested */
+ 	} else if (!cdn_dp_check_link_status(dp)) {
+@@ -1136,6 +1201,14 @@ static void cdn_dp_pd_event_work(struct work_struct *work)
+ 					      ret);
+ 			}
+ 		}
++
++		if (dp->hdcp_desired) {
++			ret = cdn_dp_start_hdcp1x_auth(dp);
++			if (ret)
++				DRM_DEV_ERROR(dp->dev,
++					      "Failed to re-enable hdcp %d\n",
++					      ret);
++		}
+ 	}
+ 
+ out:
+@@ -1164,22 +1237,12 @@ static int cdn_dp_pd_event(struct notifier_block *nb,
+ 	return NOTIFY_DONE;
+ }
+ 
+-static int cdn_dp_set_hdcp_drm_property(struct cdn_dp_device *dp, uint64_t val)
+-{
+-	struct drm_connector *connector = &dp->connector;
+-	struct drm_mode_config *mc = &connector->dev->mode_config;
+-
+-	return drm_object_property_set_value(&connector->base,
+-					     mc->content_protection_property,
+-					     val);
+-}
+-
+ static bool cdn_dp_hdcp_authorize(struct cdn_dp_device *dp)
+ {
+ 	bool auth_done = false;
+ 	u16 tx_status;
+ 	u32 sw_event;
+-	int ret;
++	int ret = 0;
+ 
+ 	mutex_lock(&dp->lock);
+ 
+@@ -1195,8 +1258,6 @@ static bool cdn_dp_hdcp_authorize(struct cdn_dp_device *dp)
+ 	sw_event = cdn_dp_get_event(dp);
+ 
+ 	if (sw_event & HDCP_TX_STATUS_EVENT) {
+-		auth_done = true;
+-
+ 		ret = cdn_dp_hdcp_tx_status_req(dp, &tx_status);
+ 		if (ret)
+ 			goto out;
+@@ -1205,11 +1266,13 @@ static bool cdn_dp_hdcp_authorize(struct cdn_dp_device *dp)
+ 				HDCP_TX_STATUS_ERROR(tx_status));
+ 			goto out;
+ 		} else if (tx_status & HDCP_TX_STATUS_AUTHENTICATED) {
+-			cdn_dp_set_hdcp_drm_property(dp,
++			ret = cdn_dp_set_hdcp_drm_property(dp,
+ 				DRM_MODE_CONTENT_PROTECTION_ENABLED);
++			if (!ret) {
++				auth_done = true;
++				DRM_DEV_INFO(dp->dev, "HDCP is enabled\n");
++			}
+ 			goto out;
+-		} else {
+-			auth_done = false;
+ 		}
+ 	}
+ 
+diff --git a/drivers/gpu/drm/rockchip/cdn-dp-core.h b/drivers/gpu/drm/rockchip/cdn-dp-core.h
+index bd9f31183241..b802548d5198 100644
+--- a/drivers/gpu/drm/rockchip/cdn-dp-core.h
++++ b/drivers/gpu/drm/rockchip/cdn-dp-core.h
+@@ -126,6 +126,7 @@ struct cdn_dp_device {
+ 	u8 dpcd[DP_RECEIVER_CAP_SIZE];
+ 	bool sink_has_audio;
+ 
++	bool hdcp_desired;
+ 	struct cdn_dp_hdcp_key_1x key;
+ 	struct delayed_work hdcp_event_work;
+ };
+-- 
+2.20.1
+

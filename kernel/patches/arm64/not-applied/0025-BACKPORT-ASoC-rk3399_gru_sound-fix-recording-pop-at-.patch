@@ -1,0 +1,98 @@
+From 30016d36629f100e3b924cb241e4ac3c0fb35e1e Mon Sep 17 00:00:00 2001
+From: Wonjoon Lee <woojoo.lee@samsung.com>
+Date: Thu, 22 Sep 2016 21:50:06 +0800
+Subject: [PATCH] BACKPORT: ASoC: rk3399_gru_sound: fix recording pop at first
+ attempt
+
+Pop happens when mclk applied but dmic's own boot-time
+Specify dmic delay times in dt to make sure
+clocks are ready earlier than dmic working
+
+(cherry picked from commit 3a6f9dce6116cc54e31dc10d176ceecb1a7e4e7f)
+
+Conflicts:
+	Documentation/devicetree/bindings/sound/rockchip,rk3399-gru-sound.txt
+	sound/soc/rockchip/rk3399_gru_sound.c
+
+BUG=b:64542435
+TEST=audio capture with DMIC still works
+  arecord -D plughw:0,1 -f dat /tmp/x.wav
+  aplay /tmp/x.wav
+    => audio was captured
+
+Change-Id: I38ff435db36847782dac87a539e7a3149698c4f9
+Signed-off-by: Wonjoon Lee <woojoo.lee@samsung.com>
+Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-on: https://chromium-review.googlesource.com/634183
+Reviewed-by: Dylan Reid <dgreid@chromium.org>
+---
+ .../bindings/sound/rockchip,rk3399-gru-sound.txt   |  7 +++++++
+ sound/soc/rockchip/rk3399_gru_sound.c              | 14 ++++++++++++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/sound/rockchip,rk3399-gru-sound.txt b/Documentation/devicetree/bindings/sound/rockchip,rk3399-gru-sound.txt
+index 83af5405b9a0..8734106dafe9 100644
+--- a/Documentation/devicetree/bindings/sound/rockchip,rk3399-gru-sound.txt
++++ b/Documentation/devicetree/bindings/sound/rockchip,rk3399-gru-sound.txt
+@@ -7,10 +7,17 @@ Required properties:
+ - rockchip,codec: The phandle of the MAX98357A/RT5514/DA7219 codecs and of the
+   DP encoder node
+ 
++Optional properties:
++- dmic-wakeup-delay-ms : specify delay time (ms) for DMIC ready.
++  If this option is specified, which means it's required dmic need
++  delay for DMIC to ready so that rt5514 can avoid recording before
++  DMIC send valid data
++
+ Example:
+ 
+ sound {
+ 	compatible = "rockchip,rk3399-gru-sound";
+ 	rockchip,cpu = <&i2s0 &i2s2>;
+ 	rockchip,codec = <&max98357a &rt5514 &da7219 &cdn_dp>;
++	dmic-wakeup-delay-ms = <20>;
+ };
+diff --git a/sound/soc/rockchip/rk3399_gru_sound.c b/sound/soc/rockchip/rk3399_gru_sound.c
+index 3a2d203dd659..1b715c93ec1e 100644
+--- a/sound/soc/rockchip/rk3399_gru_sound.c
++++ b/sound/soc/rockchip/rk3399_gru_sound.c
+@@ -39,6 +39,8 @@
+ 
+ #define SOUND_FS	256
+ 
++unsigned int rt5514_dmic_delay;
++
+ static struct snd_soc_jack rockchip_sound_jack;
+ 
+ static const struct snd_soc_dapm_widget rockchip_dapm_widgets[] = {
+@@ -124,6 +126,9 @@ static int rockchip_sound_rt5514_hw_params(struct snd_pcm_substream *substream,
+ 		return ret;
+ 	}
+ 
++	/* Wait for DMIC stable */
++	msleep(rt5514_dmic_delay);
++
+ 	return 0;
+ }
+ 
+@@ -417,6 +422,15 @@ static int rockchip_sound_probe(struct platform_device *pdev)
+ 		return -ENODEV;
+ 	}
+ 
++	/* Set DMIC delay */
++	ret = device_property_read_u32(&pdev->dev, "dmic-delay",
++					&rt5514_dmic_delay);
++	if (ret) {
++		rt5514_dmic_delay = 0;
++		dev_dbg(&pdev->dev,
++			"no optional property 'dmic-delay' found, default: no delay\n");
++	}
++
+ 	cpu_node = of_parse_phandle(pdev->dev.of_node, "rockchip,cpu", 1);
+ 	if (!cpu_node) {
+ 		dev_err(&pdev->dev, "Property 'rockchip,cpu 1' missing or invalid\n");
+-- 
+2.20.1
+
