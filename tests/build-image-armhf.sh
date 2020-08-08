@@ -32,7 +32,7 @@ apt-get update
 #required basic dependencies for build system
 apt install -y make git
 
-make install_dependencies_yes
+make install_dependencies_yes TARGET=$TEST_TARGET
 
 # Note: there's an error for /proc/modules, but at least building the image works fine:
 # libkmod: ERROR ../libkmod/libkmod-module.c:1657 kmod_module_new_from_loaded: could not open /proc/modules: No such file or directory
