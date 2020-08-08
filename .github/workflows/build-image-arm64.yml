@@ -1,6 +1,6 @@
 # FIXME: currently just builds it, eventually, should use qemu to try to run
 # the image (potentially as a separate action)
-name: build-prawnos-image
+name: build-prawnos-image-arm64
 
 on: [push]
 jobs:
