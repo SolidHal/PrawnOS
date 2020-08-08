@@ -13,7 +13,7 @@ jobs:
       - name: build image
         run: docker run --mount type=bind,source=$PWD,target=/PrawnOS
              --privileged=true -v/dev:/dev debian:buster
-             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA"
+             /bin/bash /PrawnOS/tests/build-image-armhf.sh "$GITHUB_SHA"
       - name: publish image
         uses: actions/upload-artifact@v2
         with:
