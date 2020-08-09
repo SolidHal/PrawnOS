@@ -30,5 +30,5 @@ fi
 BUILD_DIR=$1
 
 cd $BUILD_DIR
-make toolchain
-make -C target_firmware
+(unset TARGET; make toolchain)
+(unset TARGET; make -C target_firmware)
