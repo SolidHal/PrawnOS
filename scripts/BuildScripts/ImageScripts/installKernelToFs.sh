@@ -80,7 +80,8 @@ dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 # chroot $outmnt dpkg --configure $KERNEL_PACKAGE
 
 #install the kernel modules and headers
-make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install
+#we dont make any modules yet
+# make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install
 make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
 # the ath9k firmware is built into the kernel image, so nothing else must be done
 
