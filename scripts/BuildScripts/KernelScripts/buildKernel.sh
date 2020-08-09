@@ -103,8 +103,8 @@ if [ ! $RESULT -eq 0 ]; then
     rm -f vmlinux.kpart
 fi
 
-KERNEL_SIZE=$(stat -ch %s "vmlinux.kpart")
-if [ $(expr $KERNEL_SIZE \> $MAX_KERNEL_SIZE) ]; then
+KERNEL_SIZE=$(stat -c %s "vmlinux.kpart")
+if [ "$KERNEL_SIZE" -gt "$MAX_KERNEL_SIZE" ]; then
     mv vmlinux.kpart oversized_vmlinux.kpart
     echo "kernel larger than max kernel size!"
     exit 1

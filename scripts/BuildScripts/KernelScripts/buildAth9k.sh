@@ -29,6 +29,12 @@ fi
 
 BUILD_DIR=$1
 
+unset TARGET
+unset arm64
+unset armhf
+unset MAKEFLAGS
 cd $BUILD_DIR
-(unset TARGET; make toolchain)
-(unset TARGET; make -C target_firmware)
+echo PRINT ENV
+env
+echo TARGET = "$TARGET" && make toolchain
+echo TARGET = "$TARGET" && make -C target_firmware
