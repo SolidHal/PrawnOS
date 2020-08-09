@@ -57,6 +57,9 @@ TARGET=$5
 ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
 
+#this is the same as the kernel partition size
+MAX_KERNEL_SIZE=$(expr 65536 \* 512)
+
 cd $BUILD_DIR
 make mrproper
 
@@ -98,4 +101,11 @@ vbutil_kernel --pack vmlinux.kpart \
 RESULT=$?
 if [ ! $RESULT -eq 0 ]; then
     rm -f vmlinux.kpart
+fi
+
+KERNEL_SIZE=$(stat -ch %s "vmlinux.kpart")
+if [ $(expr $KERNEL_SIZE \> $MAX_KERNEL_SIZE) ]; then
+    mv vmlinux.kpart oversized_vmlinux.kpart
+    echo "kernel larger than max kernel size!"
+    exit 1
 fi
