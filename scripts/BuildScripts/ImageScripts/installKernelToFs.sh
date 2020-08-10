@@ -35,6 +35,22 @@ TARGET=$3
 KERNEL_PACKAGE_PATH=$4
 KERNEL_PACKAGE=$5
 
+
+
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
+#this arch nonsense is obnoxious.
+# armhf is just "arm" to the kernel and vbutil,
+# arm64 is what the kernel uses, but aarch64 is what vbutil uses
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    # kernel doesn't differentiate between arm and armhf
+    KERNEL_ARCH=arm
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    KERNEL_ARCH=$ARCH_ARM64
+else
+    echo "no valid target arch specified"
+fi
+
 outmnt=$(mktemp -d -p "$(pwd)")
 outdev=$(losetup -f)
 
@@ -81,8 +97,8 @@ dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
 
 #install the kernel modules and headers
 #we dont make any modules yet
-# make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install
-make -C build/$TARGET/linux-$KVER ARCH=$TARGET INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
+# make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_MOD_PATH=$outmnt modules_install
+make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
 # the ath9k firmware is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1

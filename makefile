@@ -103,7 +103,7 @@ install_dependencies:
     bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
     debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
     gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
-    parted patch pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+    parted patch pbuilder qemu-user-static rsync sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 
 .PHONY: install_dependencies_yes
 install_dependencies_yes:
