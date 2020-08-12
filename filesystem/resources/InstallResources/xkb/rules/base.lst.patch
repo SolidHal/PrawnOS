@@ -1,5 +1,5 @@
---- evdev.lst	2019-02-11 20:25:45.000000000 +0100
-+++ evdev.lst.chromebook	2019-10-09 17:24:33.479737679 +0200
+--- /mnt/sd/xkborig/rules/base.lst	2019-02-11 00:00:00.000000000 +0100
++++ base.lst	2020-04-01 08:16:35.400556053 +0200
 @@ -187,7 +187,15 @@
    teck227         Truly Ergonomic 227
    teck229         Truly Ergonomic 229
@@ -17,3 +17,19 @@
    teck227         Truly Ergonomic Computer Keyboard Model 227 (Wide Alt keys)
    teck229         Truly Ergonomic Computer Keyboard Model 229 (Standard sized Alt keys, additional Super and Menu key)
  
+@@ -293,6 +301,7 @@
+ 
+ ! variant
+   chr             us: Cherokee
++  chromebook_de   us: English (US, German characters for Chromebooks)
+   euro            us: English (US, euro on 5)
+   intl            us: English (US, intl., with dead keys)
+   alt-intl        us: English (US, alt. intl.)
+@@ -699,6 +708,7 @@
+   rstu_ru         ua: Russian (Ukraine, standard RSTU)
+   homophonic      ua: Ukrainian (homophonic)
+   extd            gb: English (UK, extended, with Win keys)
++  chromebook_de   gb: English (UK, German characters for Chromebooks)
+   intl            gb: English (UK, intl., with dead keys)
+   dvorak          gb: English (UK, Dvorak)
+   dvorakukp       gb: English (UK, Dvorak, with UK punctuation)

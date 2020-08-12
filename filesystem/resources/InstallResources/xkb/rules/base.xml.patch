@@ -1,5 +1,5 @@
---- evdev.xml	2019-02-11 20:25:45.000000000 +0100
-+++ evdev.xml.chromebook	2019-10-09 17:17:03.873093072 +0200
+--- /mnt/sd/xkborig/rules/base.xml	2019-02-11 00:00:00.000000000 +0100
++++ base.xml	2020-04-01 07:32:24.703856077 +0200
 @@ -1318,10 +1318,66 @@
      </model>
      <model>
@@ -71,3 +71,45 @@
      </model>
      <model>
        <configItem>
+@@ -1342,7 +1398,6 @@
+     <layout>
+       <configItem>
+         <name>us</name>
+-        
+         <shortDescription>en</shortDescription>
+         <description>English (US)</description>
+         <languageList>
+@@ -1353,7 +1408,6 @@
+         <variant>
+           <configItem>
+             <name>chr</name>
+-            
+             <shortDescription>chr</shortDescription>
+             <description>Cherokee</description>
+             <languageList>
+@@ -1363,6 +1417,12 @@
+         </variant>
+         <variant>
+           <configItem>
++            <name>chromebook_de</name>
++            <description>English (US, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
++          <configItem>
+             <name>euro</name>
+             <description>English (US, euro on 5)</description>
+           </configItem>
+@@ -5480,6 +5540,12 @@
+           </configItem>
+         </variant>
+         <variant>
++          <configItem>
++            <name>chromebook_de</name>
++            <description>English (UK, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
+           <configItem>
+             <name>intl</name>
+             <description>English (UK, intl., with dead keys)</description>
