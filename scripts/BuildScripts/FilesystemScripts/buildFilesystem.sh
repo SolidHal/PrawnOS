@@ -246,7 +246,11 @@ cp $build_resources_apt/deb.prawnos.com.gpg.key $outmnt/InstallResources/
 chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
+#Copy splash screen
 cp $build_resources/PrawnOS-* $outmnt/
+
+#Copy /etc/issue
+cp $build_resources/issue $outmnt/etc/issue
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
@@ -315,6 +319,10 @@ echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
+
+#Copy systemd config. This is on the end to make sure that no package overrides this
+cp $build_resources/system.conf $outmnt/etc/systemd/
+
 
 # do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1

@@ -20,7 +20,6 @@
 
 #add this to start shell at desired point
 rescue_shell() {
-    [ "{$1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
     [ "{$1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
     echo "Something went wrong. Dropping to a shell." > /dev/tty1
     exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
@@ -65,14 +64,11 @@ mount -n -t devtmpfs devtmpfs  /dev
 # get the root device, so we can find the boot partiton
 UNPARSED=$(cmdline root)
 ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-echo ${ROOT_PARTUUID} > /dev/tty1
 BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-echo ${BLKID} > /dev/tty1
 #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
 #Just want everything before the 1
 ROOT_DEV="${BLKID%1:*}"
 
-echo ${ROOT_DEV} > /dev/tty1
 
 # happens when kernel takes its time looking for devices
 if [ -z ${ROOT_DEV} ]
@@ -81,9 +77,7 @@ then
     # get the root device, so we can find the boot partiton
     UNPARSED=$(cmdline root)
     ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-    echo ${ROOT_PARTUUID} > /dev/tty1
     BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-    echo ${BLKID} > /dev/tty1
     #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
     ROOT_DEV="${BLKID%1:*}"
     # if device is still not seen, bail out
@@ -115,8 +109,12 @@ fi
 RES=$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x')
 if [ -f /newroot/PrawnOS-$(RES) ]
 then
-	dmesg -n 0
-	dd if=/newroot/PrawnOS-$RES of=/dev/fb0
+    dmesg -n 1
+    echo -e '\033[?17;0;0c' > /dev/tty1 # magically make cursor disappear
+    # PrawnOS-1280x800, PrawnOS-1920x1080, PrawnOS-1366x768, do it twice because for some reason it doesn't do it one time
+    dd status=none if=/newroot/PrawnOS-${RES} of=/dev/fb0
+    sleep 1
+    dd status=none if=/newroot/PrawnOS-${RES} of=/dev/fb0
 fi
 
 umount /sys
