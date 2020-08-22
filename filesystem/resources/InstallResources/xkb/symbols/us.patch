@@ -10,7 +10,7 @@
 +xkb_symbols "chromebook_de" {
 +
 +    include "us"
-+    name[Group1]="Chromebook German Characters (US)";
++    name[Group1]="German Characters for Chromebooks (US)";
 +
 +    key <AD03>	{ [         e,          E,     EuroSign,     Eacute ]	};
 +
