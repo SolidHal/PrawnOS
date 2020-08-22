@@ -98,6 +98,10 @@ patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
 patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
 patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
 
+patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
+
 cp  $DIR/xkb/keyboard /etc/default/keyboard
 
 #disable ertm for csr8510 bluetooth, issue #117
