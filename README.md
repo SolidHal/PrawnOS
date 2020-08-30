@@ -243,6 +243,12 @@ dhclient wlan0
 
 When that finishes, you should have access to the internet. 
 
+Alternatively, one may use `nmtui` and it's menus to connect; or issue the following nmcli commands:
+```
+nmcli device wifi list
+nmcli device wifi connect "Network_name" password "network_password"
+```
+
 
 ## Upgrading PrawnOS
 
