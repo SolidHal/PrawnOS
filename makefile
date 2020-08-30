@@ -1,4 +1,4 @@
-# This file is part of PrawnOS (http://www.prawnos.com)
+# This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
@@ -13,27 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-KVER=5.4.29
-ifeq ($(DEBIAN_SUITE),)
-DEBIAN_SUITE=buster
-endif
-ifeq ($(PRAWNOS_SUITE),)
-PRAWNOS_SUITE=Shiba
-endif
-OUTNAME=PrawnOS-$(PRAWNOS_SUITE)-c201.img
-BASE=$(OUTNAME)-BASE
-
-
-PRAWNOS_ROOT := $(shell pwd)
-PBUILDER_CHROOT=$(PRAWNOS_ROOT)/build/prawnos-pbuilder-armhf-base.tgz
-PBUILDER_RC=$(PRAWNOS_ROOT)/resources/BuildResources/pbuilder/prawnos-pbuilder.rc
-
-# Otherwise errors are ignored when output is piped to tee:
-SHELL=/bin/bash -o pipefail
+.DEFAULT_GOAL := image
+PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
+include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
+include $(PRAWNOS_ROOT)/initramfs/makefile
+include $(PRAWNOS_ROOT)/kernel/makefile
+include $(PRAWNOS_ROOT)/filesystem/makefile
 
 #Usage:
 #run make image
-#this will generate two images named OUTNAME and OUTNAME-BASE
+#this will generate two images named PRAWNOS_IMAGE and PRAWNOS_IMAGE-BASE
 #-BASE is only the filesystem with no kernel.
 
 
@@ -45,117 +34,77 @@ SHELL=/bin/bash -o pipefail
 .PHONY: clean
 clean:
 	@echo "Enter one of:"
-	@echo "	clean_kernel - which deletes the untar'd kernel folder from build"
-	@echo "	clean_ath - which deletes the untar'd ath9k driver folder from build"
-	@echo "	clean_img - which deletes the built PrawnOS image, this is ran when make image is ran"
-	@echo " clean_basefs - which deletes the built PrawnOS base image"
-	@echo " clean_initramfs - which deletes the built PrawnOS initramfs image that gets injected into the kernel"
-	@echo "	clean_all - which does all of the above"
-	@echo "	in most cases none of these need to be used manually as most cleanup steps are handled automatically"
+#TODO
 
-.PHONY: clean_kernel
-clean_kernel:
-	rm -rf build/linux-$(KVER)
-
-.PHONY: clean_ath
-clean_ath:
-	rm -rf build/open-ath9k-htc-firmware
-
-.PHONY: clean_img
-clean_img:
-	rm -f $(OUTNAME)
+.PHONY: clean_image
+clean_image:
+	rm -f $(PRAWNOS_IMAGE)
 
 .PHONY: clean_basefs
 clean_basefs:
-	rm -r $(BASE)
-
-.PHONY: clean_initramfs
-clean_initramfs:
-	rm -r build/PrawnOS-initramfs.cpio.gz
+	rm -f $(PRAWNOS_IMAGE_BASE)
 
 .PHONY: clean_pbuilder
 clean_pbuilder:
 	rm -r build/prawnos-pbuilder-armhf-base.tgz
 
 .PHONY: clean_all
-clean_all:
-	$(MAKE) clean_kernel
-	$(MAKE) clean_ath
-	$(MAKE) clean_img
-	$(MAKE) clean_basefs
-	$(MAKE) clean_initramfs
-	$(MAKE) clean_pbuilder
+clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs clean_pbuilder
 
 #:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
 .PHONY: build_dirs
 build_dirs:
-	mkdir -p build/logs/
+	mkdir -p $(PRAWNOS_BUILD_DIRS)
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
-.PHONY: kernel
-kernel:
-	$(MAKE) build_dirs
-	rm -rf build/logs/kernel-log.txt
-	./scripts/buildKernel.sh $(KVER) 2>&1 | tee build/logs/kernel-log.txt
+#included from kernel/makefile
 
-.PHONY: kernel_config
-kernel_config:
-	scripts/crossmenuconfig.sh $(KVER)
-
-.PHONY: patch_kernel
-patch_kernel:
-	scripts/patchKernel.sh
 
 #:::::::::::::::::::::::::::::: initramfs :::::::::::::::::::::::::::::::::
-.PHONY: initramfs
-initramfs:
-	$(MAKE) build_dirs
-	rm -rf build/logs/initramfs-log.txt
-	./scripts/buildInitramFs.sh $(BASE) 2>&1 | tee build/logs/initramfs-log.txt
+#included from initramfs/makefile
 
 #:::::::::::::::::::::::::::::: filesystem ::::::::::::::::::::::::::::::::
 #makes the base filesystem image without kernel. Only make a new one if the base image isnt present
-.PHONY: filesystem
-filesystem:
-	$(MAKE) build_dirs
-	rm -rf build/logs/fs-log.txt
-	$(MAKE) pbuilder_create
-	[ -f $(BASE) ] || ./scripts/buildFilesystem.sh $(KVER) $(DEBIAN_SUITE) $(BASE) 2>&1 | tee build/logs/fs-log.txt
+#included from filesystem/makefile
 
+#:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
+#included from filesystem/makefile
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
-.PHONY: kernel_inject
-kernel_inject: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	scripts/injectKernelIntoFS.sh $(KVER) $(OUTNAME)
+.PHONY: kernel_install
+kernel_install: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
+#TODO: uncomment when we have an arm64 bit kernel image
+# $(MAKE) kernel_image_package
+	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE) $(TARGET) $(PRAWNOS_BUILD) prawnos-linux-image-$(TARGET)*.deb
 
 .PHONY: kernel_update
 kernel_update:
-	$(MAKE) clean_img
+	$(MAKE) clean_image
 	$(MAKE) initramfs
 	$(MAKE) kernel
-	cp $(BASE) $(OUTNAME)
-	$(MAKE) kernel_inject
+	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
+	$(MAKE) kernel_install
 
 .PHONY: image
 image:
-	$(MAKE) clean_img
+	$(MAKE) clean_image
 	$(MAKE) filesystem
 	$(MAKE) initramfs
 	$(MAKE) kernel
-	cp $(BASE) $(OUTNAME)
-	$(MAKE) kernel_inject
+	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
+	$(MAKE) kernel_install
 
+#:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
-#:::::::::::::::::::::::::::::: pbuilder management :::::::::::::::::::::::
-.PHONY: pbuilder_create
-pbuilder_create:
-	$(MAKE) $(PBUILDER_CHROOT)
+.PHONY: install_dependencies
+install_dependencies:
+	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
+    bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
+    debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
+    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+    parted patch pbuilder qemu-user-static rsync sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 
-$(PBUILDER_CHROOT): $(PBUILDER_RC)
-	pbuilder create --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
-
-#TODO: should only update if not updated for a day
-.PHONY: pbuilder_update
-pbuilder_update:
-	pbuilder update --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
+.PHONY: install_dependencies_yes
+install_dependencies_yes:
+	$(MAKE) AUTO_YES="-y" install_dependencies

@@ -1,0 +1,5 @@
+prawnos-linux-headers-armhf (5.4.29-3-1) buster; urgency=low
+
+  * Initial prawnos linux kernel headers, glibc
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 22:55:18 -0700

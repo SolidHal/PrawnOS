@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 
-# This file is part of PrawnOS (http://www.prawnos.com)
+# This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
@@ -16,13 +16,56 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+
+### SHARED CONST AND VARS
+# TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
+device_veyron_speedy="Google Speedy"
+device_veyron_minnie="Google Minnie"
+device_gru_kevin="Google Kevin"
+device_gru_bob="Google Bob"
+
+get_device() {
+    local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
+    echo $device
+}
+
+get_emmc_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk2;;
+        $device_veyron_minnie) local devname=mmcblk2;;
+        $device_gru_kevin) local devname=mmcblk1;;
+        $device_gru_bob) local devname=mmcblk1;;
+        * ) echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+
+get_sd_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk0;;
+        $device_veyron_minnie) local devname=mmcblk0;;
+        $device_gru_kevin) local devname=mmcblk0;;
+        $device_gru_bob) local devname=mmcblk0;;
+        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+### END SHARED CONST AND VARS
+
+
 DIR=/InstallResources
+# Import the package lists
+source $DIR/package_lists.sh
 
 cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
+    read -r -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
     case $XL in
         [Gg]* ) DE=gnome; break;;
         [Xx]* ) DE=xfce; break;;
@@ -35,17 +78,13 @@ done
 dpkg-reconfigure tzdata
 
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y xorg acpi-support tasksel dpkg librsvg2-common xorg xserver-xorg-input-libinput alsa-utils anacron avahi-daemon eject iw libnss-mdns xdg-utils dconf-cli dconf-editor sudo dtrx emacs sysfsutils bluetooth
-DEBIAN_FRONTEND=noninteractive apt install -y network-manager-gnome network-manager-openvpn network-manager-openvpn-gnome
-DEBIAN_FRONTEND=noninteractive apt install -y libegl-mesa0 libegl1-mesa libgl1-mesa-dri libglapi-mesa libglu1-mesa libglx-mesa0
+DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
-# Browsers
-DEBIAN_FRONTEND=noninteractive apt install -y firefox-esr
-DEBIAN_FRONTEND=noninteractive apt install -y chromium
-
-[ "$DE" = "gnome" ] && apt install -y gdm3 gnome-session dbus-user-session gnome-shell-extensions nautilus nautilus-admin file-roller gnome-software gnome-software-plugin-flatpak gedit gnome-system-monitor gnome-logs evince gnome-disk-utility gnome-terminal fonts-cantarell gnome-tweaks seahorse papirus-icon-theme materia-gtk-theme eog
-[ "$DE" = "xfce" ] && apt install -y lightdm mousepad vlc xfce4 dbus-user-session system-config-printer tango-icon-theme xfce4-power-manager xfce4-terminal xfce4-goodies numix-gtk-theme plank accountsservice papirus-icon-theme
-[ "$DE" = "lxqt" ] && apt install -y lightdm lxqt pavucontrol-qt
+[ "$DE" = "gnome" ] && apt install -y ${gnome_debs_download[@]}
+[ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]} ${prawnos_base_debs_prebuilt_install[@]}
+[ "$DE" = "lxqt" ] && apt install -y ${lxqt_debs_download[@]}
 
 #install the keymap by patching xkb, then bindings work for any desktop environment
 cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
@@ -76,8 +115,6 @@ then
   # gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
   #Tap to click is natural
   # gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
-
-
 fi
 
 if [ "$DE" = "xfce" ]
@@ -85,13 +122,6 @@ then
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
   apt remove -y light-locker
   apt purge -y light-locker
-
-  #xsecurelock is the lightest weight, actually functional screen locker I have been able to find
-  # light-locker is outright broken, and xfce4-screensaver crashes if system
-  # is told to sleep at lid close, and activate lock
-  # gnome-screensaver shows the desktop for a fraction of a second at wakeup
-  # xscreensaver works as well, if you prefer that but is less simple
-  DEBIAN_FRONTEND=noninteractive apt install -y xsecurelock
 
   #Install packages not in an apt repo
   dpkg -i $DIR/xfce-themes/*
@@ -134,11 +164,6 @@ then
   cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
   cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
-  #Install the source code pro font for spacemacs
-  [ -d /usr/share/fonts/opentype ] || mkdir /usr/share/fonts/opentype
-  cp -rf $DIR/fonts/* /usr/share/fonts/opentype/
-  fc-cache
-
   #Install inputrc
   cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
 
@@ -148,13 +173,24 @@ fi
 
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
-cp -rf $DIR/default.pa /etc/pulse/default.pa
-# Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
-echo "flat-volumes = no" > /etc/pulse/daemon.conf
-cp -rf $DIR/sound.sh /etc/acpi/sound.sh
-cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
-mkdir /etc/X11/xorg.conf.d/
-cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
+device_model=$(get_device)
+
+if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
+then
+    cp -rf $DIR/veyron/default.pa /etc/pulse/default.pa
+    # Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
+    echo "flat-volumes = no" > /etc/pulse/daemon.conf
+    cp -rf $DIR/veyron/sound.sh /etc/acpi/sound.sh
+    cp -rf $DIR/veyron/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
+    mkdir /etc/X11/xorg.conf.d/
+    cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
+fi
+
+if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+then
+    echo "load-module module-alsa-sink device=sysdefault" > /etc/pulse/default.pa
+fi
+
 
 apt clean -y && apt autoremove --purge -y
 
@@ -186,7 +222,7 @@ done
 #Force a safe username
 while true; do
     echo "-----Enter new username:-----"
-    read username
+    read -r username
     #ensure no whitespace
     case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
 done
@@ -194,7 +230,7 @@ until adduser $username --gecos ""
 do
     while true; do
         echo "-----Enter new username:-----"
-        read username
+        read -r username
         #ensure no whitespace
         case $username in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
     done

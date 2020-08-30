@@ -1,0 +1,1 @@
+root=PARTUUID=%U/PARTNROFF=1 rootfstype=ext4 rootwait ro net.ifnames=0 console=ttyS2,115200n8 earlyprintk=ttyS2,115200n8 console=tty1

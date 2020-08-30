@@ -1,0 +1,48 @@
+From 4b021a4a7ae61b88201398a4ded19107cfa8e083 Mon Sep 17 00:00:00 2001
+From: Sean Paul <seanpaul@chromium.org>
+Date: Fri, 8 Sep 2017 09:47:43 -0400
+Subject: [PATCH] FROMLIST: drm/rockchip: Add forward declarations to
+ cdn_dp_device and audio_info
+
+Add forward declarations in cdn-dp-reg.h to cdn_dp_device and audio_info
+
+BUG=None
+TEST=None
+
+Signed-off-by: Sean Paul <seanpaul@chromium.org>
+(from https://lists.freedesktop.org/archives/dri-devel/2017-September/152108.html)
+Change-Id: I8b12f76a5fb441ad5353259b4c74d161b1d4693e
+Reviewed-on: https://chromium-review.googlesource.com/657939
+Commit-Ready: Sean Paul <seanpaul@google.com>
+Tested-by: Sean Paul <seanpaul@google.com>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Kristian H. Kristensen <hoegsberg@chromium.org>
+(cherry picked from commit 6d7c5bf105dc80d135ed52a57ea9766f54230eee)
+Reviewed-on: https://chromium-review.googlesource.com/729350
+Tested-by: Douglas Anderson <dianders@chromium.org>
+(cherry picked from commit 99d749472dea954f87c84caf7d6d95c2e3b5fad8)
+Reviewed-on: https://chromium-review.googlesource.com/741363
+Reviewed-by: Philip Chen <philipchen@chromium.org>
+Commit-Queue: Philip Chen <philipchen@chromium.org>
+Tested-by: Philip Chen <philipchen@chromium.org>
+---
+ drivers/gpu/drm/rockchip/cdn-dp-reg.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/cdn-dp-reg.h b/drivers/gpu/drm/rockchip/cdn-dp-reg.h
+index 7911430339e2..2e9333645885 100644
+--- a/drivers/gpu/drm/rockchip/cdn-dp-reg.h
++++ b/drivers/gpu/drm/rockchip/cdn-dp-reg.h
+@@ -489,6 +489,9 @@ enum HDCP_TX_SUPPORT {
+ 	HDCP_TX_BOTH,
+ };
+ 
++struct cdn_dp_device;
++struct audio_info;
++
+ void cdn_dp_clock_reset(struct cdn_dp_device *dp);
+ 
+ void cdn_dp_set_fw_clk(struct cdn_dp_device *dp, unsigned long clk);
+-- 
+2.20.1
+

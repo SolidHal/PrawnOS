@@ -1,5 +1,5 @@
 <p align="center">
-<img src="/resources/BuildResources/logo/newPrawn_transparent_high_compression.png" alt="PrawnOS" data-canonical-src="/resources/BuildResources/logo/newPrawn_transparent_high_compression.png" width="200" height="200" /></p>
+<img src="/filesystem/resources/logo/newPrawn_transparent_high_compression.png" alt="PrawnOS" data-canonical-src="/resources/BuildResources/logo/newPrawn_transparent_high_compression.png" width="200" height="200" /></p>
 
 <h1 align="center">
 PrawnOS
@@ -53,9 +53,9 @@ These packages are required:
 ``` 
         apt install --no-install-recommends --no-install-suggests \
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
-        debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
-        gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
-        pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+        debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
+        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+        parted patch pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 ```
 
 ## Build
@@ -71,6 +71,87 @@ Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the 
 ```
 sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M status=progress; sync
 ```
+
+## Enabling Developer Mode
+
+Enabling developer mode is required to install PrawnOS. Note that enabling developer mode WILL ERASE ALL LOCALLY STORED DATA.
+
+### Shut down
+First, shutdown and power off the chromebook. Once powered off, hold the 'ESCAPE' and 'REFRESH' (F3) buttons, and while continuing to hold those two buttons, press and release the 'POWER' button.
+
+### First screen
+The chromebook should power on and show a white screen, with a message saying:
+"Chrome OS is missing or damaged. Please insert a recovery USB stick or SD card."
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode1.png" alt="screen1" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode1.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Second screen
+A second screen will appear, saying:
+"To turn OS verification OFF, press ENTER. Your system will reboot and local data will be cleared. To go back, press ESC."
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode2.png" alt="screen2" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode2.png" /></p>
+
+As it says, press 'ENTER'.
+
+### Third screen
+The third screen will inform you that OS verification is disabled:
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Fourth screen
+Your system is now transitioning to developer mode. You have 30 seconds to cancel this by powering off your chromebook:
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode4.png" alt="screen4" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode4.png" /></p>
+
+Otherwise, sit back and wait.
+
+### Fifth screen
+Your chromebook is now erasing local data and preparing developer mode:
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode5.png" alt="screen5" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode5.png" /></p>
+This takes approximately 10 minutes. The system will reboot on its own.
+
+### Sixth screen
+Your system will again show the 'OS verification is off' screen:
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" alt="screen3" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode3.png" /></p>
+
+Press 'CTRL' + 'D' to continue.
+
+### Seventh screen
+Your chromebook should now show the welcome screen. You'll notice that 'debugging features' are now possible:
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode7.png" alt="screen7" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode7.png" /></p>
+
+Clicking 'Enable debugging features' doesn't actually work here, so don't try. Instead, press 'CTRL' + 'ALT' + 'REFRESH' (F3) to open a vtty.
+
+### Eighth screen
+<p align="center">
+<img src="/resources/DocumentationResources/DeveloperModeResources/devmode8.png" alt="screen8" data-canonical-src="/resources/DocumentationResources/DeveloperModeResources/devmode8.png" /></p>
+
+Log in as 'root', there is no password. Finally, enable booting PrawnOS from USB/SD:
+
+To enable booting unsigned media:
+
+`# crosssystem dev_boot_signed_only=0`
+
+To enable USB booting:
+
+`# crosssystem dev_boot_usb=1`
+
+Finally, reboot or shutdown the system:
+
+`# reboot`
+
+On each subsequent boot, you'll see the 'OS verification is off' screen.
+
+## Booting/Installing PrawnOS
+
+Now you can boot your PrawnOS USB/SD card. After rebooting/powering on, at the 'OS verification is off' screen, press 'CTRL' + 'U' to boot from USB/SD. Or 'CTRL' + 'D' to boot from the internal emmc.
 
 ## Installing
 
@@ -89,11 +170,10 @@ The second option is to boot from the external USB or SD device you wrote the im
 * Expanding the PrawnOS image allows you to boot PrawnOS from the same USB or SD device that you wrote the image to
 * Expansion does _NOT_ support root encryption. For root encryption the filesystem must be written after the encrypted root is created.
 
-
 ### Install to internal drive (emmc) or to SD card or USB drive
 Now on the C201, insert the drive you wrote the PrawnOS image to. Press `control+u` at boot to boot from the external drive. 
 
-If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting. A quick search should get you some good guides, but if you're having issues feel free to open an issue here on github. 
+If you are running stock coreboot and haven't flashed Libreboot, you will first have to enable developer mode and enable USB / external device booting:
 
 At the prompt, login as root. The password is blank. 
 
@@ -161,17 +241,32 @@ dhclient wlan0
 ```
 
 When that finishes, you should have access to the internet. 
-### Upgrading the kernel
 
-The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, initramfs, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
 
-To use it, write the new PrawnOS image to a USB drive or SD card, boot the laptop to it by pressing `control+u` at boot, navigate to the `/InstallResources` folder, and run the script. 
+## Upgrading PrawnOS
+
+The components of PrawnOS are now packaged, making upgrades much easier. You have two options:
+
+### build the packages yourself
+- filesystem packages are located under `filesystem/packages`
+all can be built by calling `make filesystem_packages_clean && make filesystem_packages`
+or they can be built individually by going to the specific package and running `make clean && make`
+
+once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
+
+- kernel packages are located under `filesystem/packages`
+the kernel image package can be built by running `make` in the `prawnos-linux-image-armhf` directory
+once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
+
+### use the PrawnOS APT repo to update the PrawnOS packages automatically
+
+`sudo apt upgrade` 
 
 ## Documentation
 Some useful things can be found in `DOCUMENTATION.md`
 
 
-## Make options, developer tools
+### Make options, developer tools
 (All of these should be run as root or with sudo to avoid issues) 
 The makefile automates many processes that make debugging the kernel or the filesystem easier. 
 To begin with:
@@ -184,9 +279,9 @@ To begin with:
 
 `make initramfs` builds the PrawnOS-initramfs.cpio.gz, which can be found in /build
 
-`make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_inject
+`make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_install
 
-`make kernel_inject` Injects a newly built kernel into a previously built PrawnOS.img located in the root of the checkout. Usually, this will be a copy of the -BASE image made by make filesystem. Only use this if you already have a built kernel and filesystem -BASE image. 
+`make kernel_install` Installs a newly built kernel into a previously built PrawnOS.img-BASE.
 
 
 You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Buster`.  For example, to use Debian stretch, you can build with `sudo PRAWNOS_SUITE=stretch make image`.  Note that only `stretch` and `buster` have been tested.
@@ -194,7 +289,7 @@ You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
 
-## Crossystem / mosys
+### Crossystem / mosys
 
 crossystem is installed from the debian repos and mosys (a dependency of crossystem, and all around useful tool) is built and installed as part of the PrawnOS filesystem build.
 
@@ -236,13 +331,6 @@ On older PrawnOS releases or other distributions, you can run the `buildCrossyst
 sudo /InstallScripts/buildCrossystem.sh
 ```
 
-### GPU Support
-
-Watch this link for GPU support:
-https://gitlab.freedesktop.org/panfrost
-and this one for progress updates:
-https://rosenzweig.io/blog/gpu-feed.xml
-
 ### Build the WiFi dongle into the laptop
 
 Sick of having a USB dongle on the outside of your machine for wi-fi? Want to be able to use two USB devices at once without a hub? 
@@ -252,6 +340,9 @@ Warning: decent soldering skills required
 ## Troubleshooting
 
 The pulse audio mixer will only run if you are logged in as a non-root account. This is an issue (feature?) of pulse audio
+
+## Discussion, Support, and IRC
+IRC - You can find PrawnOS on the #prawnos channel on freenode
 
 ## Credits and Legal Information
 

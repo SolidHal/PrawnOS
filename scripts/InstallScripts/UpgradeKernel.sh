@@ -1,11 +1,10 @@
-
 #!/bin/bash
 
 #Replace the PrawnOS linux kernel that is installed on the internal emmc storage with
 #the PrawnOS linux kernel from the booted usb device or sd card
 
 
-# This file is part of PrawnOS (http://www.prawnos.com)
+# This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
@@ -20,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-RESOURCES=/InstallResources
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk0 for an sd card
 BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
 
