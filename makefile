@@ -51,11 +51,6 @@ clean_pbuilder:
 .PHONY: clean_all
 clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs clean_pbuilder
 
-#:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
-.PHONY: build_dirs
-build_dirs:
-	mkdir -p $(PRAWNOS_BUILD_DIRS)
-
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 #included from kernel/makefile
 
