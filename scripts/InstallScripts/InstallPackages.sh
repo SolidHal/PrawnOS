@@ -91,12 +91,16 @@ cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
 cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
 cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
 
-patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.chromebook.patch
-patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.chromebook.patch
-patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.chromebook.patch
+patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
+patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
+patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
+patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
+patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
+patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
+
+patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
 
 cp  $DIR/xkb/keyboard /etc/default/keyboard
 

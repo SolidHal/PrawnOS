@@ -1,22 +1,20 @@
---- base.xml	2019-02-11 20:25:45.000000000 +0100
-+++ base.xml.chromebook	2019-10-09 17:20:59.304823438 +0200
-@@ -1316,12 +1316,68 @@
-        <vendor>SteelSeries</vendor>
-      </configItem>
+--- /mnt/sd/xkborig/rules/evdev.xml	2019-02-11 00:00:00.000000000 +0100
++++ evdev.xml	2020-04-01 07:32:24.703856077 +0200
+@@ -1318,10 +1318,66 @@
      </model>
-+    <model>
-+      <configItem>
-+        <name>chromebook</name>
-+        <description>Chromebook (most models) | Search overlay</description>
-+        <vendor>Google</vendor>
-+      </configItem>
-+    </model>
      <model>
        <configItem>
 -       <name>chromebook</name>
 -       <description>Chromebook</description>
 -       <vendor>Google</vendor>
 -     </configItem>
++        <name>chromebook</name>
++        <description>Chromebook (most models) | Search overlay</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
 +        <name>chromebook_ralt</name>
 +        <description>Chromebook (most models) | Right alt overlay</description>
 +        <vendor>Google</vendor>
@@ -73,3 +71,45 @@
      </model>
      <model>
        <configItem>
+@@ -1342,7 +1398,6 @@
+     <layout>
+       <configItem>
+         <name>us</name>
+-        
+         <shortDescription>en</shortDescription>
+         <description>English (US)</description>
+         <languageList>
+@@ -1353,7 +1408,6 @@
+         <variant>
+           <configItem>
+             <name>chr</name>
+-            
+             <shortDescription>chr</shortDescription>
+             <description>Cherokee</description>
+             <languageList>
+@@ -1363,6 +1417,12 @@
+         </variant>
+         <variant>
+           <configItem>
++            <name>chromebook_de</name>
++            <description>English (US, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
++          <configItem>
+             <name>euro</name>
+             <description>English (US, euro on 5)</description>
+           </configItem>
+@@ -5480,6 +5540,12 @@
+           </configItem>
+         </variant>
+         <variant>
++          <configItem>
++            <name>chromebook_de</name>
++            <description>English (UK, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
+           <configItem>
+             <name>intl</name>
+             <description>English (UK, intl., with dead keys)</description>

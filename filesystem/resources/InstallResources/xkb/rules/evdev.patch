@@ -1,5 +1,5 @@
---- evdev	2019-02-11 20:25:45.000000000 +0100
-+++ evdev.chromebook	2019-10-09 17:15:08.145221521 +0200
+--- /mnt/sd/xkborig/rules/evdev	2019-02-11 00:00:00.000000000 +0100
++++ evdev	2019-10-23 10:06:25.480000040 +0200
 @@ -97,6 +97,13 @@
   $jollamodels   =       evdev+jolla(jolla)
    olpc          =       evdev+olpc(olpc)
