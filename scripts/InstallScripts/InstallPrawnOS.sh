@@ -241,12 +241,12 @@ emmc_partition() {
     if [ $DISK_SZ = 30785536 ]
     then
         echo Detected Emmc Type 1
-        sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap || true
 
     elif [ $DISK_SZ = 30777344 ]
     then
         echo Detected Emmc Type 2
-        sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+        sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap || true
     else
         echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
         echo Try a fallback value? This will allow installation to continue, at the cost of a very small amoutnt of disk space. This may not work.
@@ -255,7 +255,7 @@ emmc_partition() {
             case $yn,$REPLY in
                 Yes,*|*,Yes )
                     echo Trying Emmc Type 2
-                    sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap
+                    sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap || true
                     break
                     ;;
                 * )
