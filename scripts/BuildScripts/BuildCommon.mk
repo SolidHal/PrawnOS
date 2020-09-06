@@ -76,11 +76,10 @@ PRAWNOS_FILESYSTEM := $(PRAWNOS_ROOT)/filesystem
 ### BUILD DIRS
 
 PRAWNOS_BUILD_LOGS := $(PRAWNOS_BUILD)/logs
+PRAWNOS_BUILD_SOURCES := $(PRAWNOS_BUILD)/sources
 PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE := $(PRAWNOS_BUILD)/debootstrap-apt-cache
 PRAWNOS_BUILD_CHROOT_APT_CACHE := $(PRAWNOS_BUILD)/chroot-apt-cache
 PRAWNOS_LOCAL_APT_REPO := $(PRAWNOS_BUILD)/prawnos-local-apt-repo
-
-PRAWNOS_BUILD_DIRS := $(PRAWNOS_BUILD_LOGS) $(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE) $(PRAWNOS_BUILD_CHROOT_APT_CACHE) $(PRAWNOS_LOCAL_APT_REPO) $(PRAWNOS_BUILD_SHARED)
 
 ### PRAWNOS IMAGES
 ifeq ($(DEBIAN_SUITE),)
@@ -158,11 +157,38 @@ PRAWNOS_INITRAMFS_IMAGE := $(PRAWNOS_BUILD)/PrawnOS-initramfs.cpio.gz
 ### ATH9K
 PRAWNOS_ATH9K_BUILD := $(PRAWNOS_BUILD_SHARED)/open-ath9k-htc-firmware
 
+### WGET
+#keeping the server timestamps confuses make, causing needless rebuilds
+WGET_OPTS := --no-use-server-timestamps
+
 #=========================================================================================
 
 
 #Place all shared make rules below
 #=========================================================================================
+
+### Build directory rules, use with "|" to make them "order only" prerequisites
+
+$(PRAWNOS_BUILD_SHARED):
+	mkdir -p $(PRAWNOS_BUILD_SHARED)
+
+$(PRAWNOS_BUILD):
+	mkdir -p $(PRAWNOS_BUILD)
+
+$(PRAWNOS_BUILD_LOGS): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_LOGS)
+
+$(PRAWNOS_BUILD_SOURCES): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_SOURCES)
+
+$(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE)
+
+$(PRAWNOS_BUILD_CHROOT_APT_CACHE): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_CHROOT_APT_CACHE)
+
+$(PRAWNOS_LOCAL_APT_REPO): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
 
 #=========================================================================================
 
