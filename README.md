@@ -230,25 +230,12 @@ Say no at the prompt to install packages and a desktop environment.
 Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 
 #### Connecting to WiFi in a basic environment
-If have a basic environment without xfce or lxqt you can connect to WiFi using wpa_supplicant by running the following commands:
-```
-wpa_passphrase <Network_name> <network_password> > wpa.conf
-wpa_supplicant -i wlan0 -c wpa.conf
-```
-Now switch to another tty by pressing ctrl+alt+f2
-Login as root, and run
-```
-dhclient wlan0
-```
-
-When that finishes, you should have access to the internet. 
-
-Alternatively, one may use `nmtui` and it's menus to connect; or issue the following nmcli commands:
+If have a basic environment without xfce or lxqt you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
 ```
 nmcli device wifi list
 nmcli device wifi connect "Network_name" password "network_password"
 ```
-
+When that finishes, you should have access to the internet. 
 
 ## Upgrading PrawnOS
 
