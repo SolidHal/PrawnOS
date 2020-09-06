@@ -113,7 +113,25 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
+# Retry a command up to 5 times, else fail
+retry_until() {
+    command=("$@")
+
+    NUM_RETRIES=0
+    MAX_RETRIES=5
+
+    until [ $NUM_RETRIES -eq 5 ] || ${command[@]}; do
+        echo Apt failure, trying again in 5 seconds
+        ((NUM_RETRIES++))
+        sleep 5
+    done
+    if [ "$NUM_RETRIES" -ge "$MAX_RETRIES" ]; then
+        exit 1
+    fi
+}
+
 # Download, cache externally, and optionally install the specified packages
+# also implements retries since the build dockers seem to fail randomly
 # 2: mount of the chroot
 # 3: list of packages in install
 # 4: if true, download, cache, and install. If false just download and cache
@@ -126,10 +144,11 @@ apt_install() {
   shift
   package_list=("$@")
 
-  chroot $outmnt apt install -y -d ${package_list[@]}
+  retry_until chroot $outmnt apt install -y -d ${package_list[@]}
+
   cp "$outmnt/var/cache/apt/archives/"* "$PRAWNOS_BUILD/chroot-apt-cache/" || true
   if [ "$install" = true ]; then
-      chroot $outmnt apt install -y ${package_list[@]}
+      retry_until chroot $outmnt apt install -y ${package_list[@]}
   fi
 }
 
