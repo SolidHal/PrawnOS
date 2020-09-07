@@ -115,19 +115,22 @@ trap cleanup INT TERM EXIT
 
 # Retry a command up to 5 times, else fail
 retry_until() {
+    #must clear and unclear the "e" flag to avoid trapping into cleanup before retrying
+    set +e
     command=("$@")
 
     NUM_RETRIES=0
     MAX_RETRIES=5
 
-    until [ $NUM_RETRIES -eq 5 ] || ${command[@]}; do
-        echo Apt failure, trying again in 5 seconds
+    until [ "$NUM_RETRIES" -eq 5 ] || ${command[@]}; do
+        echo Apt failure, NUM_RETRIES = $NUM_RETRIES, trying again in 5 seconds
         ((NUM_RETRIES++))
         sleep 5
     done
     if [ "$NUM_RETRIES" -ge "$MAX_RETRIES" ]; then
         exit 1
     fi
+    set -e
 }
 
 # Download, cache externally, and optionally install the specified packages
