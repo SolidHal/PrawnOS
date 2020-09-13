@@ -33,8 +33,13 @@ include $(PRAWNOS_ROOT)/filesystem/makefile
 #:::::::::::::::::::::::::::::: cleaning ::::::::::::::::::::::::::::::
 .PHONY: clean
 clean:
-	@echo "Enter one of:"
-#TODO
+	@echo "Enter one of the following:"
+	@echo "clean_image     : removes the built PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img"
+	@echo "clean_bashfs    : removes the -BASE prawnos image which contains the base filesystem"
+	@echo "clean_pbuilder  : removes the pbuilder chroot used to build the prawnos packages locally located in build/$(TARGET)/prawnos-pbuilder-$(TARGET)-base.tgz"
+	@echo "clean_kernel    : removes the kernel build directory build/$(TARGET)/linux-<kver>"
+	@echo "clean_ath9k     : removes the ath9k firmware build directory build/shared/open-ath9k-htc-firmware"
+	@echo "clean_initramfs : removes the built initramfs image located in build/$(TARGET)/PrawnOS-initramfs.cpio.gz"
 
 .PHONY: clean_image
 clean_image:
