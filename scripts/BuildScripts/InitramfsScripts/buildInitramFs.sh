@@ -165,7 +165,7 @@ chmod +x $initramfs_src/init
 cp $initramfs_src/init $initramfs_src/sbin/init
 
 #compress and install
-rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
+rm -rf $outmnt/boot/PrawnOS-initramfs.cpio
 cd $initramfs_src
 ln -s busybox bin/cat
 ln -s busybox bin/mount

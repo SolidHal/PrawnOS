@@ -1,5 +1,6 @@
 tmp.*
 PrawnOS-Shiba-*
-PrawnOS-initramfs.cpio.gz
+PrawnOS-initramfs.cpio
 build
 kernel/sources/linux-*.tar.gz
+filesystem/packages/xsecurelock/xsecurelock_1.5.1-2.dsc
