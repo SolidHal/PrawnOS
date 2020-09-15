@@ -108,7 +108,7 @@ fi
 
 dmesg -n 1
 echo -e '\033[?17;0;0c' > /dev/tty1 # magically make cursor disappear
-dd status=none if=/newroot/PrawnOS-$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x') of=/dev/fb0 ||dmesg -n 4 # write splash to framebuffer, if it fails, bring the log level back to default 
+dd status=none if=/newroot/PrawnOS-$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x') of=/dev/fb0 # write splash to framebuffer
 
 umount /sys
 umount /proc
