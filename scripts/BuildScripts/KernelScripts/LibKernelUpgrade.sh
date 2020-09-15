@@ -68,6 +68,12 @@ sed_versnum_pattern='[0-9]\+.[0-9]\+.[0-9]\+'
 # if it's already at the newest version.
 # Set to 1 (one) to build it anyway.
 rebuild_kernel_if_latest=0
+#
+# Reset global variables used to parse version strings
+PRAWNOS_KVER_VER=
+PRAWNOS_KVER_MAJ=
+PRAWNOS_KVER_MIN=
+PRAWNOS_KVER_FULLSTR=
 # ------------------------------------------------------
 
 log()
@@ -139,9 +145,9 @@ split_version_string()
     match_ver="($anynum)\.($anynum)\.($anynum)"
 
     if [[ $target =~ $match_ver ]];then
-	PRAWNOS_KVER_VER=${BASH_REMATCH[1]}
-	PRAWNOS_KVER_MAJ=${BASH_REMATCH[2]}
-	PRAWNOS_KVER_MIN=${BASH_REMATCH[3]}
+	export PRAWNOS_KVER_VER=${BASH_REMATCH[1]}
+	export PRAWNOS_KVER_MAJ=${BASH_REMATCH[2]}
+	export PRAWNOS_KVER_MIN=${BASH_REMATCH[3]}
 	return 0
     else
 	return 1
@@ -314,6 +320,7 @@ set_build_kver()
 # Extract the current value of $KVER in the given file.
 # Print the version number to stdout.
 # Split the value into "ver" "maj" "min".
+# Set $PRAWNOS_KVER_FULLSTR with the full version string ('w.x.z')
 # Set $PRAWNOS_KVER_VER with the main version number ('w').
 # Set $PRAWNOS_KVER_MAJ wiht the major revision number ('x').
 # Set $PRAWNOS_KVER_MIN with the minor revision number ('y').
@@ -324,6 +331,7 @@ get_build_kver()
 	       | sed 's/KVER=//') ||
 	return 1
 
+    export PRAWNOS_KVER_FULLSTR=$kver
     echo "$kver"
 
     split_version_string "$kver"
@@ -332,8 +340,12 @@ get_build_kver()
 
 build_latest_kernel()
 {
-    currver=$(get_build_kver "$kver_file") ||
+    get_build_kver "$kver_file" ||
 	die "FAILED to fetch current KVER version from $kver_file"
+
+    # $PRAWNOS_KVER_FULLSTR is exported
+    # by the call to get_build_kver() hereabove
+    currver=$PRAWNOS_KVER_FULLSTR
     
     ver=$(get_latest_src_kver "$PRAWNOS_KVER_VER" "$PRAWNOS_KVER_MAJ") ||
 	die "FAILED to retrieve latest kernel version."
