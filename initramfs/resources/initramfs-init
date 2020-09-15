@@ -106,16 +106,9 @@ else
     mount ${ROOT_DEV}2 /newroot
 fi
 
-RES=$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x')
-if [ -f /newroot/PrawnOS-$(RES) ]
-then
-    dmesg -n 1
-    echo -e '\033[?17;0;0c' > /dev/tty1 # magically make cursor disappear
-    # PrawnOS-1280x800, PrawnOS-1920x1080, PrawnOS-1366x768, do it twice because for some reason it doesn't do it one time
-    dd status=none if=/newroot/PrawnOS-${RES} of=/dev/fb0
-    sleep 1
-    dd status=none if=/newroot/PrawnOS-${RES} of=/dev/fb0
-fi
+dmesg -n 1
+echo -e '\033[?17;0;0c' > /dev/tty1 # magically make cursor disappear
+dd status=none if=/newroot/PrawnOS-$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x') of=/dev/fb0 ||dmesg -n 4 # write splash to framebuffer, if it fails, bring the log level back to default 
 
 umount /sys
 umount /proc

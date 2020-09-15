@@ -173,6 +173,5 @@ ln -s busybox bin/sh
 ln -s busybox bin/switch_root
 ln -s busybox bin/umount
 
-# store for kernel building
-find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
-
+# store for kernel building. gzip is not needed becase kernel + initramfs are gzipped together
+find . -print0 | cpio --null --create --verbose --format=newc > $OUT_DIR/PrawnOS-initramfs.cpio
