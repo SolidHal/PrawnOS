@@ -53,9 +53,10 @@ These packages are required:
 ``` 
         apt install --no-install-recommends --no-install-suggests \
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
-        debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
-        gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
-        pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+        debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
+        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+        parted patch pbuilder qemu-user-static rsync sudo texinfo u-boot-tools udev \
+        vboot-kernel-utils wget
 ```
 
 ## Build
@@ -229,29 +230,37 @@ Say no at the prompt to install packages and a desktop environment.
 Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 
 #### Connecting to WiFi in a basic environment
-If have a basic environment without xfce or lxqt you can connect to WiFi using wpa_supplicant by running the following commands:
+If have a basic environment without xfce or lxqt you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
 ```
-wpa_passphrase <Network_name> <network_password> > wpa.conf
-wpa_supplicant -i wlan0 -c wpa.conf
+nmcli device wifi list
+nmcli device wifi connect "Network_name" password "network_password"
 ```
-Now switch to another tty by pressing ctrl+alt+f2
-Login as root, and run
-```
-dhclient wlan0
-```
-
 When that finishes, you should have access to the internet. 
-### Upgrading the kernel
 
-The script `UpgradeKernel.sh` located in `/InstallResources` can be ran be used to copy the kernel, modules, initramfs, and ath9k firmware from a newer version of PrawnOS running on a USB drive or SD card onto an older version of PrawnOS installed on the laptops internal emmc storage. 
+## Upgrading PrawnOS
 
-To use it, write the new PrawnOS image to a USB drive or SD card, boot the laptop to it by pressing `control+u` at boot, navigate to the `/InstallResources` folder, and run the script. 
+The components of PrawnOS are now packaged, making upgrades much easier. You have two options:
+
+### build the packages yourself
+- filesystem packages are located under `filesystem/packages`
+all can be built by calling `make filesystem_packages_clean && make filesystem_packages`
+or they can be built individually by going to the specific package and running `make clean && make`
+
+once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
+
+- kernel packages are located under `filesystem/packages`
+the kernel image package can be built by running `make` in the `prawnos-linux-image-armhf` directory
+once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
+
+### use the PrawnOS APT repo to update the PrawnOS packages automatically
+
+`sudo apt upgrade` 
 
 ## Documentation
 Some useful things can be found in `DOCUMENTATION.md`
 
 
-## Make options, developer tools
+### Make options, developer tools
 (All of these should be run as root or with sudo to avoid issues) 
 The makefile automates many processes that make debugging the kernel or the filesystem easier. 
 To begin with:
@@ -264,9 +273,9 @@ To begin with:
 
 `make initramfs` builds the PrawnOS-initramfs.cpio.gz, which can be found in /build
 
-`make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_inject
+`make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_install
 
-`make kernel_inject` Injects a newly built kernel into a previously built PrawnOS.img located in the root of the checkout. Usually, this will be a copy of the -BASE image made by make filesystem. Only use this if you already have a built kernel and filesystem -BASE image. 
+`make kernel_install` Installs a newly built kernel into a previously built PrawnOS.img-BASE.
 
 
 You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Buster`.  For example, to use Debian stretch, you can build with `sudo PRAWNOS_SUITE=stretch make image`.  Note that only `stretch` and `buster` have been tested.
@@ -274,7 +283,7 @@ You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
 
-## Crossystem / mosys
+### Crossystem / mosys
 
 crossystem is installed from the debian repos and mosys (a dependency of crossystem, and all around useful tool) is built and installed as part of the PrawnOS filesystem build.
 
@@ -315,13 +324,6 @@ On older PrawnOS releases or other distributions, you can run the `buildCrossyst
 ```
 sudo /InstallScripts/buildCrossystem.sh
 ```
-
-### GPU Support
-
-Watch this link for GPU support:
-https://gitlab.freedesktop.org/panfrost
-and this one for progress updates:
-https://rosenzweig.io/blog/gpu-feed.xml
 
 ### Build the WiFi dongle into the laptop
 

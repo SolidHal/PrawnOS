@@ -16,6 +16,47 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+
+### SHARED CONST AND VARS
+# TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
+device_veyron_speedy="Google Speedy"
+device_veyron_minnie="Google Minnie"
+device_gru_kevin="Google Kevin"
+device_gru_bob="Google Bob"
+
+get_device() {
+    local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
+    echo $device
+}
+
+get_emmc_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk2;;
+        $device_veyron_minnie) local devname=mmcblk2;;
+        $device_gru_kevin) local devname=mmcblk1;;
+        $device_gru_bob) local devname=mmcblk1;;
+        * ) echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+
+get_sd_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk0;;
+        $device_veyron_minnie) local devname=mmcblk0;;
+        $device_gru_kevin) local devname=mmcblk0;;
+        $device_gru_bob) local devname=mmcblk0;;
+        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+### END SHARED CONST AND VARS
+
+
 DIR=/InstallResources
 # Import the package lists
 source $DIR/package_lists.sh
@@ -50,12 +91,16 @@ cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
 cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
 cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
 
-patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.chromebook.patch
-patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.chromebook.patch
-patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.chromebook.patch
-patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.chromebook.patch
+patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
+patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
+patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
+patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
+patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
+patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
+
+patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
 
 cp  $DIR/xkb/keyboard /etc/default/keyboard
 
@@ -132,13 +177,24 @@ fi
 
 
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
-cp -rf $DIR/default.pa /etc/pulse/default.pa
-# Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
-echo "flat-volumes = no" > /etc/pulse/daemon.conf
-cp -rf $DIR/sound.sh /etc/acpi/sound.sh
-cp -rf $DIR/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
-mkdir /etc/X11/xorg.conf.d/
-cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
+device_model=$(get_device)
+
+if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
+then
+    cp -rf $DIR/veyron/default.pa /etc/pulse/default.pa
+    # Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
+    echo "flat-volumes = no" > /etc/pulse/daemon.conf
+    cp -rf $DIR/veyron/sound.sh /etc/acpi/sound.sh
+    cp -rf $DIR/veyron/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
+    mkdir /etc/X11/xorg.conf.d/
+    cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
+fi
+
+if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+then
+    echo "load-module module-alsa-sink device=sysdefault" > /etc/pulse/default.pa
+fi
+
 
 apt clean -y && apt autoremove --purge -y
 

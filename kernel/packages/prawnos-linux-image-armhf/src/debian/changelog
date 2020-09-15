@@ -1,0 +1,47 @@
+prawnos-linux-image-armhf (5.4.29-3-1) stable; urgency=medium
+
+  * release 5.4.29-3-1
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 22:24:07 -0700
+
+prawnos-linux-image-armhf (5.4.29-2-4) stable; urgency=medium
+
+  * release 5.4.29-2-4
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 22:20:39 -0700
+
+prawnos-linux-image-armhf (5.4.29-2-3) stable; urgency=medium
+
+  * release 5.4.29-2-3
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 22:15:18 -0700
+
+prawnos-linux-image-armhf (5.4.29-2-2) stable; urgency=medium
+
+  * release 5.4.29-2-2
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 22:04:09 -0700
+
+prawnos-linux-image-armhf (5.4.29-2-1) stable; urgency=medium
+
+  * release 5.4.29-2-1
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 21:49:53 -0700
+
+prawnos-linux-image-armhf (5.4.29-1-3) stable; urgency=medium
+
+  * release 5.4.29-1-3
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 21:12:06 -0700
+
+prawnos-linux-image-armhf (5.4.29-1-2) stable; urgency=medium
+
+  * release 5.4.29-1-2
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 13 Jul 2020 21:07:01 -0700
+
+prawnos-linux-image-armhf (5.4.29-1-1) stable; urgency=medium
+
+  * Initial packaged release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 10 Jul 2020 22:29:42 -0700

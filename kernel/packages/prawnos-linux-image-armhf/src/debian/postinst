@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+# the kernel file version doesn't include the debian package version, so we have to do some sed magic to drop it
+DEBVERSION=$(dpkg-query --show --showformat='${Version}' prawnos-linux-image-armhf)
+VERSION=$(sed 's/\(.*\)-.*/\1/' <<< ${DEBVERSION})
+
+KERNEL_IMAGE="/boot/prawnos-linux-image-armhf_${VERSION}"
+
+set -e
+
+case "$1" in
+    configure)
+        /bin/install-prawnos-kernel.sh $KERNEL_IMAGE
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Do nothing
+        ;;
+    *)
+        echo "Unrecognized postinst argument '$1'"
+        ;;
+esac

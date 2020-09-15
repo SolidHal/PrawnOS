@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This file is part of PrawnOS (https://www.prawnos.com)
-# Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
+# Copyright (c) 2020 Hal Emmerich <hal@halemmerich.com>
 # Copyright (c) 2020 Fil Bergamo <fil@filberg.eu>
 
 # PrawnOS is free software: you can redistribute it and/or modify
@@ -16,6 +16,44 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+### SHARED CONST AND VARS
+# TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
+device_veyron_speedy="Google Speedy"
+device_veyron_minnie="Google Minnie"
+device_gru_kevin="Google Kevin"
+device_gru_bob="Google Bob"
+
+get_device() {
+    local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
+    echo $device
+}
+
+get_emmc_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk2;;
+        $device_veyron_minnie) local devname=mmcblk2;;
+        $device_gru_kevin) local devname=mmcblk0;;
+        $device_gru_bob) local devname=mmcblk0;;
+        * ) echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+
+get_sd_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk0;;
+        $device_veyron_minnie) local devname=mmcblk0;;
+        $device_gru_kevin) local devname=mmcblk1;;
+        $device_gru_bob) local devname=mmcblk1;;
+        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+### END SHARED CONST AND VARS
+
 # -----------------------------------------------
 #              STATIC CONFIGURATION
 # -----------------------------------------------
@@ -23,7 +61,7 @@
 usagestr="USAGE: $0 \"/path/to/vmlinux.kpart\""
 #
 # eMMC device name
-emmc_devname=mmcblk2
+emmc_devname=$(get_emmc_devname)
 #
 # flashing paramters
 kernel_size=65536
@@ -153,4 +191,4 @@ It's now safe to reboot."
 # TODO: install modules. -----------------------------------
 # Right now, there's no easy way to do that on the running machine
 # -----------------------------------------------------------------
-# make -C build/linux-$KVER ARCH=arm INSTALL_MOD_PATH=$outmnt modules_install
+# make -C build/linux-$KVER ARCH=$TARGET INSTALL_MOD_PATH=$outmnt modules_install

@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+srctree ?= .
+
+build:
+	@echo skip since done already
+#	@echo remove the references to ath9k firmware, not required for header and breaks the build
+#	sed -i '/CONFIG_EXTRA_FIRMWARE/d' $(srctree)/.config
+#	$(MAKE) KERNELRELEASE=5.4.29-3 ARCH=arm 	KBUILD_BUILD_VERSION=1 KBUILD_BUILD_USER=hal KBUILD_BUILD_HOST=prawnosbuild -f $(srctree)/Makefile
+
+binary-arch:
+#	@echo remove the references to ath9k firmware, not required for header and breaks the build
+#	sed -i '/CONFIG_EXTRA_FIRMWARE/d' $(srctree)/.config
+	$(MAKE) KERNELRELEASE=5.4.29-3 ARCH=arm 	KBUILD_BUILD_VERSION=1 KBUILD_BUILD_USER=hal KBUILD_BUILD_HOST=prawnosbuild -f $(srctree)/Makefile intdeb-pkg
+
+clean:
+	rm -rf debian/*tmp debian/files
+
+binary: binary-arch

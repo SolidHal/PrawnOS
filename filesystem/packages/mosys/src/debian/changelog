@@ -1,3 +1,9 @@
+mosys (69.10895-1) stable; urgency=medium
+
+  * rebuild for arm64 support, need to keep .dsc to make uploads properly
+
+ -- Hal Emmerich <hal@halemmerich.com>  Sun, 19 Jul 2020 16:03:09 -0500
+
 mosys (69.10895) stable; urgency=medium
 
   * Initial release.

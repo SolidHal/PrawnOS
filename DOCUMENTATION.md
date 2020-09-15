@@ -155,3 +155,31 @@ upload the package
 ```
 dput deb.prawnos.com *.changes
 ```
+
+
+### MMC and SD mapping
+veyron-speedy:
+/dev/mmcblk0 : sd
+/dev/mmcblk1 : ???
+/dev/mmcblk2 : emmc
+
+gru-kevin:
+/dev/mmcblk0 : sd
+/dev/mmcblk1 : emmc
+
+gru-bob:
+/dev/mmcblk0 :
+/dev/mmcblk1 : 
+
+### device identification
+cat /sys/firmware/devicetree/base/model
+
+veyron-speedy: "Google Speedy"
+gru-kevin:     "Google Kevin"
+
+
+### enable usb boot
+sometimes when the c201 (and likely other machines) completely drain their battery, the usb boot option is lost. We can re-enable it from inside PrawnOS using the following command: 
+```
+sudo crosystem dev_boot_usb=1
+```

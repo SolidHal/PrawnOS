@@ -33,8 +33,13 @@ include $(PRAWNOS_ROOT)/filesystem/makefile
 #:::::::::::::::::::::::::::::: cleaning ::::::::::::::::::::::::::::::
 .PHONY: clean
 clean:
-	@echo "Enter one of:"
-#TODO
+	@echo "Enter one of the following:"
+	@echo "clean_image     : removes the built PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img"
+	@echo "clean_bashfs    : removes the -BASE prawnos image which contains the base filesystem"
+	@echo "clean_pbuilder  : removes the pbuilder chroot used to build the prawnos packages locally located in build/$(TARGET)/prawnos-pbuilder-$(TARGET)-base.tgz"
+	@echo "clean_kernel    : removes the kernel build directory build/$(TARGET)/linux-<kver>"
+	@echo "clean_ath9k     : removes the ath9k firmware build directory build/shared/open-ath9k-htc-firmware"
+	@echo "clean_initramfs : removes the built initramfs image located in build/$(TARGET)/PrawnOS-initramfs.cpio.gz"
 
 .PHONY: clean_image
 clean_image:
@@ -50,10 +55,6 @@ clean_pbuilder:
 
 .PHONY: clean_all
 clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs clean_pbuilder
-
-#:::::::::::::::::::::::::::::: premake prep ::::::::::::::::::::::::::::::
-.PHONY: build_dirs
-build_dirs: $(PRAWNOS_BUILD)
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 #included from kernel/makefile
@@ -73,7 +74,9 @@ build_dirs: $(PRAWNOS_BUILD)
 
 .PHONY: kernel_install
 kernel_install: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE)
+#TODO: uncomment when we have an arm64 bit kernel image
+# $(MAKE) kernel_image_package
+	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE) $(TARGET) $(PRAWNOS_BUILD) prawnos-linux-image-$(TARGET)*.deb
 
 .PHONY: kernel_update
 kernel_update:
@@ -91,3 +94,17 @@ image:
 	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
+
+#:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
+
+.PHONY: install_dependencies
+install_dependencies:
+	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
+    bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
+    debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
+    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+    parted patch pbuilder qemu-user-static rsync sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+
+.PHONY: install_dependencies_yes
+install_dependencies_yes:
+	$(MAKE) AUTO_YES="-y" install_dependencies

@@ -1,0 +1,78 @@
+From f30a3159a22256d7b0697dac7ec77e87aef823fc Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 9 Aug 2017 18:41:03 +0800
+Subject: [PATCH] FROMGIT: drm/rockchip: Fix suspend crash when drm is not
+ bound
+
+Currently we are allocating drm_device in rockchip_drm_bind, so if the
+suspend/resume code access it when drm is not bound, we would hit this
+crash:
+
+[  253.402836] Unable to handle kernel NULL pointer dereference at virtual address 00000028
+[  253.402837] pgd = ffffffc06c9b0000
+[  253.402841] [00000028] *pgd=0000000000000000, *pud=0000000000000000
+[  253.402844] Internal error: Oops: 96000005 [#1] PREEMPT SMP
+[  253.402859] Modules linked in: btusb btrtl btbcm btintel bluetooth ath10k_pci ath10k_core ar10k_ath ar10k_mac80211 cfg80211 ip6table_filter asix usbnet mii
+[  253.402864] CPU: 4 PID: 1331 Comm: cat Not tainted 4.4.70 #15
+[  253.402865] Hardware name: Google Scarlet (DT)
+[  253.402867] task: ffffffc076c0ce00 ti: ffffffc06c2c8000 task.ti: ffffffc06c2c8000
+[  253.402871] PC is at rockchip_drm_sys_suspend+0x20/0x5c
+
+Add sanity checks to prevent that.
+
+BUG=b:64485838
+TEST=build for scarlet and boot without display
+
+(cherry picked from anongit.freedesktop.org drm-misc/drm-misc-fixes
+commit 0fa375e6bc9023211eead30a6a79963c45a563da)
+
+Change-Id: If7ef2b440e9cf6be4d6b02fd62736fd2a4dc5170
+Reported-by: Brian Norris <briannorris@chromium.com>
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+Signed-off-by: Sean Paul <seanpaul@chromium.org>
+Link: https://patchwork.kernel.org/patch/9890297/
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-on: https://chromium-review.googlesource.com/609468
+Reviewed-by: Brian Norris <briannorris@chromium.org>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_drv.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
+index d0174ec56e6e..851606f78ae4 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
+@@ -460,11 +460,15 @@ void rockchip_drm_fb_resume(struct drm_device *drm)
+ static int rockchip_drm_sys_suspend(struct device *dev)
+ {
+ 	struct drm_device *drm = dev_get_drvdata(dev);
+-	struct rockchip_drm_private *priv = drm->dev_private;
++	struct rockchip_drm_private *priv;
++
++	if (!drm)
++		return 0;
+ 
+ 	drm_kms_helper_poll_disable(drm);
+ 	rockchip_drm_fb_suspend(drm);
+ 
++	priv = drm->dev_private;
+ 	priv->state = drm_atomic_helper_suspend(drm);
+ 	if (IS_ERR(priv->state)) {
+ 		rockchip_drm_fb_resume(drm);
+@@ -478,8 +482,12 @@ static int rockchip_drm_sys_suspend(struct device *dev)
+ static int rockchip_drm_sys_resume(struct device *dev)
+ {
+ 	struct drm_device *drm = dev_get_drvdata(dev);
+-	struct rockchip_drm_private *priv = drm->dev_private;
++	struct rockchip_drm_private *priv;
++
++	if (!drm)
++		return 0;
+ 
++	priv = drm->dev_private;
+ 	drm_atomic_helper_resume(drm, priv->state);
+ 	rockchip_drm_fb_resume(drm);
+ 	drm_kms_helper_poll_enable(drm);
+-- 
+2.20.1
+

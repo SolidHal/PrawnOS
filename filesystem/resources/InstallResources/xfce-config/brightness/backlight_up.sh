@@ -1,14 +1,14 @@
 #!/bin/bash
-DEV=/sys/class/backlight/backlight
-BL=$(cat $DEV/brightness)
-MAX=$(cat $DEV/max_brightness)
+DEV="/sys/class/backlight/backlight"
+BL="$(cat "$DEV/brightness")"
+MAX="$(cat "$DEV/max_brightness")"
 
-if [ $BL -lt 5 ]; then
-	BL=$((BL + 1))
+if [ "$BL" -lt 5 ]; then
+	BL="$((BL + 1))"
 else
-	BL=$((BL + ( BL / 4 )))
+	BL="$((BL + ( BL / 4 )))"
 fi
-if [ $BL -gt $MAX ]; then
-	BL=$MAX
+if [ "$BL" -gt "$MAX" ]; then
+	BL="$MAX"
 fi
-echo $BL > $DEV/brightness
+echo "$BL" > "$DEV/brightness"

@@ -1,0 +1,35 @@
+--- /mnt/sd/xkborig/rules/evdev.lst	2019-02-11 00:00:00.000000000 +0100
++++ evdev.lst	2020-04-01 08:17:05.129558936 +0200
+@@ -187,7 +187,15 @@
+   teck227         Truly Ergonomic 227
+   teck229         Truly Ergonomic 229
+   apex300         SteelSeries Apex 300 (Apex RAW)
+-  chromebook      Chromebook
++  chromebook      Chromebook (most models) | Search overlay
++  chromebook_ralt Chromebook (most models) | Right alt overlay
++  chromebook_m    Chromebook (most models) | Search overlay | F keys mapped to media keys
++  chromebook_m_ralt Chromebook (most models) | Right alt overlay | F keys mapped to media keys
++  chromebook_falco Chromebook Falco/Pixel/Pixel2 | Search overlay
++  chromebook_falco_ralt Chromebook Falco/Pixel/Pixel2 | Right alt overlay
++  chromebook_m_falco Chromebook Falco/Pixel/Pixel2 | Search overlay | F keys mapped to media keys
++  chromebook_m_falco_ralt Chromebook Falco/Pixel/Pixel2 | Right alt overlay | F keys mapped to media keys
++  chromebook_no_m Chromebook (most models) | No overlay | F keys mapped to media keys
+   teck227         Truly Ergonomic Computer Keyboard Model 227 (Wide Alt keys)
+   teck229         Truly Ergonomic Computer Keyboard Model 229 (Standard sized Alt keys, additional Super and Menu key)
+ 
+@@ -293,6 +301,7 @@
+ 
+ ! variant
+   chr             us: Cherokee
++  chromebook_de   us: English (US, German characters for Chromebooks)
+   euro            us: English (US, euro on 5)
+   intl            us: English (US, intl., with dead keys)
+   alt-intl        us: English (US, alt. intl.)
+@@ -699,6 +708,7 @@
+   rstu_ru         ua: Russian (Ukraine, standard RSTU)
+   homophonic      ua: Ukrainian (homophonic)
+   extd            gb: English (UK, extended, with Win keys)
++  chromebook_de   gb: English (UK, German characters for Chromebooks)
+   intl            gb: English (UK, intl., with dead keys)
+   dvorak          gb: English (UK, Dvorak)
+   dvorakukp       gb: English (UK, Dvorak, with UK punctuation)

@@ -40,9 +40,15 @@ fi
 BASE=$1
 RESOURCES=$2
 OUT_DIR=$3
+TARGET=$4
+
+
+
+ARCH_ARMHF=armhf
+ARCH_ARM64=arm64
 
 outmnt=$(mktemp -d -p "$(pwd)")
-outdev=/dev/loop7
+outdev=$(losetup -f)
 
 if [ ! -f $BASE ]
 then
@@ -66,6 +72,36 @@ cleanup() {
     losetup -d $outdev > /dev/null 2>&1
 }
 
+function chroot_get_libs
+{
+    set +e
+    set -x
+    [ $# -lt 2 ] && return
+
+    dest=$1
+    shift
+    for i in "$@"
+    do
+        # Get an absolute path for the file
+        [ "${i:0:1}" == "/" ] || i=$(which $i)
+        # Skip files that already exist at target.
+        [ -f "$dest/$i" ] && continue
+        if [ -e "$i" ]
+        then
+            # Create destination path
+            d=`echo "$i" | grep -o '.*/'` &&
+                mkdir -p "$dest/$d" &&
+                # Copy file
+                cat "$i" > "$dest/$i" &&
+                chmod +x "$dest/$i"
+        else
+            echo "Not found: $i"
+        fi
+        # Recursively copy shared libraries' shared libraries.
+        chroot_get_libs "$dest" $(ldd "$i" | egrep -o '/.* ')
+    done
+}
+
 trap cleanup INT TERM EXIT
 
 [ ! -d build ] && mkdir build
@@ -73,6 +109,9 @@ trap cleanup INT TERM EXIT
 losetup -P $outdev $BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
+
+
+
 
 #make a skeleton filesystem
 initramfs_src=$outmnt/InstallResources/initramfs_src
@@ -89,40 +128,37 @@ mkdir $initramfs_src/sbin
 mkdir $initramfs_src/run
 mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
-mkdir $initramfs_src/lib/arm-linux-gnueabihf
 
-mknod -m 622 $initramfs_src/dev/console c 5 1
-mknod -m 622 $initramfs_src/dev/tty c 4 0
+mknod $initramfs_src/dev/console c 5 1
+mknod $initramfs_src/dev/null c 1 3
+mknod $initramfs_src/dev/tty c 5 0
+mknod $initramfs_src/dev/urandom c 1 9
+mknod $initramfs_src/dev/random c 1 8
+mknod $initramfs_src/dev/zero c 1 5
+
 
 #install the few tools we need, and the supporting libs
-cp $outmnt/bin/busybox $outmnt/sbin/cryptsetup $initramfs_src/bin/
-cp $outmnt/lib/arm-linux-gnueabihf/libblkid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/
-cp $outmnt/lib/arm-linux-gnueabihf/libuuid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/
-cp $outmnt/lib/arm-linux-gnueabihf/libc.so.6 $initramfs_src/lib/arm-linux-gnueabihf/
+initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
 
-cp $outmnt/lib/ld-linux-armhf.so.3 $initramfs_src/lib/
-cp $outmnt/sbin/blkid $initramfs_src/bin/
+#do so **automatigically**
+export -f chroot_get_libs
+export initramfs_binaries
 
-cp $outmnt/usr/lib/arm-linux-gnueabihf/libpopt.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpopt.so.0
-cp $outmnt/usr/lib/arm-linux-gnueabihf/libssl.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libssl.so.1.1
-cp $outmnt/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.1 $initramfs_src/lib/arm-linux-gnueabihf/libcrypto.so.1.1
-cp $outmnt/usr/lib/arm-linux-gnueabihf/libargon2.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libargon2.so.1
-cp $outmnt/usr/lib/arm-linux-gnueabihf/libjson-c.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libjson-c.so.3
+chroot $outmnt /bin/bash -c "chroot_get_libs /InstallResources/initramfs_src $initramfs_binaries"
 
-cp $outmnt/lib/arm-linux-gnueabihf/libm.so.6 $initramfs_src/lib/arm-linux-gnueabihf/libm.so.6
-cp $outmnt/lib/arm-linux-gnueabihf/libcryptsetup.so.12 $initramfs_src/lib/arm-linux-gnueabihf/libcryptsetup.so.12
-cp $outmnt/lib/arm-linux-gnueabihf/libuuid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libuuid.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libblkid.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libblkid.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libc.so.6 $initramfs_src/lib/arm-linux-gnueabihf/libc.so.6
-cp $outmnt/lib/ld-linux-armhf.so.3 $initramfs_src/lib/ld-linux-armhf.so.3
-cp $outmnt/lib/arm-linux-gnueabihf/libdevmapper.so.1.02.1 $initramfs_src/lib/arm-linux-gnueabihf/libdevmapper.so.1.02.1
-cp $outmnt/lib/arm-linux-gnueabihf/librt.so.1 $initramfs_src/lib/arm-linux-gnueabihf/librt.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libdl.so.2 $initramfs_src/lib/arm-linux-gnueabihf/libdl.so.2
-cp $outmnt/lib/arm-linux-gnueabihf/libselinux.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libselinux.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libudev.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libudev.so.1
-cp $outmnt/lib/arm-linux-gnueabihf/libpthread.so.0 $initramfs_src/lib/arm-linux-gnueabihf/libpthread.so.0
-cp $outmnt/lib/arm-linux-gnueabihf/libpcre.so.3 $initramfs_src/lib/arm-linux-gnueabihf/libpcre.so.3
-cp $outmnt/lib/arm-linux-gnueabihf/libgcc_s.so.1 $initramfs_src/lib/arm-linux-gnueabihf/libgcc_s.so.1
+#have to add libgcc manually since ldd doesn't see it as a requirement :/
+armhf_libs=arm-linux-gnueabihf
+arm64_libs=aarch64-linux-gnu
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    LIBS_DIR=$armhf_libs
+elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+    LIBS_DIR=$arm64_libs
+else
+    echo "no valid target arch specified"
+    exit 1
+fi
+cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/
+
 #add the init script
 cp $RESOURCES/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
