@@ -35,11 +35,13 @@ include $(PRAWNOS_ROOT)/filesystem/makefile
 clean:
 	@echo "Enter one of the following:"
 	@echo "clean_image     : removes the built PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img"
-	@echo "clean_bashfs    : removes the -BASE prawnos image which contains the base filesystem"
+	@echo "clean_basefs    : removes the -BASE prawnos image which contains the base filesystem"
 	@echo "clean_pbuilder  : removes the pbuilder chroot used to build the prawnos packages locally located in build/$(TARGET)/prawnos-pbuilder-$(TARGET)-base.tgz"
 	@echo "clean_kernel    : removes the kernel build directory build/$(TARGET)/linux-<kver>"
 	@echo "clean_ath9k     : removes the ath9k firmware build directory build/shared/open-ath9k-htc-firmware"
 	@echo "clean_initramfs : removes the built initramfs image located in build/$(TARGET)/PrawnOS-initramfs.cpio.gz"
+	@echo "clean_most      : cleans kernel, initramfs, basefs, image. these are the most common items required to clean for a full rebuild."
+	@echo "clean_all       : runs all of the above clean commands, rarely needed. Most likely want clean_most"
 
 .PHONY: clean_image
 clean_image:
@@ -51,10 +53,15 @@ clean_basefs:
 
 .PHONY: clean_pbuilder
 clean_pbuilder:
-	rm -r build/prawnos-pbuilder-armhf-base.tgz
+	rm -f $(PBUILDER_CHROOT)
+
+.PHONY: clean_most
+clean_most: clean_kernel clean_initramfs clean_image clean_basefs clean_pbuilder
+	@echo "cleaned kernel, initramfs, basefs, image"
 
 .PHONY: clean_all
-clean_all: clean_kernel clean_initramfs clean_ath9k clean_image clean_basefs clean_pbuilder
+clean_all: clean_most clean_ath9k clean_pbuilder
+	@echo "cleaned all"
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 #included from kernel/makefile
