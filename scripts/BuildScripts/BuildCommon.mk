@@ -59,10 +59,11 @@ ifdef PRAWNOS_KVER
 ## by injecting it via "export PRAWNOS_KVER=w.x.y".
 ## and not depending on the hard-coded version number here above.
 KVER := $(PRAWNOS_KVER)
-## Should this values be reset in this case??
-#PRAWNOS_KERNEL_VER := 1
-#PRAWNOS_KERNEL_IMAGE_DEBVER := 1
-#PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+#Offset the kernel package versions to avoid future collision if we end up using
+#the specified KVER
+PRAWNOS_KERNEL_VER := 200
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 endif
 
 PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)

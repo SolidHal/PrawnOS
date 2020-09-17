@@ -2,4 +2,3 @@ tmp.*
 PrawnOS-Shiba-*
 PrawnOS-initramfs.cpio.gz
 build
-kernel/sources
