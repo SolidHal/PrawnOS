@@ -161,7 +161,7 @@ install() {
     CRYPTO=false
 
     echo Writing kernel partition
-    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
+    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=131072
     dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION conv=notrunc
 
     #Handle full disk encryption
@@ -249,7 +249,7 @@ emmc_partition() {
         sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap || true
     else
         echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
-        echo Try a fallback value? This will allow installation to continue, at the cost of a very small amoutnt of disk space. This may not work.
+        echo Try a fallback value? This will allow installation to continue, at the cost of a very small amount of disk space. This may not work.
         select yn in "Yes" "No"
         do
             case $yn,$REPLY in
@@ -271,7 +271,7 @@ emmc_partition() {
 external_partition() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
-    kernel_size=65536
+    kernel_size=131072
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET

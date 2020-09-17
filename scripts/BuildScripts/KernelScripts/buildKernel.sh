@@ -58,7 +58,7 @@ ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
 
 #this is the same as the kernel partition size
-MAX_KERNEL_SIZE=$(expr 65536 \* 512)
+MAX_KERNEL_SIZE=$(expr 131072 \* 512)
 
 cd $BUILD_DIR
 make mrproper
