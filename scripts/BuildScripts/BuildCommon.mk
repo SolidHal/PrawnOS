@@ -53,6 +53,19 @@ PRAWNOS_KERNEL_IMAGE_DEBVER := 1
 PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 endif
 
+ifdef PRAWNOS_KVER
+## Override KVER with the value of global $PRAWNOS_KVER if it's set.
+## This allows the caller to explicitly select the desired KVER
+## by injecting it via "export PRAWNOS_KVER=w.x.y".
+## and not depending on the hard-coded version number here above.
+KVER := $(PRAWNOS_KVER)
+#Offset the kernel package versions to avoid future collision if we end up using
+#the specified KVER
+PRAWNOS_KERNEL_VER := 200
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+endif
+
 PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)
 PRAWNOS_KERNEL_HEADERS_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_HEADERS_DEBVER)
 

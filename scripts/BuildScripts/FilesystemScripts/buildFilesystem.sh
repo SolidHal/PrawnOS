@@ -161,7 +161,7 @@ create_image() {
   parted --script $1 mklabel gpt
   cgpt create $1
   kernel_start=8192
-  kernel_size=65536
+  kernel_size=131072
   cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
   #Now the main filesystem
   root_start=$(($kernel_start + $kernel_size))
