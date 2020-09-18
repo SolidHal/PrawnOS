@@ -9,7 +9,7 @@ cd /tmp || exit 1
 git clone https://gitlab.freedesktop.org/mesa/mesa -b 20.2
 mkdir -p mesa/build
 cd mesa/build || exit 1
-meson .. . -Dprefix=/usr -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro,swrast -Dlibunwind=false
+meson .. . -Dprefix=/opt -Ddri-drivers= -Dvulkan-drivers= -Dgallium-drivers=panfrost,kmsro -Dlibunwind=false
 sudo ninja install
 
 echo "You may now reboot"
