@@ -53,6 +53,19 @@ PRAWNOS_KERNEL_IMAGE_DEBVER := 1
 PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 endif
 
+ifdef PRAWNOS_KVER
+## Override KVER with the value of global $PRAWNOS_KVER if it's set.
+## This allows the caller to explicitly select the desired KVER
+## by injecting it via "export PRAWNOS_KVER=w.x.y".
+## and not depending on the hard-coded version number here above.
+KVER := $(PRAWNOS_KVER)
+#Offset the kernel package versions to avoid future collision if we end up using
+#the specified KVER
+PRAWNOS_KERNEL_VER := 200
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+endif
+
 PRAWNOS_KERNEL_IMAGE_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_IMAGE_DEBVER)
 PRAWNOS_KERNEL_HEADERS_CAT_VER=$(KVER)-$(PRAWNOS_KERNEL_VER)-$(PRAWNOS_KERNEL_HEADERS_DEBVER)
 
@@ -76,11 +89,10 @@ PRAWNOS_FILESYSTEM := $(PRAWNOS_ROOT)/filesystem
 ### BUILD DIRS
 
 PRAWNOS_BUILD_LOGS := $(PRAWNOS_BUILD)/logs
+PRAWNOS_BUILD_SOURCES := $(PRAWNOS_BUILD)/sources
 PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE := $(PRAWNOS_BUILD)/debootstrap-apt-cache
 PRAWNOS_BUILD_CHROOT_APT_CACHE := $(PRAWNOS_BUILD)/chroot-apt-cache
 PRAWNOS_LOCAL_APT_REPO := $(PRAWNOS_BUILD)/prawnos-local-apt-repo
-
-PRAWNOS_BUILD_DIRS := $(PRAWNOS_BUILD_LOGS) $(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE) $(PRAWNOS_BUILD_CHROOT_APT_CACHE) $(PRAWNOS_LOCAL_APT_REPO) $(PRAWNOS_BUILD_SHARED)
 
 ### PRAWNOS IMAGES
 ifeq ($(DEBIAN_SUITE),)
@@ -158,11 +170,38 @@ PRAWNOS_INITRAMFS_IMAGE := $(PRAWNOS_BUILD)/PrawnOS-initramfs.cpio.gz
 ### ATH9K
 PRAWNOS_ATH9K_BUILD := $(PRAWNOS_BUILD_SHARED)/open-ath9k-htc-firmware
 
+### WGET
+#keeping the server timestamps confuses make, causing needless rebuilds
+WGET_OPTS := --no-use-server-timestamps
+
 #=========================================================================================
 
 
 #Place all shared make rules below
 #=========================================================================================
+
+### Build directory rules, use with "|" to make them "order only" prerequisites
+
+$(PRAWNOS_BUILD_SHARED):
+	mkdir -p $(PRAWNOS_BUILD_SHARED)
+
+$(PRAWNOS_BUILD):
+	mkdir -p $(PRAWNOS_BUILD)
+
+$(PRAWNOS_BUILD_LOGS): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_LOGS)
+
+$(PRAWNOS_BUILD_SOURCES): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_SOURCES)
+
+$(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_DEBOOTSTRAP_APT_CACHE)
+
+$(PRAWNOS_BUILD_CHROOT_APT_CACHE): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_CHROOT_APT_CACHE)
+
+$(PRAWNOS_LOCAL_APT_REPO): | $(PRAWNOS_BUILD)
+	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
 
 #=========================================================================================
 

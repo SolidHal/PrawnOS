@@ -20,5 +20,9 @@ default xkb_keycodes "media" {
         <MUTE> = 74;
         <VOL-> = 75;
         <VOL+> = 76;
+        # Volume rocker for convertible models
+        <VLR-> = 122;
+        <VLR+> = 123;
+
 };
 

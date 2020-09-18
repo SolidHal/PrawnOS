@@ -58,11 +58,14 @@ get_sd_devname() {
 #              STATIC CONFIGURATION
 # -----------------------------------------------
 #
+usagestr="USAGE: $0 \"/path/to/vmlinux.kpart\""
+#
 # eMMC device name
 emmc_devname=$(get_emmc_devname)
 #
-# Actual kernel image (.kpart)
-kimg=./vmlinux.kpart
+# flashing paramters
+kernel_size=65536
+block_size=512
 #
 # GPT partition type UUID for "ChromeOS kernel"
 ptype_kernel="FE3A2A5D-4F32-41A7-B725-ACCC3285A309"
@@ -112,9 +115,18 @@ get_root_partition()
 
 set -e
 
+if [ ! $# = 1 ] || [ -z "$1" ]
+then
+    echo ""
+    echo "$usagestr"
+    die "" 255
+fi
+
+kimg=$1
+
 # Check root or sudo
 [ ! $(id -u) = 0 ] &&
-    die "Please run this script with sudo, or as root" 1
+    die "Please run this script with sudo, or as root" 2
 
 rootfs=$(get_root_partition)
 devname=$(lsblk -no pkname $rootfs | head -n 1)
@@ -147,10 +159,6 @@ ptype=$(get_partition_type_uuid /dev/$devname $pnum_kernel)
 [ ! -e "$kimg" ] &&
     die "ERROR: cannot find kernel image at $kimg !" 127
 
-[ ! -e "$blnk" ] &&
-    die "ERROR: cannot find blank image at $blnk !" 127
-
-
 # Prompt for user's confirmation
 echo "
 ----------------------------
@@ -170,9 +178,7 @@ read ans
 
 # put the kernel in the kernel partition
 #blank the kernel partition first, with 32MiB of zeros
-kernel_size=65536
-block_size=512
-dd if=/dev/zero of="$kpart" conv=notrunc bs=512 count=$kernel_size ||
+dd if=/dev/zero of="$kpart" conv=notrunc bs=$block_size count=$kernel_size ||
     die "FAILED to flash blank kernel on $kpart!" 255
 
 dd if="$kimg" of="$kpart" conv=notrunc ||

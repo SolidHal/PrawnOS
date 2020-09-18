@@ -176,3 +176,10 @@ cat /sys/firmware/devicetree/base/model
 
 veyron-speedy: "Google Speedy"
 gru-kevin:     "Google Kevin"
+
+
+### enable usb boot
+sometimes when the c201 (and likely other machines) completely drain their battery, the usb boot option is lost. We can re-enable it from inside PrawnOS using the following command: 
+```
+sudo crosystem dev_boot_usb=1
+```

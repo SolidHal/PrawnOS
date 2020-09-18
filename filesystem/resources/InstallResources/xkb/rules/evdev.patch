@@ -1,0 +1,61 @@
+--- /mnt/sd/xkborig/rules/evdev	2019-02-11 00:00:00.000000000 +0100
++++ evdev	2019-10-23 10:06:25.480000040 +0200
+@@ -97,6 +97,13 @@
+  $jollamodels   =       evdev+jolla(jolla)
+   olpc          =       evdev+olpc(olpc)
+   olpcm         =       evdev+olpc(olpcm)
++  chromebook_m  =       evdev+chromebook_m(media)
++  chromebook_m_ralt  =  evdev+chromebook_m(media)
++  chromebook_falco_m  = evdev+chromebook_m_falco(media)
++  chromebook_falco  = evdev+chromebook_falco(fkeys)
++  chromebook_falco_ralt  = evdev+chromebook_falco(fkeys)
++  chromebook_no_m  =    evdev+chromebook_m(media)
++
+   *		=	evdev
+ 
+ ! layout[1]	=	keycodes
+@@ -868,7 +875,15 @@
+ 
+ ! model		=	symbols
+   $evdevkbds    =   +inet(evdev)+inet(%m)
+-  chromebook    =   +inet(evdev)+inet(chromebook)
++  chromebook               =   +inet(evdev)+chromebook(overlay)
++  chromebook_ralt          =   +inet(evdev)+chromebook_ralt(overlay)
++  chromebook_m             =   +inet(evdev)+chromebook_m(overlay)
++  chromebook_m_ralt        =   +inet(evdev)+chromebook_m_ralt(overlay)
++  chromebook_falco         =   +inet(evdev)+chromebook(overlay)
++  chromebook_falco_ralt    =   +inet(evdev)+chromebook_ralt(overlay)
++  chromebook_m_falco       =   +inet(evdev)+chromebook_m(overlay)
++  chromebook_m_falco_ralt  =   +inet(evdev)+chromebook_m_ralt(overlay)
++  chromebook_no_m          =   +inet(evdev)
+   applealu_jis  =   +inet(evdev)+macintosh_vndr/jp(alujiskeys)
+   *             =   +inet(evdev)
+ 
+@@ -929,9 +944,27 @@
+   *		jp		=	complete+japan
+   olpc          *               =       olpc
+   olpcm         *               =       olpc
++  chromebook              *               =       complete+chromebook
++  chromebook_ralt         *               =       complete+chromebook
++  chromebook_m            *               =       complete+chromebook
++  chromebook_m_ralt       *               =       complete+chromebook
++  chromebook_falco        *               =       complete+chromebook
++  chromebook_falco_ralt   *               =       complete+chromebook
++  chromebook_m_falco      *               =       complete+chromebook
++  chromebook_m_falco_ralt *               =       complete+chromebook
++  chromebook_no_m         *               =       complete
+   *		*		=	complete
+ 
+ ! model		layout[1]	=	compat
++  chromebook              *       =       complete+chromebook
++  chromebook_ralt         *       =       complete+chromebook
++  chromebook_m            *       =       complete+chromebook
++  chromebook_m_ralt       *       =       complete+chromebook
++  chromebook_falco        *       =       complete+chromebook
++  chromebook_falco_ralt   *       =       complete+chromebook
++  chromebook_m_falco      *       =       complete+chromebook
++  chromebook_m_falco_ralt *       =       complete+chromebook
++  chromebook_no_m         *       =       complete
+   *		*		=	complete
+ 
+ ! model		=	types
