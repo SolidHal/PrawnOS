@@ -21,6 +21,7 @@
 #add this to start shell at desired point
 rescue_shell() {
     [ "{$1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
+    dmesg -n 4
     echo "Something went wrong. Dropping to a shell." > /dev/tty1
     exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 }
