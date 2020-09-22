@@ -250,7 +250,8 @@ chroot $outmnt apt update
 cp $build_resources/PrawnOS-* $outmnt/
 
 #Copy /etc/issue
-cp $build_resources/issue $outmnt/etc/issue
+mkdir -p $outmnt/etc/issue.d/
+cp $build_resources/splash-recover-cursor.issue $outmnt/etc/issue.d/splash-recover-cursor.issue
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
