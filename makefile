@@ -56,7 +56,7 @@ clean_pbuilder:
 	rm -f $(PBUILDER_CHROOT)
 
 .PHONY: clean_most
-clean_most: clean_kernel clean_initramfs clean_image clean_basefs clean_pbuilder
+clean_most: clean_kernel clean_initramfs clean_image clean_basefs
 	@echo "cleaned kernel, initramfs, basefs, image"
 
 .PHONY: clean_all
