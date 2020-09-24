@@ -20,7 +20,12 @@ set -e
 set -x
 
 GITHUB_SHA="$1"
-TEST_TARGET=arm64
+TEST_TARGET="$2"
+RELEASE_VERSION="$3"
+
+IMG="PrawnOS-${RELEASE_VERSION}-${TEST_TARGET}"
+IMAGE="${IMG}.img"
+IMAGE_GIT="${IMG}-git-${GITHUB_SHA}.img"
 
 cd "$(dirname "$0")/.."
 
@@ -39,4 +44,7 @@ make install_dependencies_yes TARGET=$TEST_TARGET
 make image TARGET=$TEST_TARGET
 
 # rename the image to include git sha:
-mv PrawnOS-Shiba-$TEST_TARGET.img "PrawnOS-Shiba-${TEST_TARGET}-git-${GITHUB_SHA}.img"
+mv $IMAGE $IMAGE_GIT
+
+# compress, otherwise downloads take forever
+xz -1 $IMAGE_GIT

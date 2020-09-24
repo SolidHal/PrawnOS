@@ -1,6 +1,6 @@
 # FIXME: currently just builds it, eventually, should use qemu to try to run
 # the image (potentially as a separate action)
-name: build-prawnos-image-armhf
+name: build-image-armhf
 
 on: [push, pull_request]
 jobs:
@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout project
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
       - name: build image
         run: docker run --mount type=bind,source=$PWD,target=/PrawnOS
              --privileged=true -v/dev:/dev debian:buster
-             /bin/bash /PrawnOS/tests/build-image-armhf.sh "$GITHUB_SHA"
+             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" armhf Shiba
       - name: publish image
         uses: actions/upload-artifact@v2
         with:
-          name: image
-          path: "PrawnOS-Shiba-armhf-git-*.img"
+          name: "PrawnOS-Shiba-armhf-git-${GITHUB_SHA}.img.xz"
+          path: "PrawnOS-Shiba-armhf-git-${GITHUB_SHA}.img.xz"
