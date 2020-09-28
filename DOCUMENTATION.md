@@ -183,3 +183,15 @@ sometimes when the c201 (and likely other machines) completely drain their batte
 ```
 sudo crosystem dev_boot_usb=1
 ```
+
+### Modify the dev boot screen (make it not beep loudly)
+TODO: expand to be more than just some notes
+https://web.archive.org/web/20170711043202/https://johnlewis.ie/neutering-the-developer-mode-screen-on-your-chromebook/
+https://gist.github.com/stupidpupil/1e88638e5240476ec1f77d4b27747c88#extra-extra---replace-the-boot-screen-image
+
+flashrom for internal flashing can be found in sid repos
+it just needs -p linux_mtd iirc
+
+gbb from vboot-utils works
+
+cut and paste from the archived neutering page gave me the the wrong dashes: –set vs --set, but it looks like it might be working with sid flashrom and sid vboot-utils. But I think I better study more before I flash the reflagged img.
