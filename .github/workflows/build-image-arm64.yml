@@ -17,5 +17,5 @@ jobs:
       - name: publish image
         uses: actions/upload-artifact@v2
         with:
-          name: "PrawnOS-Shiba-arm64-git-${GITHUB_SHA}.img.xz"
-          path: "PrawnOS-Shiba-arm64-git-${GITHUB_SHA}.img.xz"
+          name: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"
+          path: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"
