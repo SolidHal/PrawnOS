@@ -192,7 +192,8 @@ fi
 
 if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
 then
-    echo "load-module module-alsa-sink device=sysdefault" > /etc/pulse/default.pa
+    #same bash tracpad config works well enough
+    cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
 
