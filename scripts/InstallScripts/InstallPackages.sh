@@ -192,7 +192,8 @@ fi
 
 if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
 then
-    #same bash tracpad config works well enough
+    #same bash trackpad config works well enough
+    mkdir /etc/X11/xorg.conf.d/
     cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
