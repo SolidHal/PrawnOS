@@ -148,7 +148,7 @@ then
 
   #Install libinput-gestures and xfdashboard "packages"
   cd $DIR/packages/
-  dtrx libinput-gestures.tar.gz
+  tar -xf libinput-gestures.tar.gz
   cd libinput-gestures
   make install
   cd ..
@@ -186,14 +186,14 @@ then
     echo "flat-volumes = no" > /etc/pulse/daemon.conf
     cp -rf $DIR/veyron/sound.sh /etc/acpi/sound.sh
     cp -rf $DIR/veyron/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
-    mkdir /etc/X11/xorg.conf.d/
+    mkdir -p /etc/X11/xorg.conf.d/
     cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
 if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
 then
     #same bash trackpad config works well enough
-    mkdir /etc/X11/xorg.conf.d/
+    mkdir -p /etc/X11/xorg.conf.d/
     cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
