@@ -65,16 +65,27 @@ PBUILDER_HOOKS=$4
 PRAWNOS_LOCAL_APT_REPO=$5
 PRAWNOS_LOCAL_APT_SOURCE=$6
 
+#set to true when rebuild packages for anew distro or rebuild the apt repo so the original source tar is included in the upload
+PDEBUILD_ORIGINAL_SOURCE="false"
+
 PACKAGE_DIR=$PWD
+
 
 # only defined if there are build deps we need to satisfy
 PACKAGE_LOCAL_BUILD_DEPS=$7
+
+DEBUILD_OPTS=""
+if [[ $PDEBUILD_ORIGINAL_SOURCE == "true" ]]; then
+	DEBUILD_OPTS="--debbuildopts -sa"
+fi
+
 
 if [[ $PACKAGE_LOCAL_BUILD_DEPS == "" ]]; then
 	  echo Building $PACKAGE_NAME
     cd src
     pdebuild --configfile $PBUILDER_RC \
                       --buildresult $PACKAGE_DIR \
+		      $DEBUILD_OPTS \
                       -- \
                       --hookdir $PBUILDER_HOOKS \
                       --basetgz $PBUILDER_CHROOT
@@ -92,6 +103,7 @@ else
 	  cd src
     pdebuild --configfile $PBUILDER_RC \
                       --buildresult $PACKAGE_DIR \
+		      $DEBUILD_OPTS \
                       -- \
                       --override-config \
                       --basetgz $PBUILDER_CHROOT \
