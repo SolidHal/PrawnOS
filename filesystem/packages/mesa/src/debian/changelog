@@ -1,0 +1,6 @@
+mesa (20.2.1-1) testing; urgency=medium
+
+  * backport to bullseye
+
+ -- Hal Emmerich <hal@halemmerich.com>  Tue, 20 Oct 2020 12:38:36 +0300
+

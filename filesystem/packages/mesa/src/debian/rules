@@ -1,0 +1,254 @@
+#!/usr/bin/make -f
+# debian/rules for the Debian mesa package
+# Copyright © 2006 Thierry Reding <thierry@gilfi.de>
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+include /usr/share/dpkg/pkg-info.mk
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
+
+# for finding the correct llvm-config when meson doesn't know about it yet
+export PATH:=/usr/lib/llvm-11/bin/:$(PATH)
+
+ifeq (,$(filter $(DEB_HOST_ARCH), armhf sh3 sh4))
+buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
+else
+  ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+  # Workaround for a variant of LP: #725126
+  buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" DEB_CXXFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" dpkg-buildflags --export=configure)
+  else
+  # Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83143
+  buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -O1" DEB_CXXFLAGS_MAINT_APPEND="-Wall -O1" dpkg-buildflags --export=configure)
+  endif
+endif
+
+DRI_DRIVERS =
+GALLIUM_DRIVERS =
+VULKAN_DRIVERS =
+
+confflags_DRI3 = -Ddri3=false
+
+# hurd doesn't do direct rendering
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	DRI_DRIVERS = swrast
+	EGL_PLATFORMS = x11
+
+	confflags_DIRECT_RENDERING = -Dglx-direct=false
+	confflags_GBM = -Dgbm=false
+	confflags_OSMESA = -Dosmesa=classic
+else
+	DRI_DRIVERS += r200,r100
+	EGL_PLATFORMS = drm,surfaceless,x11
+	GALLIUM_DRIVERS += r600,r300
+
+  # radv needs LLVM and the Vulkan loader, so only build on the subset of
+  # arches where we have LLVM enabled and where the Vulkan loader is built.
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 mips64el mipsel powerpc ppc64 ppc64el s390x sparc64))
+	VULKAN_DRIVERS += amd
+  endif
+
+  ifeq ($(DEB_HOST_ARCH_OS), linux)
+	confflags_DRI3 = -Ddri3=true
+	DRI_DRIVERS += ,nouveau
+	# Gallium drivers which require kernel support, not yet ported to non-Linux
+	GALLIUM_DRIVERS += ,nouveau,virgl
+
+	# Freedreno requires arm in addition
+	ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
+		GALLIUM_DRIVERS += ,freedreno
+	endif
+
+	# etnaviv, kmsro, tegra, vc4 and v3d kernel support are only available on armhf and arm64
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf arm64))
+		GALLIUM_DRIVERS += ,etnaviv,kmsro,lima,panfrost,tegra,vc4,v3d
+	endif
+
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 x32))
+		GALLIUM_DRIVERS += ,svga,zink
+		# svga needs xa state tracker
+		confflags_GALLIUM += -Dgallium-xa=true
+		VULKAN_DRIVERS += ,intel
+	endif
+
+	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
+	EGL_PLATFORMS += ,wayland
+
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armhf i386 mips64el mipsel powerpc ppc64 ppc64el s390x))
+		confflags_VALGRIND += -Dvalgrind=true
+	endif
+  endif
+
+  # Build intel drivers on archs where libdrm-intel is installed
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
+	DRI_DRIVERS += ,i915, i965
+	GALLIUM_DRIVERS += ,iris
+  endif
+
+  # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
+  # It's also required for building OpenCL support.
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips64el mipsel powerpc ppc64 ppc64el s390x sparc64))
+	GALLIUM_DRIVERS += ,radeonsi,swrast
+	confflags_GALLIUM += -Dllvm=true
+	confflags_GALLIUM += -Dgallium-opencl=icd
+	confflags_OSMESA = -Dosmesa=gallium
+
+	# nine makes sense only on archs that build wine
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-i386 powerpc))
+		confflags_GALLIUM += -Dgallium-nine=true
+	endif
+  else
+	DRI_DRIVERS += ,swrast
+	confflags_GALLIUM += -Dllvm=false
+	confflags_OSMESA = -Dosmesa=classic
+  endif
+
+  # build vulkan layers where Vulkan loader is available
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 mips64el mipsel powerpc ppc64 ppc64el s390x sparc64 x32))
+	confflags_VULKAN += -Dvulkan-device-select-layer=true
+	confflags_VULKAN += -Dvulkan-overlay-layer=true
+  endif
+
+	confflags_DIRECT_RENDERING = -Dglx-direct=true
+	confflags_GBM = -Dgbm=true
+	confflags_GALLIUM += -Dgallium-extra-hud=true
+	confflags_GALLIUM += -Dgallium-vdpau=true
+	confflags_GALLIUM += -Dlmsensors=true
+
+  ifeq (,$(filter pkg.mesa.nolibva,$(DEB_BUILD_PROFILES)))
+        confflags_GALLIUM += -Dgallium-va=true
+  endif
+endif
+
+confflags_EGL = -Dplatforms="$(EGL_PLATFORMS)"
+confflags_GLES = -Dgles1=false -Dgles2=true
+confflags_GALLIUM += -Dgallium-drivers="$(GALLIUM_DRIVERS)"
+
+confflags += \
+	-Ddri-drivers="$(DRI_DRIVERS)" \
+	-Ddri-drivers-path=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
+	-Ddri-search-path='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
+	-Dvulkan-drivers="$(VULKAN_DRIVERS)" \
+	-Dglvnd=true \
+	-Dshared-glapi=true \
+	-Dgallium-xvmc=false \
+	-Dgallium-omx=disabled \
+	-Db_ndebug=true \
+	-Dbuild-tests=true \
+	$(confflags_DIRECT_RENDERING) \
+	$(confflags_GBM) \
+	$(confflags_DRI3) \
+	$(confflags_EGL) \
+	$(confflags_GALLIUM) \
+	$(confflags_GLES) \
+	$(confflags_OSMESA) \
+	$(confflags_VALGRIND) \
+	$(confflags_VULKAN)
+
+override_dh_clean:
+	rm -rf .pc
+	rm -rf build
+	rm -rf configure bin/config.guess bin/config.sub config.h.in
+	rm -rf $$(find -name Makefile.in)
+	rm -rf bin/install-sh bin/ltmain.sh
+	for file in debian/*.in; do rm -f $${file%%.in}; done
+	rm -rf src/amd/compiler/__pycache__/ src/amd/registers/__pycache__
+	rm -rf src/amd/vulkan/*.pyc src/amd/vulkan/__pycache__/
+	rm -rf src/compiler/nir/*.pyc src/compiler/nir/__pycache__/
+	rm -rf src/egl/generate/*.pyc src/egl/generate/__pycache__/
+	rm -rf src/gallium/auxiliary/util/*.pyc src/gallium/auxiliary/util/__pycache__/
+	rm -rf src/intel/vulkan/*.pyc src/intel/vulkan/__pycache__/
+	rm -rf src/mapi/glapi/gen/*.pyc src/mapi/glapi/gen/__pycache__/ src/mapi/new/__pycache__/
+	rm -rf src/mesa/main/*.pyc src/mesa/main/__pycache__/
+	dh_clean
+
+override_dh_auto_configure:
+	$(buildflags) dh_auto_configure -- \
+		$(confflags)
+
+override_dh_auto_install:
+	dh_auto_install
+	for file in debian/*.in; \
+	do \
+		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
+			$${file} > $${file%%.in}; \
+	done
+
+# some tests are expected to fail for now, drop this when upstream has
+# better cross-build testing in place and expected failures fixed
+override_dh_auto_test:
+	-dh_auto_test
+
+allpkg = $(shell dh_listpackages -a)
+
+override_dh_installchangelogs:
+	dh_installchangelogs -a
+	dh_installchangelogs -pmesa-common-dev
+
+override_dh_install:
+	# purge .la files
+	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
+
+	# Get rid of some files which aren't installed. Do not
+	# use -f to ensure we notice disappearing files:
+	rm debian/tmp/usr/lib/*/libglapi.so
+	rm debian/tmp/usr/lib/*/libEGL_mesa.so
+	rm debian/tmp/usr/lib/*/libGLX_mesa.so
+
+	# Copy the hardlinked *_dri.so correctly.
+	install -m755 -d debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_dri.so \
+	   debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+
+  # Remove vulkan headers only where they get installed in tmp
+  # We ship those headers via src:vulkan / libvulkan-dev
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 x32))
+	rm debian/tmp/usr/include/vulkan/vulkan_intel.h
+	rmdir debian/tmp/usr/include/vulkan
+  endif
+
+  ifneq ($(DEB_HOST_ARCH_OS), hurd)
+	# Copy the hardlinked vdpau drivers correctly.
+	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
+	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+
+    ifeq (,$(filter pkg.mesa.nolibva,$(DEB_BUILD_PROFILES)))
+	# Copy the hardlinked va drivers correctly.
+	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
+	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+    endif
+  endif
+
+	dh_install -a
+
+	# Install bug control and script:
+	set -e; for p in $(allpkg); do \
+		install -d debian/$$p/usr/share/bug/$$p && \
+		install -m 644 debian/local/control debian/$$p/usr/share/bug/$$p && \
+		install -m 755 debian/local/script  debian/$$p/usr/share/bug/$$p; \
+	done
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_makeshlibs:
+	dh_makeshlibs -a -- -c4
+
+%:
+	dh $@ --with quilt \
+		--builddirectory=build/ \
+		--buildsystem=meson
+
+# For maintainer use only, generate a tarball:
+gentarball:
+	git archive --format=tar upstream-experimental --prefix=$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)/ \
+		| gzip -9 > ../$(DEB_SOURCE)_$(DEB_VERSION_UPSTREAM).orig.tar.gz
