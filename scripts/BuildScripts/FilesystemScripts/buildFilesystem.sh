@@ -115,19 +115,22 @@ trap cleanup INT TERM EXIT
 
 # Retry a command up to 5 times, else fail
 retry_until() {
+    #must clear and unclear the "e" flag to avoid trapping into cleanup before retrying
+    set +e
     command=("$@")
 
     NUM_RETRIES=0
     MAX_RETRIES=5
 
-    until [ $NUM_RETRIES -eq 5 ] || ${command[@]}; do
-        echo Apt failure, trying again in 5 seconds
+    until [ "$NUM_RETRIES" -eq 5 ] || ${command[@]}; do
+        echo Apt failure, NUM_RETRIES = $NUM_RETRIES, trying again in 5 seconds
         ((NUM_RETRIES++))
         sleep 5
     done
     if [ "$NUM_RETRIES" -ge "$MAX_RETRIES" ]; then
         exit 1
     fi
+    set -e
 }
 
 # Download, cache externally, and optionally install the specified packages
@@ -158,7 +161,7 @@ create_image() {
   parted --script $1 mklabel gpt
   cgpt create $1
   kernel_start=8192
-  kernel_size=65536
+  kernel_size=131072
   cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
   #Now the main filesystem
   root_start=$(($kernel_start + $kernel_size))

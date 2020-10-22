@@ -9,12 +9,12 @@ INITRAMFS_BUILD_LOG := $(PRAWNOS_BUILD_LOGS)/initramfs-log.txt
 
 INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources
 
-.PHONY: initramfs initramfs_clean
+.PHONY: initramfs clean_initramfs
 
 initramfs: $(PRAWNOS_INITRAMFS_IMAGE)
 
-initramfs_clean:
-	rm -f $(PRAWNOS_INITRAMFS)
+clean_initramfs:
+	rm -f $(PRAWNOS_INITRAMFS_IMAGE)
 
 $(PRAWNOS_INITRAMFS_IMAGE): | $(PRAWNOS_BUILD_LOGS)
 	rm -rf $(INITRAMFS_BUILD_LOG)
