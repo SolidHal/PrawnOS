@@ -219,6 +219,15 @@ sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
 sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/prawnos.list
 if [ "$DEBIAN_SUITE" != "sid" ]
 then
+    # sid doesn't have updates or security; they're present for all other suites
+    cat $build_resources_apt/updates.list >> $outmnt/etc/apt/sources.list
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
+    # sid doesn't have backports; it's present for all other suites
+    cp $build_resources_apt/backports.list $outmnt/etc/apt/sources.list.d/
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
+    #setup apt pinning
+    cp $build_resources_apt/backports.pref $outmnt/etc/apt/preferences.d/
+    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
     # Install sid (unstable) as an additional source for bleeding edge packages.
     cp $build_resources_apt/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
@@ -226,15 +235,9 @@ then
 fi
 if [ "$DEBIAN_SUITE" = "buster" ]
 then
-    # sid and bullseye don't have backports or security; it's present for all other suites
-    cat $build_resources_apt/updates.list >> $outmnt/etc/apt/sources.list
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
-    cp $build_resources_apt/backports.list $outmnt/etc/apt/sources.list.d/
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
-    cp $build_resources_apt/backports.pref $outmnt/etc/apt/preferences.d/
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
     # Install bullseye (testing) as an additional source
     cp $build_resources_apt/bullseye.list $outmnt/etc/apt/sources.list.d/
+    #setup apt pinning
     cp $build_resources_apt/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 

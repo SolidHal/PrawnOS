@@ -82,6 +82,7 @@ base_debs_download=(
     dbus-user-session
     dpkg
     dkms
+    dtrx
     eject
     emacs
     firefox-esr
