@@ -1,1 +1,0 @@
-libglapi 0 libglapi-mesa (= ${binary:Version})
