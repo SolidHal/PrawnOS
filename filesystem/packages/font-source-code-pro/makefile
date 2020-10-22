@@ -20,14 +20,6 @@ $(PACKAGE_NAME_DEB):
 	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
 	cp $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
-.PHONY: full_build
-# includes the .orig.tar.gz in the changes file so it gets uploaded
-full_build:
-	@echo Full Building $@
-	cd src/; debuild -us -uc -sa
-	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
-	cp $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
-
 .PHONY: clean
 clean:
 	rm -rf $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
