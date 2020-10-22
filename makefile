@@ -104,8 +104,6 @@ image:
 
 #:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
-# this will only do everything right on bullseye due to https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109
-# see the README for how to build on buster
 .PHONY: install_dependencies
 install_dependencies:
 	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
