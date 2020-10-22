@@ -1,5 +1,5 @@
 PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-apt"
-DISTRIBUTION=bullseye
+DISTRIBUTION=buster
 ARCHITECTURE=arm64
 DEBOOTSTRAP=qemu-debootstrap
 DEBOOTSTRAPOPTS=( '--variant=buildd' '--arch=arm64' )
