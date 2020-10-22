@@ -178,7 +178,7 @@ veyron-speedy: "Google Speedy"
 gru-kevin:     "Google Kevin"
 
 
-### enable usb boot
+### Enable usb boot
 sometimes when the c201 (and likely other machines) completely drain their battery, the usb boot option is lost. We can re-enable it from inside PrawnOS using the following command: 
 ```
 sudo crosystem dev_boot_usb=1
@@ -189,9 +189,84 @@ TODO: expand to be more than just some notes
 https://web.archive.org/web/20170711043202/https://johnlewis.ie/neutering-the-developer-mode-screen-on-your-chromebook/
 https://gist.github.com/stupidpupil/1e88638e5240476ec1f77d4b27747c88#extra-extra---replace-the-boot-screen-image
 
-flashrom for internal flashing can be found in sid repos
-it just needs -p linux_mtd iirc
+flashrom for internal flashing can be found in sid repos. On Debian 10 and derivitives the command is :
+```
+sudo apt install -t bullseye flashrom
+```
 
-gbb from vboot-utils works
+The following commands can be used to create a backup image named testread1.img and to write back a modified image named modified.img:
 
-cut and paste from the archived neutering page gave me the the wrong dashes: –set vs --set, but it looks like it might be working with sid flashrom and sid vboot-utils. But I think I better study more before I flash the reflagged img.
+```
+sudo flashrom -p linux_mtd -r testread1.img 
+sudo flashrom -p linux_mtd -w modified.img 
+```
+
+### Modifying a factory image with gbb_utility
+
+Using gbb_utility on a factory image can change settings, without even having to use the vendor operating system. As the changes happen to the read only region of the coreboot image, the changes can persist when the battery dies. 
+
+This means for example, developer mode can be permantly enabled, and persists even when a battery prematurely dies. The user can confidently replace the vendor operating system on the internal emmc device, and continue to boot their kernel (signed with dev keys) sucessfully.
+
+For reference, (the flags that can be set can be found here) [https://chromium.googlesource.com/chromiumos/platform/vboot/+/master/_vboot_reference/firmware/include/gbb_header.h]
+
+Make sure that flashrom and vboot-utils are installed. This can be on either the host or an external device; the following command works on Debian and derivitives: 
+```
+sudo apt install flash vboot-utils 
+```
+
+On Coreboot/Depthcharge devices (this means no legacy bios or uefi implementations), these three flags will be the ones mosts users will want to set: 
+```
+#define GBB_FLAG_DEV_SCREEN_SHORT_DELAY	        	0x00000001
+#define GBB_FLAG_FORCE_DEV_SWITCH_ON			0x00000008
+#define GBB_FLAG_FORCE_DEV_BOOT_USB			0x00000010
+```
+
+As these flags add up to 0x00000019, we can drop the preceding zeroes and issue the following command: 
+```
+gbb_utility --set --flags 0x19 modified.img 
+```
+
+
+
+### Reading and writing with an external flasher
+
+By using an external flasher (ie, a Raspberry Pi) one can make changes to their factory coreboot image without needing to remove the write-protect screw. 
+
+When the write-protect screw is in place, using flashrom on the device to backup the factory image in NOT recommended. This is because the md5sum of the image will change between power cycles. 
+
+To obtain an accurate backup, opening up the case to gain physical access is required. At this point, the user has the option of either:
+
+
+1) Removing the write-protect screw. Flashrom can now be used on the host device (chromebook), and md5sums will be consistent accross power cycles. 
+
+OPTIONAL: Once done backingup and writing a modified image, restore the write-protect screw for additional security.
+
+or 
+
+2) Using an external flashing tool, attach your chip clipper to the chip. Take care not to fry your chip by plugging the clipper backwards. The following commands can be used to create a backup image named testread1.img and to write back a modified image named modified.img:
+
+```
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512 -r testread1.img 
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512 -w modified.img 
+```
+
+It is recommended to create three test reads, and run 'md5sum testread*.img' to confirm consistency. It is also advised to use your favorite hex editor to scroll through the image, looking for plain english strings. 
+
+### Disabling the Bright White Screen of Maximum Brightness at Boot
+
+The quick and easy way is:
+
+```
+touch null-images
+gbb_utility --set --bmpfv=null-images modified.img
+```
+
+### Extracting the factory bitmaps to a folder named to-repack:
+
+```
+gbb_utility --get --bmpfv=factory-bitmaps testread1.img 
+bmpblk_utility -x -d to-repack factory-bitmaps 
+```
+
+TODO: Document the repacking process. Notes from jcs.org's post on openbsd on chromebook pixel would come in handy.
+ALSO TODO: Identify which bitmaps contain trademarked images. This can come in hany for those wishing to debrand their coreboot image, or  rebrand their libreboot image. This however is easier said than done, as both the trademarked logo and text are embedded into the bitmap files spread accross 42 different languages.
