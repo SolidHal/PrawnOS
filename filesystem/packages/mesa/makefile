@@ -12,6 +12,7 @@ PACKAGE_LOCAL_BUILD_DEPS :=
 
 default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 
+
 #libegl1-mesa-dev
 #libgbm-dev
 #libgbm1
@@ -44,8 +45,7 @@ clean:
 	rm -rf *.buildinfo
 
 install:
-#	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
-	cp *.deb $(INSTALL_TARGET)
+	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
 
 .PHONY: upload
 upload:
