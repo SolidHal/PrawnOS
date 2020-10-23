@@ -246,6 +246,13 @@ cp $build_resources_apt/deb.prawnos.com.gpg.key $outmnt/InstallResources/
 chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
+#Copy splash screen
+cp $build_resources/PrawnOS-* $outmnt/
+
+#Copy /etc/issue
+mkdir -p $outmnt/etc/issue.d/
+cp $build_resources/splash-recover-cursor.issue $outmnt/etc/issue.d/splash-recover-cursor.issue
+
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
@@ -313,6 +320,24 @@ echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
+
+#Copy systemd config. This is on the end to make sure that no package overrides this
+cp $build_resources/system.conf $outmnt/etc/systemd/
+
+#install hwdb file for iio-sensor-proxy to work
+printf 'sensor:modalias:platform:*\n ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, -1, 0; 0, 0, -1\n' > $outmnt/etc/udev/hwdb.d/61-sensor-local.hwdb
+chroot $outmnt systemd-hwdb update
+
+#make bootsplash not disappear again
+chroot $outmnt systemctl mask plymouth-start
+chroot $outmnt dpkg-reconfigure -f noninteractive console-setup
+grep -v setfont $outmnt/etc/console-setup/cached_setup_font.sh > /tmp/cached_setup_font.sh
+cp /tmp/cached_setup_font.sh $outmnt/etc/console-setup/cached_setup_font.sh
+
+mkdir -p $outmnt/opt/git/
+cd $outmnt/opt/git/
+rm -rf $outmnt/opt/git/c100pa-daemon
+git clone https://github.com/Maccraft123/c100pa-daemon.git $outmnt/opt/git/c100pa-daemon
 
 # do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1

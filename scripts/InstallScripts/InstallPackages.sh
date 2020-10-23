@@ -242,6 +242,25 @@ do
     done
 done
 
+#install hwdb file for iio-sensor-proxy to work
+printf 'sensor:modalias:platform:*\n ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, -1, 0; 0, 0, -1\n' > /etc/udev/hwdb.d/61-sensor-local.hwdb
+systemd-hwdb update
+udevadm trigger
+
+#make bootsplash not disappear again
+systemctl mask plymouth-start
+dpkg-reconfigure -f noninteractive console-setup
+grep -v setfont /etc/console-setup/cached_setup_font.sh > /tmp/cached_setup_font.sh
+cp /tmp/cached_setup_font.sh /etc/console-setup/cached_setup_font.sh
+
+#daemon for disabling touchpad and keyboard
+mkdir -p /opt/git
+cd /opt/git/
+cd c100pa-daemon
+make
+make install
+systemctl enable c100pa-daemon
+
 usermod -a -G sudo,netdev,input,video,bluetooth $username
 
 dmesg -E

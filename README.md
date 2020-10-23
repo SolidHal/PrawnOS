@@ -271,7 +271,7 @@ To begin with:
 
 `make filesystem` builds the -BASE filesystem image with no kernel
 
-`make initramfs` builds the PrawnOS-initramfs.cpio.gz, which can be found in /build
+`make initramfs` builds the PrawnOS-initramfs.cpio, which can be found in /build
 
 `make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_install
 

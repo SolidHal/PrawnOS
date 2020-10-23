@@ -17,12 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-echo In PrawnOS Init
 
 #add this to start shell at desired point
 rescue_shell() {
-    [ "{$1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
     [ "{$1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
+    dmesg -n 4
     echo "Something went wrong. Dropping to a shell." > /dev/tty1
     exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
 }
@@ -66,14 +65,26 @@ mount -n -t devtmpfs devtmpfs  /dev
 # get the root device, so we can find the boot partiton
 UNPARSED=$(cmdline root)
 ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-echo ${ROOT_PARTUUID} > /dev/tty1
 BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-echo ${BLKID} > /dev/tty1
 #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
 #Just want everything before the 1
 ROOT_DEV="${BLKID%1:*}"
 
-echo ${ROOT_DEV} > /dev/tty1
+
+# happens when kernel takes its time looking for devices
+if [ -z ${ROOT_DEV} ]
+then
+    sleep 1
+    # get the root device, so we can find the boot partiton
+    UNPARSED=$(cmdline root)
+    ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
+    BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
+    #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
+    ROOT_DEV="${BLKID%1:*}"
+    # if device is still not seen, bail out
+    [ -z ${ROOT_DEV} ] && rescue_shell
+fi
+
 
 # label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
 # you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
@@ -89,13 +100,16 @@ then
     dmesg -n 2
     echo "Opening encrypted root partition, this will take 30s..."
     cryptsetup --tries 5 luksOpen ${ROOT_DEV}2 luksroot || rescue_shell
-    dmesg -n 7
     mount /dev/mapper/luksroot /newroot
 else
     # mount the unencrypted root filesystem
     [ -d "/newroot" ] || mkdir -p /newroot
     mount ${ROOT_DEV}2 /newroot
 fi
+
+dmesg -n 1
+echo -e '\033[?17;0;0c' > /dev/tty1 # magically make cursor disappear
+dd status=none if=/newroot/PrawnOS-$(cat /sys/class/graphics/fb0/virtual_size | tr ',' 'x') of=/dev/fb0 # write splash to framebuffer
 
 umount /sys
 umount /proc
