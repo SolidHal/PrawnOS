@@ -160,9 +160,9 @@ install() {
     ROOT_PARTITION=${TARGET}2
     CRYPTO=false
 
-    echo Writing kernel partition
+    echo Writing kernel to partition $KERNEL_PARTITION
     dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=131072
-    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION conv=notrunc
+    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
