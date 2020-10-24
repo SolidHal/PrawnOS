@@ -14,7 +14,6 @@ default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 
 #libegl1-mesa-dev
 #libgbm-dev
-#libgbm1
 #libgl1-mesa-dri
 #libglapi-mesa
 #mesa-common-dev
@@ -45,7 +44,21 @@ clean:
 
 install:
 #	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
-	cp *_$(TARGET).deb $(INSTALL_TARGET)
+	cp libgbm1_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libgl1-mesa-dri_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libegl1-mesa_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libegl-mesa0_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libglapi-mesa_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libgl1-mesa-glx_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libgles2-mesa_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libglx-mesa0_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libosmesa6_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp libwayland-egl1-mesa_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp mesa-opencl-icd_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp mesa-va-drivers_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp mesa-vdpau-drivers_*_$(TARGET).deb $(INSTALL_TARGET)
+	cp mesa-vulkan-drivers_*_$(TARGET).deb $(INSTALL_TARGET)
+
 
 .PHONY: upload
 upload:

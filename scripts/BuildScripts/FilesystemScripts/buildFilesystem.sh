@@ -279,7 +279,8 @@ apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 if [ "$TARGET_ARCH" != "arm64" ]
 then
     #Download the lxqt packages to be installed by Install.sh:
-    apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
+    #TODO: exclude lxqt for both armhf and arm64, image too large
+    #apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
 
     #Download the gnome packages to be installed by Install.sh:
     apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
