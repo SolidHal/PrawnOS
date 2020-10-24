@@ -203,11 +203,11 @@ sudo flashrom -p linux_mtd -w modified.img
 
 ### Modifying a factory image with gbb_utility
 
-Using gbb_utility on a factory image can change settings, without even having to use the vendor operating system. As the changes happen to the read only region of the coreboot image, the changes can persist when the battery dies. 
+Using gbb_utility on a factory image can change settings, without even having to use the vendor operating system. As the changes happen to the (normally) read only region of the coreboot image (the gbb block), these changes can persist when the battery dies. 
 
-This means for example, developer mode can be permantly enabled, and persists even when a battery prematurely dies. The user can confidently replace the vendor operating system on the internal emmc device, and continue to boot their kernel (signed with dev keys) sucessfully.
+This means for example, developer mode can be permanently enabled, and persists even when a battery prematurely dies. The user can confidently replace the vendor operating system on the internal emmc device, and continue to boot their kernel (signed with dev keys) successfully.
 
-For reference, (the flags that can be set can be found here) [https://chromium.googlesource.com/chromiumos/platform/vboot/+/master/_vboot_reference/firmware/include/gbb_header.h]
+For reference, the flags that can be set can be found here: https://chromium.googlesource.com/chromiumos/platform/vboot/+/master/_vboot_reference/firmware/include/gbb_header.h
 
 Make sure that flashrom and vboot-utils are installed. This can be on either the host or an external device; the following command works on Debian and derivitives: 
 ```
@@ -243,7 +243,7 @@ OPTIONAL: Once done backingup and writing a modified image, restore the write-pr
 
 or 
 
-2) Using an external flashing tool, attach your chip clipper to the chip. Take care not to fry your chip by plugging the clipper backwards. The following commands can be used to create a backup image named testread1.img and to write back a modified image named modified.img:
+2) Using an external flashing tool, such as the aforementioned Raspberry Pi, attach your chip clipper to the chip. Take care not to fry your chip by plugging the clipper backwards. The following commands may be used to create a backup image named testread1.img and to write back a modified image named modified.img:
 
 ```
 sudo flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512 -r testread1.img 
@@ -269,4 +269,4 @@ bmpblk_utility -x -d to-repack factory-bitmaps
 ```
 
 TODO: Document the repacking process. Notes from jcs.org's post on openbsd on chromebook pixel would come in handy.
-ALSO TODO: Identify which bitmaps contain trademarked images. This can come in hany for those wishing to debrand their coreboot image, or  rebrand their libreboot image. This however is easier said than done, as both the trademarked logo and text are embedded into the bitmap files spread accross 42 different languages.
+ALSO TODO: Identify which bitmaps contain trademarked images. This can come in handy for those wishing to debrand their coreboot image, or rebrand their libreboot image. This however is easier said than done, as both the trademarked logo and text are embedded into the bitmap files spread accross 42 different languages.
