@@ -45,7 +45,7 @@ clean:
 
 install:
 #	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
-	cp *.deb $(INSTALL_TARGET)
+	cp *_$(TARGET).deb $(INSTALL_TARGET)
 
 .PHONY: upload
 upload:
