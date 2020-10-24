@@ -1,0 +1,53 @@
+diff --git a/drivers/gpu/drm/panfrost/panfrost_device.c b/drivers/gpu/drm/panfrost/panfrost_device.c
+index 36b5c8fea3eb..f1474b961def 100644
+--- a/drivers/gpu/drm/panfrost/panfrost_device.c
++++ b/drivers/gpu/drm/panfrost/panfrost_device.c
+@@ -90,9 +90,11 @@ static int panfrost_regulator_init(struct panfrost_device *pfdev)
+ {
+ 	int ret, i;
+ 
+-	if (WARN(pfdev->comp->num_supplies > ARRAY_SIZE(pfdev->regulators),
+-			"Too many supplies in compatible structure.\n"))
+-		return -EINVAL;
++	pfdev->regulators = devm_kcalloc(pfdev->dev, pfdev->comp->num_supplies,
++					 sizeof(*pfdev->regulators),
++					 GFP_KERNEL);
++	if (!pfdev->regulators)
++		return -ENOMEM;
+ 
+ 	for (i = 0; i < pfdev->comp->num_supplies; i++)
+ 		pfdev->regulators[i].supply = pfdev->comp->supply_names[i];
+@@ -119,8 +121,10 @@ static int panfrost_regulator_init(struct panfrost_device *pfdev)
+ 
+ static void panfrost_regulator_fini(struct panfrost_device *pfdev)
+ {
+-	regulator_bulk_disable(pfdev->comp->num_supplies,
+-			pfdev->regulators);
++	if (!pfdev->regulators)
++		return;
++
++	regulator_bulk_disable(pfdev->comp->num_supplies, pfdev->regulators);
+ }
+ 
+ static void panfrost_pm_domain_fini(struct panfrost_device *pfdev)
+diff --git a/drivers/gpu/drm/panfrost/panfrost_device.h b/drivers/gpu/drm/panfrost/panfrost_device.h
+index 2efa59c9d1c5..953f7536a773 100644
+--- a/drivers/gpu/drm/panfrost/panfrost_device.h
++++ b/drivers/gpu/drm/panfrost/panfrost_device.h
+@@ -22,7 +22,6 @@ struct panfrost_job;
+ struct panfrost_perfcnt;
+ 
+ #define NUM_JOB_SLOTS 3
+-#define MAX_REGULATORS 2
+ #define MAX_PM_DOMAINS 3
+ 
+ struct panfrost_features {
+@@ -81,7 +80,7 @@ struct panfrost_device {
+ 	void __iomem *iomem;
+ 	struct clk *clock;
+ 	struct clk *bus_clock;
+-	struct regulator_bulk_data regulators[MAX_REGULATORS];
++	struct regulator_bulk_data *regulators;
+ 	struct reset_control *rstc;
+ 	/* pm_domains for devices with more than one. */
+ 	struct device *pm_domain_devs[MAX_PM_DOMAINS];

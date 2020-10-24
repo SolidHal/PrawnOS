@@ -1,0 +1,25 @@
+diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.c b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
+index 1b560b903ea6..df7b71da9a84 100644
+--- a/drivers/gpu/drm/panfrost/panfrost_devfreq.c
++++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
+@@ -1,18 +1,14 @@
+ // SPDX-License-Identifier: GPL-2.0
+ /* Copyright 2019 Collabora ltd. */
++
++#include <linux/clk.h>
+ #include <linux/devfreq.h>
+ #include <linux/devfreq_cooling.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_opp.h>
+-#include <linux/clk.h>
+-#include <linux/regulator/consumer.h>
+ 
+ #include "panfrost_device.h"
+ #include "panfrost_devfreq.h"
+-#include "panfrost_features.h"
+-#include "panfrost_issues.h"
+-#include "panfrost_gpu.h"
+-#include "panfrost_regs.h"
+ 
+ static void panfrost_devfreq_update_utilization(struct panfrost_device *pfdev)
+ {
