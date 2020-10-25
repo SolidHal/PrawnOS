@@ -15,14 +15,14 @@ src/debian/*
 !src/debian/source/format
 
 #generic packaging artifacts
-debhelper-build-stamp
-.debhelper
-*.deb
-*.build
-*.buildinfo
-*.changes
-*.log
-*.substvars
-*.diff.gz
-*.upload
-*.debian.tar.xz
+/debhelper-build-stamp
+/.debhelper
+/*.deb
+/*.build
+/*.buildinfo
+/*.changes
+/*.log
+/*.substvars
+/*.diff.gz
+/*.upload
+/*.debian.tar.xz
