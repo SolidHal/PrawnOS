@@ -183,6 +183,20 @@ prawnos_base_debs_prebuilt_download=(
 prawnos_base_debs_prebuilt_install=(
     flashmap
     mosys
+    libgbm1=20.2.1-100
+    libgl1-mesa-dri=20.2.1-100
+    libegl1-mesa=20.2.1-100
+    libegl-mesa0=20.2.1-100
+    libglapi-mesa=20.2.1-100
+    libgl1-mesa-glx=20.2.1-100
+    libgles2-mesa=20.2.1-100
+    libglx-mesa0=20.2.1-100
+    libosmesa6=20.2.1-100
+    libwayland-egl1-mesa=20.2.1-100
+    mesa-opencl-icd=20.2.1-100
+    mesa-va-drivers=20.2.1-100
+    mesa-vdpau-drivers=20.2.1-100
+    mesa-vulkan-drivers=20.2.1-100
 )
 
 # ====================================== END Package Lists =======================================

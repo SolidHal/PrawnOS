@@ -12,17 +12,22 @@ PACKAGE_LOCAL_BUILD_DEPS :=
 
 default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 
-#libegl1-mesa-dev
-#libgbm-dev
-#libgl1-mesa-dri
-#libglapi-mesa
-#mesa-common-dev
-#mesa-vdpau-drivers
-#mesa-va-drivers
 
 $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB): $(PRAWNOS_BUILD_DIRS) $(PACKAGE_NAME_DEB)
-# TODO: install for each of the required mesa/panfrost packages
-# $(PRAWNOS_PACKAGE_SCRIPTS_INSTALL)  $(PRAWNOS_LOCAL_APT_REPO)
+	cp libgbm1_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libgl1-mesa-dri_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libegl1-mesa_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libegl-mesa0_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libglapi-mesa_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libgl1-mesa-glx_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libgles2-mesa_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libglx-mesa0_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libosmesa6_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp libwayland-egl1-mesa_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp mesa-opencl-icd_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp mesa-va-drivers_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp mesa-vdpau-drivers_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
+	cp mesa-vulkan-drivers_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_DEB):
 	rm -f mesa_build.log
@@ -43,7 +48,6 @@ clean:
 	rm -rf *.buildinfo
 
 install:
-#	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)
 	cp libgbm1_*_$(TARGET).deb $(INSTALL_TARGET)
 	cp libgl1-mesa-dri_*_$(TARGET).deb $(INSTALL_TARGET)
 	cp libegl1-mesa_*_$(TARGET).deb $(INSTALL_TARGET)
