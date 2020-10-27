@@ -1,0 +1,60 @@
+From d07495208d5f591479eb53059fa791c3948542dc Mon Sep 17 00:00:00 2001
+From: SolidHal <hal@halemmerich.com>
+Date: Mon, 26 Oct 2020 17:53:23 -0700
+Subject: [PATCH] Don't try to load the cdn_dp firmware at all
+
+---
+ drivers/gpu/drm/rockchip/cdn-dp-core.c | 36 ++------------------------
+ 1 file changed, 2 insertions(+), 34 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/cdn-dp-core.c b/drivers/gpu/drm/rockchip/cdn-dp-core.c
+index a4a45daf93f2..1f63d52fd04a 100644
+--- a/drivers/gpu/drm/rockchip/cdn-dp-core.c
++++ b/drivers/gpu/drm/rockchip/cdn-dp-core.c
+@@ -606,41 +606,9 @@ static void cdn_dp_encoder_enable(struct drm_encoder *encoder)
+ 	if (ret)
+ 		return;
+ 
+-	mutex_lock(&dp->lock);
+-
+-	ret = cdn_dp_enable(dp);
+-	if (ret) {
+-		DRM_DEV_ERROR(dp->dev, "Failed to enable encoder %d\n",
+-			      ret);
+-		goto out;
+-	}
+-	if (!cdn_dp_check_link_status(dp)) {
+-		ret = cdn_dp_train_link(dp);
+-		if (ret) {
+-			DRM_DEV_ERROR(dp->dev, "Failed link train %d\n", ret);
+-			goto out;
+-		}
+-	}
+-
+-	ret = cdn_dp_set_video_status(dp, CONTROL_VIDEO_IDLE);
+-	if (ret) {
+-		DRM_DEV_ERROR(dp->dev, "Failed to idle video %d\n", ret);
+-		goto out;
+-	}
+-
+-	ret = cdn_dp_config_video(dp);
+-	if (ret) {
+-		DRM_DEV_ERROR(dp->dev, "Failed to config video %d\n", ret);
+-		goto out;
+-	}
++  // don't bother trying to setup and load firmware, will fail since firmware isn't present
++	return;
+ 
+-	ret = cdn_dp_set_video_status(dp, CONTROL_VIDEO_VALID);
+-	if (ret) {
+-		DRM_DEV_ERROR(dp->dev, "Failed to valid video %d\n", ret);
+-		goto out;
+-	}
+-out:
+-	mutex_unlock(&dp->lock);
+ }
+ 
+ static void cdn_dp_encoder_disable(struct drm_encoder *encoder)
+-- 
+2.20.1
+

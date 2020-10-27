@@ -161,7 +161,7 @@ create_image() {
   parted --script $1 mklabel gpt
   cgpt create $1
   kernel_start=8192
-  kernel_size=131072
+  kernel_size=65536
   cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $1
   #Now the main filesystem
   root_start=$(($kernel_start + $kernel_size))
@@ -176,8 +176,10 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# create a 2GB image with the Chrome OS partition layout
-create_image $BASE $outdev 50M 40 $outmnt
+# create a 2.5GB image with the Chrome OS partition layout
+# Bumped to keep both Gnome and Xfce
+#TODO: change back to 40 (2GB)
+create_image $BASE $outdev 50M 50 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -275,15 +277,8 @@ apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 #Download the xfce packages to be installed by Install.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
-#TODO: exclude these packages, image gets too full
-if [ "$TARGET_ARCH" != "arm64" ]
-then
-    #Download the lxqt packages to be installed by Install.sh:
-    apt_install $PRAWNOS_BUILD $outmnt false ${lxqt_debs_download[@]}
-
-    #Download the gnome packages to be installed by Install.sh:
-    apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
-fi
+#Download the gnome packages to be installed by Install.sh:
+apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies

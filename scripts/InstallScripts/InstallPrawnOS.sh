@@ -160,9 +160,9 @@ install() {
     ROOT_PARTITION=${TARGET}2
     CRYPTO=false
 
-    echo Writing kernel partition
-    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=131072
-    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION conv=notrunc
+    echo Writing kernel to partition $KERNEL_PARTITION
+    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
+    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
@@ -272,7 +272,7 @@ emmc_partition() {
 external_partition() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
-    kernel_size=131072
+    kernel_size=65536
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET

@@ -81,10 +81,11 @@ mount -o noatime ${outdev}p2 $outmnt
 # put the kernel in the kernel partition, modules in /lib/modules and AR9271
 # firmware in /lib/firmware
 kernel_size=65536
-#blank the kernel partition first, with 32MiB of zeros
+#blank the kernel partition first, with of zeros
+#this is very very important, not doing this or using the incorrect kernel size can lead to very strange and difficult to debug issues
 dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 #now write the new kernel
-dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1 conv=notrunc
+dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1
 
 #install the kernel image package to the chroot so it can be updated by apt later
 #need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition

@@ -1,0 +1,12 @@
+diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+index 89538d9e39e5..8a295bcb4dd3 100644
+--- a/arch/arm64/configs/defconfig
++++ b/arch/arm64/configs/defconfig
+@@ -504,6 +504,7 @@ CONFIG_SENSORS_INA2XX=m
+ CONFIG_SENSORS_INA3221=m
+ CONFIG_THERMAL_GOV_POWER_ALLOCATOR=y
+ CONFIG_CPU_THERMAL=y
++CONFIG_DEVFREQ_THERMAL=y
+ CONFIG_THERMAL_EMULATION=y
+ CONFIG_QORIQ_THERMAL=m
+ CONFIG_SUN8I_THERMAL=y

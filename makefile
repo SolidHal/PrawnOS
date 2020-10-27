@@ -88,6 +88,7 @@ kernel_install: #Targets an already built .img and swaps the old kernel with the
 .PHONY: kernel_update
 kernel_update:
 	$(MAKE) clean_image
+	$(MAKE) clean_kernel
 	$(MAKE) initramfs
 	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)

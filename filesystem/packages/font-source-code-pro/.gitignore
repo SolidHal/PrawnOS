@@ -11,13 +11,13 @@ src/debian/*
 
 
 #generic packaging artifacts
-debhelper-build-stamp
-.debhelper
-*.deb
-*.build
-*.buildinfo
-*.changes
-*.log
-*.substvars
-*.diff.gz
-*.upload
+/debhelper-build-stamp
+/.debhelper
+/*.deb
+/*.build
+/*.buildinfo
+/*.changes
+/*.log
+/*.substvars
+/*.diff.gz
+/*.upload
