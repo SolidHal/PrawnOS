@@ -71,22 +71,6 @@
      </model>
      <model>
        <configItem>
-@@ -1342,7 +1398,6 @@
-     <layout>
-       <configItem>
-         <name>us</name>
--        
-         <shortDescription>en</shortDescription>
-         <description>English (US)</description>
-         <languageList>
-@@ -1353,7 +1408,6 @@
-         <variant>
-           <configItem>
-             <name>chr</name>
--            
-             <shortDescription>chr</shortDescription>
-             <description>Cherokee</description>
-             <languageList>
 @@ -1363,6 +1417,12 @@
          </variant>
          <variant>
