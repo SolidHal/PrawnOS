@@ -8,7 +8,7 @@ PrawnOS
 
 #### A build system for making blobless Debian and mainline Linux kernel with support for dmcrypt/LUKS root partition encryption graphics acceleration using panfrost
 
-Supports the Following Devices:
+Supports the following Devices:
 * armhf cpu:
     * Asus C201 (veyron-speedy)
     * Asus C100 (veyron-minnie)
