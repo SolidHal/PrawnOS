@@ -6,17 +6,27 @@ PrawnOS
 </h1>
 
 
-#### A build system for making blobless Debian and mainline Linux kernel for the Asus c201 Chromebook with support for dmcrypt/LUKS root partition encryption
+#### A build system for making blobless Debian and mainline Linux kernel with support for dmcrypt/LUKS root partition encryption graphics acceleration using panfrost
+
+Supports the Following Devices:
+* armhf cpu:
+    * Asus C201 (veyron-speedy)
+    * Asus C100 (veyron-minnie)
+* arm64 cpu:
+    * _BETA_ Samsung Chromebook Plus V1 (gru-kevin)
+    * _ALPHA_ Asus C101p (gru-bob)
 
 Build Debian filesystem with:
 * No blobs, anywhere. 
 * Sources from only main, not contrib or non-free which keeps Debian libre.
-* Currently PrawnOS supports xfce and lxqt as choices for desktop enviroment.
+* Currently PrawnOS supports xfce and gnome as choices for desktop enviroment.
 * full root filesystem encryption
+* mesa with support for panfrost for graphics acceleration 
+* functional sound, touchpad, keyboard mappings
 
 Build a deblobbed mainline kernel with:
-* Patches for reliable USB.
-* Patches to support the custom GPT partition table required to boot.
+* Patches for reliable USB on veyron devices.
+* Patches to support the custom GPT partition table required to boot on veyron devices.
 * Support for Atheros AR9271 and AR7010 WiFi dongles.
 * Support for CSR8510 (and possibly other) bluetooth dongles.
 
@@ -30,6 +40,7 @@ Combined with Libreboot, an AR9271 or AR7010 WiFi dongle, and a libre OS (like D
 If you do not have a way to recover your device by using an external flasher as described in the second part of this page https://libreboot.org/docs/install/c201.html it would be safest to wait until this issue is resolved. I have opened a bug with libreboot, which can be found here https://notabug.org/libreboot/libreboot/issues/666 If you have any information that may help with debugging, please post it there.
 
 _The install process of PrawnOS does not flash your bios, so it is safe to use along with the default coreboot/depthcharge and does not risk bricking your device_
+
 
 ## What is a blob?
 
@@ -46,9 +57,9 @@ Building PrawnOS has been tested on Debian 10 Buster (in a VM).
 
 NOTE: _stretch doesn't work as the version of gcc-arm-none-eabi is too old_!
 
-NOTE: _buster requires backports to build packages for bullseye because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109_
+NOTE: _buster requires backports to build packages because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109_
 
-Debian Bullseye or Buster with the Buster Backports repo are the only build enviroments that are supported.
+Debian Bullseye or Buster with the Buster Backports repo are the only build environments that are supported.
 These packages are required:
 
 <!-- Please keep the packages sorted (and in sync with ./tests/build-image.sh): -->
@@ -65,9 +76,12 @@ These packages are required:
 ## Build
 Clone this Git repo: `git clone --recurse-submodules https://github.com/SolidHal/PrawnOS`
 
-Build the `PrawnOS-*-.img` by running `sudo make image`
+All make commands required a TARGET=$ARCH to specify either armhf or arm64. 
+See the top of the README for if you don't know which your device is.
+armhf and arm64 builds can live side by side in the same git checkout. 
 
-This has only been tested on a Debian Buster VM, and borrows some components from the host system to setup apt/debootstrap during the build process so I would recommend using a Debian Buster VM to avoid any issues. 
+Build the `PrawnOS-*-.img` by running `sudo make image TARGET=$ARCH`
+
 
 ## Write to a flash drive or SD card
 Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the desired target flash drive or SD card device. If you're not familiar with dd, check out Debian's
@@ -76,7 +90,7 @@ Write the 2GB image to a flash drive. Make sure to replace $USB_DEVICE with the 
 sudo dd if=PrawnOS-*.img of=/dev/$USB_DEVICE bs=50M status=progress; sync
 ```
 
-## Enabling Developer Mode
+## Enable Developer Mode
 
 Enabling developer mode is required to install PrawnOS. Note that enabling developer mode WILL ERASE ALL LOCALLY STORED DATA.
 
@@ -155,7 +169,9 @@ On each subsequent boot, you'll see the 'OS verification is off' screen.
 
 ## Booting/Installing PrawnOS
 
-Now you can boot your PrawnOS USB/SD card. After rebooting/powering on, at the 'OS verification is off' screen, press 'CTRL' + 'U' to boot from USB/SD. Or 'CTRL' + 'D' to boot from the internal emmc.
+If you haven't enabled developer mode, see [Enable Developer Mode](#enable-developer-mode)
+
+After rebooting/powering on, at the 'OS verification is off' screen, press 'CTRL' + 'U' to boot from USB/SD. Or 'CTRL' + 'D' to boot from the internal emmc.
 
 ## Installing
 
@@ -260,7 +276,8 @@ once the `.deb` is built, move it to your PrawnOS device and run `sudo apt insta
 `sudo apt upgrade` 
 
 ## Documentation
-Some useful things can be found in `DOCUMENTATION.md`
+
+Some useful things can be found in `DOCUMENTATION.md` including making the coreboot screen less annoying and less beepy
 
 
 ### Make options, developer tools
@@ -281,7 +298,7 @@ To begin with:
 `make kernel_install` Installs a newly built kernel into a previously built PrawnOS.img-BASE.
 
 
-You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Buster`.  For example, to use Debian stretch, you can build with `sudo PRAWNOS_SUITE=stretch make image`.  Note that only `stretch` and `buster` have been tested.
+You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Bullseye`.  For example, to use Debian sid, you can build with `sudo PRAWNOS_SUITE=sid make image`
 
 You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
 
