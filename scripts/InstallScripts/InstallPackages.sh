@@ -65,12 +65,11 @@ cat $DIR/icons/ascii-icon.txt
 echo ""
 
 while true; do
-    read -r -p "Install (X)fce4, (L)xqt or (G)nome, if unsure choose (X)fce: " XL
+    read -r -p "Install (X)fce4, or (G)nome, if unsure choose (X)fce: " XL
     case $XL in
         [Gg]* ) DE=gnome; break;;
         [Xx]* ) DE=xfce; break;;
-        [Ll]* ) DE=lxqt; break;;
-        * ) echo "Please answer (X)fce4, (L)xqt or (G)nome";;
+        * ) echo "Please answer (X)fce4, (G)nome";;
     esac
 done
 
@@ -84,7 +83,6 @@ DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_downl
 
 [ "$DE" = "gnome" ] && apt install -y ${gnome_debs_download[@]}
 [ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]} ${prawnos_base_debs_prebuilt_install[@]}
-[ "$DE" = "lxqt" ] && apt install -y ${lxqt_debs_download[@]}
 
 #install the keymap by patching xkb, then bindings work for any desktop environment
 cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
