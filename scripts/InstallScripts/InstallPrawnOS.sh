@@ -209,6 +209,7 @@ install() {
             * ) echo "Please answer y or n";;
         esac
     done
+    setup_users $INSTALL_MOUNT
     umount $ROOT_PARTITION
     echo Running fsck
     e2fsck -p -f $ROOT_PARTITION
@@ -322,26 +323,78 @@ expand() {
             * ) echo "Please answer y or n";;
         esac
     done
+}
 
+# helper for install_packages()/setup_users()
+chroot_wrapper() {
+    local mountpoint="$1"
+    shift
 
+    mount -t proc proc "$mountpoint/proc/"
+    mount --rbind /sys "$mountpoint/sys/"
+    mount --rbind /dev "$mountpoint/dev/"
+
+    chroot "$mountpoint" $@
+
+    umount "$mountpoint/proc/"
+    mount --make-rprivate /sys
+    mount --make-rprivate /dev
+    umount -R "$mountpoint/sys/"
+    umount -R "$mountpoint/dev/"
 }
 
 #Install all packages, desktop environment to target device
+
 install_packages() {
     TARGET_MOUNT=$1
     echo "Installing Packages"
-    mount -t proc proc $TARGET_MOUNT/proc/
-    mount --rbind /sys $TARGET_MOUNT/sys/
-    mount --rbind /dev $TARGET_MOUNT/dev/
-    chroot $TARGET_MOUNT/ ./InstallResources/InstallPackages.sh
-    umount $TARGET_MOUNT/proc/
-    mount --make-rprivate /sys
-    mount --make-rprivate /dev
-    umount -R $TARGET_MOUNT/sys/
-    umount -R $TARGET_MOUNT/dev/
-
+    chroot_wrapper "$TARGET_MOUNT" ./InstallResources/InstallPackages.sh
+    desktop=true
 }
 
+setup_users() {
+    TARGET_MOUNT="$1"
+
+    dmesg -D
+
+    echo ""
+    echo ""
+    echo ""
+
+    cat /InstallResources/icons/ascii-icon.txt
+    echo ""
+    echo "*************Welcome To PrawnOS*************"
+    echo ""
+    # Have the user set a root password
+    echo "-----Enter a password for the root user-----"
+    until chroot_wrapper "$TARGET_MOUNT" passwd
+    do
+        echo "-----Enter a password for the root user-----"
+        chroot_wrapper "$TARGET_MOUNT" passwd
+    done
+
+    if [[ "$desktop" = "true" ]]; then
+        #Force a safe username
+        while true; do
+            echo "-----Enter new username:-----"
+                read -r username
+                #ensure no whitespace
+                case "$username" in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
+            done
+        until chroot_wrapper "$TARGET_MOUNT" adduser "$username" --gecos \"\"
+        do
+            while true; do
+                echo "-----Enter new username:-----"
+                read -r username
+                #ensure no whitespace
+                case "$username" in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
+            done
+        done
+        chroot_wrapper "$TARGET_MOUNT" usermod -a -G sudo,netdev,input,video,bluetooth "$username"
+    fi
+
+    dmesg -E
+}
 
 #call the main function, script technically starts here
 #Organized this way so that main can come before the functions it calls
