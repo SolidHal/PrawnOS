@@ -45,6 +45,10 @@ pbuilder_update: $(PBUILDER_CHROOT)
 	@echo UPDATING $(PBUILDER_CHROOT)
 	pbuilder update --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
 
+pbuilder_login: $(PBUILDER_CHROOT)
+	@echo UPDATING $(PBUILDER_CHROOT)
+	pbuilder login --basetgz $(PBUILDER_CHROOT) --configfile $(PBUILDER_RC)
+
 ### REAL TARGETS
 
 $(PACKAGES_BUILT): $(PBUILDER_CHROOT) | $(PRAWNOS_LOCAL_APT_REPO)
