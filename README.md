@@ -46,7 +46,9 @@ Building PrawnOS has been tested on Debian 10 Buster (in a VM).
 
 NOTE: _stretch doesn't work as the version of gcc-arm-none-eabi is too old_!
 
-Debian/Buster is the only build enviroment that is supported.
+NOTE: _buster requires backports to build packages for bullseye because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109_
+
+Debian Bullseye or Buster with the Buster Backports repo are the only build enviroments that are supported.
 These packages are required:
 
 <!-- Please keep the packages sorted (and in sync with ./tests/build-image.sh): -->
@@ -57,6 +59,7 @@ These packages are required:
         gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
         parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev \
         vboot-kernel-utils wget
+        apt install -t buster-backports qemu-user-static
 ```
 
 ## Build
