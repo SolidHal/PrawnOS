@@ -96,7 +96,7 @@ PRAWNOS_LOCAL_APT_REPO := $(PRAWNOS_BUILD)/prawnos-local-apt-repo
 
 ### PRAWNOS IMAGES
 ifeq ($(DEBIAN_SUITE),)
-DEBIAN_SUITE := buster
+DEBIAN_SUITE := bullseye
 endif
 ifeq ($(PRAWNOS_SUITE),)
 PRAWNOS_SUITE := Shiba
