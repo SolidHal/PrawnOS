@@ -66,7 +66,6 @@ base_debs_install=(
     uuid-runtime
     vim
     vboot-utils
-    wpasupplicant
     xdotool
     xz-utils
 )
@@ -77,13 +76,11 @@ base_debs_download=(
     anacron
     avahi-daemon
     bluetooth
-    chromium
     crda
     dbus-user-session
     dpkg
     dkms
     eject
-    emacs
     firefox-esr
     iw
     libnss-mdns
@@ -121,7 +118,6 @@ xfce_debs_download=(
     papirus-icon-theme
     plank
     system-config-printer
-    tango-icon-theme
     xfce4
     xfce4-goodies
     xfce4-power-manager
