@@ -1,3 +1,9 @@
+xsecurelock (1.5.1-3) testing; urgency=medium
+
+  * bump to bullseye
+
+ -- Hal Emmerich <hal@halemmerich.com>  Wed, 20 Oct 2020 16:03:09 -0500
+
 xsecurelock (1.5.1-2) stable; urgency=medium
 
   * Upstream version 1.5.1
