@@ -103,6 +103,16 @@ image:
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
+.PHONE: release
+release: $(PRAWNOS_IMAGE_GIT_GZ)
+
+$(PRAWNOS_IMAGE):
+	$(MAKE) image
+
+$(PRAWNOS_IMAGE_GIT_GZ): $(PRAWNOS_IMAGE)
+	cp $(PRAWNOS_IMAGE) $(PRAWNOS_IMAGE_GIT)
+	tar -czvf $(PRAWNOS_IMAGE_GIT_GZ) $(PRAWNOS_IMAGE_GIT)
+
 #:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
 # this will only do everything right on bullseye due to https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109
