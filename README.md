@@ -6,7 +6,7 @@ PrawnOS
 </h1>
 
 
-#### A build system for making blobless Debian and mainline Linux kernel with support for dmcrypt/LUKS root partition encryption graphics acceleration using panfrost
+#### A build system for making blobless Debian and mainline Linux kernel with support for libre ath9k wireless, dmcrypt/LUKS root partition encryption, and graphics acceleration using panfrost
 
 Supports the following Devices:
 * armhf cpu:
