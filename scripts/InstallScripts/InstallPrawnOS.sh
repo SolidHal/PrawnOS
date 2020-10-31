@@ -381,7 +381,7 @@ setup_users() {
                 #ensure no whitespace
                 case "$username" in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
             done
-        until chroot_wrapper "$TARGET_MOUNT" adduser "$username" --gecos \"\"
+        until chroot_wrapper "$TARGET_MOUNT" adduser "$username" --gecos "$username"
         do
             while true; do
                 echo "-----Enter new username:-----"
