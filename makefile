@@ -111,7 +111,7 @@ $(PRAWNOS_IMAGE):
 
 $(PRAWNOS_IMAGE_GIT_GZ): $(PRAWNOS_IMAGE)
 	cp $(PRAWNOS_IMAGE) $(PRAWNOS_IMAGE_GIT)
-	tar -czvf $(PRAWNOS_IMAGE_GIT_GZ) $(PRAWNOS_IMAGE_GIT)
+	gzip -c $(PRAWNOS_IMAGE_GIT) > $(PRAWNOS_IMAGE_GIT_GZ)
 
 #:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
