@@ -11,7 +11,10 @@ jobs:
       - name: checkout project
         uses: actions/checkout@v2
       - name: build image
-        run: sudo apt install -y qemu-user-static binfmt-support && docker run --mount type=bind,source=$PWD,target=/PrawnOS
+        run: sudo add-apt-repository ppa:jacob/virtualisation &&
+             sudo apt update &&
+             sudo apt install -y qemu-user-static binfmt-support &&
+             docker run --mount type=bind,source=$PWD,target=/PrawnOS
              --privileged -v/dev:/dev debian:bullseye
              /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" arm64 Shiba
       - name: publish image
