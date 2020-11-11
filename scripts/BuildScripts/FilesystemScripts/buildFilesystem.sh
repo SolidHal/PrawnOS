@@ -179,7 +179,7 @@ create_image() {
 # create a 2.5GB image with the Chrome OS partition layout
 # Bumped to keep both Gnome and Xfce
 #TODO: change back to 40 (2GB)
-create_image $BASE $outdev 50M 50 $outmnt
+create_image $BASE $outdev 50M 60 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -273,7 +273,7 @@ chroot $outmnt apt-get clean
 #Download the shared packages to be installed by Install.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
-## DEs
+#DEs
 #Download the xfce packages to be installed by Install.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 

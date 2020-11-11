@@ -167,7 +167,6 @@ gnome_debs_download=(
 # packages built by prawnos, to be installed when running InstallPrawnOS
 # and choosing xfce
 prawnos_xfce_debs_prebuilt_download=(
-    font-source-code-pro
     xsecurelock
 )
 
@@ -177,6 +176,7 @@ prawnos_base_debs_prebuilt_download=(
 
 # packages built by prawnos, to be installed at build time
 prawnos_base_debs_prebuilt_install=(
+    font-source-code-pro
     flashmap
     mosys
     libgbm1=20.2.1-100

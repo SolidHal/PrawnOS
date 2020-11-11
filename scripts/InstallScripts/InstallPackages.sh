@@ -80,47 +80,62 @@ dpkg-reconfigure tzdata
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
-
-[ "$DE" = "gnome" ] && apt install -y ${gnome_debs_download[@]}
-[ "$DE" = "xfce" ] && apt install -y ${xfce_debs_download[@]} ${prawnos_base_debs_prebuilt_install[@]}
-
-#install the keymap by patching xkb, then bindings work for any desktop environment
-cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
-cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
-cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
-
-patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
-patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
-patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
-patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
-patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
-patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
-
-patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
-patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 
 
-cp  $DIR/xkb/keyboard /etc/default/keyboard
+
 
 #disable ertm for csr8510 bluetooth, issue #117
 echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
 
 if [ "$DE" = "gnome" ]
 then
+
+  apt install -y ${gnome_debs_download[@]}
+
   #install firefox-esr default settings
   cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
   cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
-  #TODO: a config file way to do the following would be nice, so that we can install the configs now instead
-  # of having to run the following commands after login
-  #Natural scrolling is un-natural
-  # gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
-  #Tap to click is natural
-  # gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+  #apply gsettings and tweaks changes
+  cp $DIR/Gnome/prawnos-setting-schema/* /usr/share/glib-2.0/schemas/
+  glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+  #copy in wallpapers
+  rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+
+  #remove the logo on gdm
+  cp $DIR/Gnome/greeter.dconf-defaults /etc/gdm3/greeter.dconf-defaults
+  dpkg-reconfigure gdm3
+
+
+  #TODO: debug why rotation is flipped
+  # work around issue #234
+  apt remove -y iio-sensor-proxy
+
 fi
 
 if [ "$DE" = "xfce" ]
 then
+  apt install -y ${xfce_debs_download[@]}
+
+  #install the keymap by patching xkb, then bindings work for any desktop environment
+  cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
+  cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
+  cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
+
+  patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
+  patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
+  patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
+  patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
+  patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
+  patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
+
+  patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+  patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
+  cp  $DIR/xkb/keyboard /etc/default/keyboard
+
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
   apt remove -y light-locker
   apt purge -y light-locker
@@ -171,6 +186,11 @@ then
 
   #Install brightness control scripts
   cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
+
+
+  #same bash trackpad config works well enough for both devices, but only useful on xfce
+  mkdir -p /etc/X11/xorg.conf.d/
+  cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
 
@@ -188,12 +208,10 @@ then
     cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
 fi
 
-if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
-then
-    #same bash trackpad config works well enough
-    mkdir -p /etc/X11/xorg.conf.d/
-    cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
-fi
+#if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+#then
+    #nothing for now
+#fi
 
 
 apt clean -y && apt autoremove --purge -y

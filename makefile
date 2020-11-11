@@ -103,6 +103,11 @@ image:
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_install
 
+# $PDEV should be passed like PDEV=/dev/sdb
+.PHONY: write_image
+write_image: $(PRAWNOS_IMAGE)
+	$(PRAWNOS_IMAGE_SCRIPTS_WRITE_IMAGE) $(PRAWNOS_IMAGE) $(PDEV)
+
 .PHONE: release
 release: $(PRAWNOS_IMAGE_GIT_GZ)
 

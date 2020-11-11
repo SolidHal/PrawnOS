@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 5.9.1-gnu Kernel Configuration
+# Linux/arm64 5.9.6-gnu Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="aarch64-linux-gnu-gcc (Debian 8.3.0-2) 8.3.0"
 CONFIG_CC_IS_GCC=y
@@ -6338,7 +6338,7 @@ CONFIG_ROCKCHIP_SARADC=y
 
 CONFIG_IIO_CROS_EC_SENSORS_CORE=y
 CONFIG_IIO_CROS_EC_SENSORS=y
-# CONFIG_IIO_CROS_EC_SENSORS_LID_ANGLE is not set
+CONFIG_IIO_CROS_EC_SENSORS_LID_ANGLE=y
 
 #
 # Hid Sensor IIO Common
