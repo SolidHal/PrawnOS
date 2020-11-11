@@ -297,6 +297,8 @@ To begin with:
 
 `make kernel_install` Installs a newly built kernel into a previously built PrawnOS.img-BASE.
 
+`make write_image PDEV=/dev/sdX` Does everything `make image` does but then also checks `/dev/sdX` is available and writes the image to it using a sane blocksize and runs sync
+
 
 You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Bullseye`.  For example, to use Debian sid, you can build with `sudo PRAWNOS_SUITE=sid make image`
 
