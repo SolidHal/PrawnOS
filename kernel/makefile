@@ -82,7 +82,7 @@ update_ath9k_tar:
 blobby_kernel:
 	rm -rf $(PRAWNOS_KERNEL_BUILD)
 	wget $(WGET_OPTS) https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-$(KVER).tar.xz -O $(KERNEL_BLOBBY_TAR)
-	tar -Jxvf $(KERNEL_BLOBBY_TAR) -C $(PRAWNOS_BUILD)
+	tar -Jxf $(KERNEL_BLOBBY_TAR) -C $(PRAWNOS_BUILD)
 	touch $(KERNEL_EXTRACTED)
 	touch $(KERNEL_PATCHED)
 
