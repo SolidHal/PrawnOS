@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.9.1-gnu Kernel Configuration
+# Linux/arm 5.9.8-gnu Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-none-eabi-gcc (15:7-2018-q2-6) 7.3.1 20180622 (release) [ARM/embedded-7-branch revision 261907]"
 CONFIG_CC_IS_GCC=y
