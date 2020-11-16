@@ -209,8 +209,15 @@ install() {
             * ) echo "Please answer y or n";;
         esac
     done
+
+    # final setup:
+    dmesg -D
+    welcome
     setup_users $INSTALL_MOUNT
+    dmesg -E
+
     umount $ROOT_PARTITION
+
     echo Running fsck
     e2fsck -p -f $ROOT_PARTITION
     if [[ $CRYPTO == "true" ]]
@@ -355,16 +362,6 @@ install_packages() {
 setup_users() {
     TARGET_MOUNT="$1"
 
-    dmesg -D
-
-    echo ""
-    echo ""
-    echo ""
-
-    cat /InstallResources/icons/ascii-icon.txt
-    echo ""
-    echo "*************Welcome To PrawnOS*************"
-    echo ""
     # Have the user set a root password
     echo "-----Enter a password for the root user-----"
     until chroot_wrapper "$TARGET_MOUNT" passwd
@@ -392,8 +389,17 @@ setup_users() {
         done
         chroot_wrapper "$TARGET_MOUNT" usermod -a -G sudo,netdev,input,video,bluetooth "$username"
     fi
+}
 
-    dmesg -E
+welcome() {
+    echo ""
+    echo ""
+    echo ""
+
+    cat /InstallResources/icons/ascii-icon.txt
+    echo ""
+    echo "*************Welcome To PrawnOS*************"
+    echo ""
 }
 
 #call the main function, script technically starts here
