@@ -214,6 +214,7 @@ install() {
     dmesg -D
     welcome
     setup_users $INSTALL_MOUNT
+    setup_hostname $INSTALL_MOUNT
     dmesg -E
 
     umount $ROOT_PARTITION
@@ -357,6 +358,28 @@ install_packages() {
     echo "Installing Packages"
     chroot_wrapper "$TARGET_MOUNT" ./InstallResources/InstallPackages.sh
     desktop=true
+}
+
+setup_hostname() {
+    TARGET_MOUNT="$1"
+
+    while true; do
+        read -r -p "Would you like to set a custom hostname (default: PrawnOS)? [Y/n]" response
+        case $response in
+            [Yy]*)
+                echo "-----Enter hostname:-----"
+                read -r hostname
+                # ensure no whitespace
+                case "$hostname" in *\ *) echo hostnames may not contain whitespace;;  *) break;; esac
+                ;;
+            [Nn]* ) hostname="PrawnOS"; break;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
+
+    # Setup /etc/hostname and /etc/hosts:
+    echo -n "$hostname" > "$TARGET_MOUNT/etc/hostname"
+    echo -n "127.0.0.1        $hostname" > "$TARGET_MOUNT/etc/hosts"
 }
 
 setup_users() {
