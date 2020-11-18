@@ -191,11 +191,12 @@ install() {
         esac
     done
 
-    echo Writing Filesystem, this will take about 4 minutes...
+    echo Creating ext4 filesystem on root partition
     mkfs.ext4 -F -b 1024 $ROOT_PARTITION
     INSTALL_MOUNT=/mnt/install_mount
     mkdir -p $INSTALL_MOUNT/
     mount $ROOT_PARTITION $INSTALL_MOUNT/
+    echo Syncing live root filesystem with new root filesystem, this will take about 4 minutes...
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / $INSTALL_MOUNT/
     #Remove the live-fstab and install a base fstab
     rm $INSTALL_MOUNT/etc/fstab
