@@ -81,6 +81,7 @@ update_ath9k_tar:
 .PHONY: blobby_kernel
 blobby_kernel:
 	rm -rf $(PRAWNOS_KERNEL_BUILD)
+	mkdir -p $(PRAWNOS_BUILD_SOURCES)
 	wget $(WGET_OPTS) https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-$(KVER).tar.xz -O $(KERNEL_BLOBBY_TAR)
 	tar -Jxf $(KERNEL_BLOBBY_TAR) -C $(PRAWNOS_BUILD)
 	touch $(KERNEL_EXTRACTED)
