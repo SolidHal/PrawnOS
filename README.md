@@ -350,7 +350,8 @@ sudo /InstallScripts/buildCrossystem.sh
 ### Build the WiFi dongle into the laptop
 
 Sick of having a USB dongle on the outside of your machine for wi-fi? Want to be able to use two USB devices at once without a hub? 
-Check out the instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
+Check out the instructions here for the c201: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
+And here for the samsung chromebook plus v1: https://github.com/SolidHal/Samsung_Chromebook_plus_v1_wifi_from_webcam
 Warning: decent soldering skills required
 
 ## Troubleshooting
