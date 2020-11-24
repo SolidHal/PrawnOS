@@ -67,7 +67,7 @@ These packages are required:
         apt install --no-install-recommends --no-install-suggests \
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
         debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
-        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev make \
         parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev \
         vboot-kernel-utils wget
         apt install -t buster-backports qemu-user-static
