@@ -70,11 +70,13 @@ base_debs_install=(
     xz-utils
 )
 
+# blueman can be moved to xfce only once gnome-bluetooth in settings works properly
 base_debs_download=(
     acpi-support
     alsa-utils
     anacron
     avahi-daemon
+    blueman
     bluetooth
     crda
     dbus-user-session
@@ -144,6 +146,7 @@ gnome_debs_download=(
     fonts-cantarell
     gdm3
     gedit
+    gnome-bluetooth
     gnome-clocks
     gnome-disk-utility
     gnome-logs
