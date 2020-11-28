@@ -78,7 +78,10 @@ dpkg-reconfigure tzdata
 
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
-DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]}
+# PrawnOS only has specific mesa packages when the debian upstream versions are too old. When they eventually catch up and provide a newer version,
+# we should *NOT* downgrade to the PrawnOS versions
+DEBIAN_FRONTEND=noninteractive apt install -y ${mesa_debs_download[@]} || true
+echo Ignore downgrade failure
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 
