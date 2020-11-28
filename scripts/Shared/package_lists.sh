@@ -85,9 +85,16 @@ base_debs_download=(
     eject
     firefox-esr
     iw
+    libegl-mesa0
+    libegl1-mesa
+    libgl1-mesa-dri
+    libglapi-mesa
+    libglu1-mesa
+    libglx-mesa0
     libnss-mdns
     librsvg2-common
     libutempter0
+    libwayland-egl1-mesa
     sudo
     sysfsutils
     tasksel
@@ -95,15 +102,6 @@ base_debs_download=(
     xdg-utils
     xorg
     xserver-xorg-input-libinput
-)
-
-mesa_debs_download=(
-    libegl-mesa0
-    libegl1-mesa
-    libgl1-mesa-dri
-    libglapi-mesa
-    libglu1-mesa
-    libglx-mesa0
 )
 
 xfce_debs_download=(
@@ -182,6 +180,10 @@ prawnos_base_debs_prebuilt_install=(
     font-source-code-pro
     flashmap
     mosys
+)
+
+# these are only required when the debian mesa version is too old for us
+prawnos_mesa_prebuilt_install=(
     libgbm1=20.2.1-100
     libgl1-mesa-dri=20.2.1-100
     libegl1-mesa=20.2.1-100

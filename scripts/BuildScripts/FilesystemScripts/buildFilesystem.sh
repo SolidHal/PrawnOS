@@ -295,9 +295,11 @@ chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
 chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
 
-## GPU support
-#download mesa packages
-apt_install $PRAWNOS_BUILD $outmnt false ${mesa_debs_download[@]}
+## PrawnOS mesa packages
+# PrawnOS only has specific mesa packages when the debian upstream versions are too old.
+# commented out until we need it again
+
+# chroot $outmnt apt install -y -d ${prawnos_mesa_prebuilt_install[@]}
 
 #Setup console font size
 cp -f $build_resources/console-font.sh $outmnt/etc/profile.d/console-font.sh
