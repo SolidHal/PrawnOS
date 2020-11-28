@@ -270,14 +270,14 @@ chmod 644 $outmnt/etc/fstab
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
-#Download the shared packages to be installed by Install.sh:
+#Download the shared packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
 #DEs
-#Download the xfce packages to be installed by Install.sh:
+#Download the xfce packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
-#Download the gnome packages to be installed by Install.sh:
+#Download the gnome packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
 
