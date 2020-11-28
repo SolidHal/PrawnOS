@@ -49,7 +49,7 @@ remote_tool="wget"
 # The naming pattern of the actual source archive
 # as found in ${src_url}/${src_tar_pattern}
 # follows the same variable expansion as $src_url
-src_tar_pattern="linux-libre-VER.MAJ.MIN-gnu.tar.lz"
+src_tar_pattern="linux-libre-VER.MAJ.MIN-gnu.tar.xz"
 #
 # Then naming pattern of the signature for the source archive
 src_tar_sig_pattern="${src_tar_pattern}.sign"

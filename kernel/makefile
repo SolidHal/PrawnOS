@@ -17,7 +17,7 @@ KERNEL_PATCHES := $(PRAWNOS_KERNEL)/patches/$(TARGET)
 KERNEL_BUILD_LOG := $(PRAWNOS_BUILD_LOGS)/kernel-log-$(TARGET).txt
 
 ### UNIVERSAL VARS ###
-KERNEL_TAR := $(PRAWNOS_BUILD_SOURCES)/linux-libre-$(KVER)-gnu.tar.lz
+KERNEL_TAR := $(PRAWNOS_BUILD_SOURCES)/linux-libre-$(KVER)-gnu.tar.xz
 KERNEL_BLOBBY_TAR := $(PRAWNOS_BUILD_SOURCES)/blobby-linux-$(KVER)-gnu.tar.xz
 KERNEL_TAR_SIGNATURE := $(KERNEL_TAR).sign
 KERNEL_LINUX_LIBRE_PUB := $(KERNEL_SHARED_RESOURCES)/linux-libre-signing-key.gpg
@@ -92,15 +92,15 @@ $(KERNEL_ATH9K_FIRMWARES):
 	mkdir -p $(KERNEL_ATH9K_FIRMWARES)
 
 $(KERNEL_TAR_SIGNATURE): | $(PRAWNOS_BUILD_SOURCES)
-	wget $(WGET_OPTS) https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz.sign -O $(KERNEL_TAR_SIGNATURE)
+	wget $(WGET_OPTS) https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.xz.sign -O $(KERNEL_TAR_SIGNATURE)
 
 $(KERNEL_TAR): $(KERNEL_TAR_SIGNATURE) | $(PRAWNOS_BUILD_LOGS) $(PRAWNOS_BUILD_SOURCES)
-	wget $(WGET_OPTS) https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.lz -O $(KERNEL_TAR)
+	wget $(WGET_OPTS) https://www.linux-libre.fsfla.org/pub/linux-libre/releases/$(KVER)-gnu/linux-libre-$(KVER)-gnu.tar.xz -O $(KERNEL_TAR)
 	gpg --import $(KERNEL_LINUX_LIBRE_PUB)
 	gpg --verify $(KERNEL_TAR_SIGNATURE) $(KERNEL_TAR)
 
 $(KERNEL_EXTRACTED): $(KERNEL_TAR)
-	tar --lzip -xvf $(KERNEL_TAR) -C $(PRAWNOS_BUILD)
+	tar -xvf $(KERNEL_TAR) -C $(PRAWNOS_BUILD)
 	touch $(KERNEL_EXTRACTED)
 
 $(KERNEL_PATCHED): $(KERNEL_EXTRACTED)
