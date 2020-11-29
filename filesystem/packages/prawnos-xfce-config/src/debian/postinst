@@ -1,0 +1,37 @@
+#!/bin/bash
+
+DIR=/etc/prawnos
+# patch xkb if it isn't already
+PATCHED=$DIR/prawnos/xkb/.patched
+
+cleanup() {
+    set +e
+
+    cp -a $DIR/xkb/backup/* /usr/share/X11/xkb/rules/
+    echo "PATCHING XKB FAILED DURING INSTALLATION, PATCHES LIKELY NO LONGER APPLY. RESTORED FILES."
+    exit 1
+}
+
+
+trap cleanup INT TERM EXIT
+if [ ! -f "$PATCHED" ]; then
+    # if the xkb patches don't apply, this is likely because newer xkb files are available and the patches need to be updated
+    # lets leave things in a reasonable state when this happens
+
+    rm -rf $DIR/xkb/backup
+    mkdir -p $DIR/xkb/backup
+    cp -a /usr/share/X11/xkb/rules/* $DIR/xkb/backup/
+
+    patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
+    patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
+    patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
+    patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
+    patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
+    patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
+    patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+    patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
+    touch $PATCHED
+fi
+
+trap - INT TERM EXIT

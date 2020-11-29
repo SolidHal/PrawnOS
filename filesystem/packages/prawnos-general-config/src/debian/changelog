@@ -1,0 +1,17 @@
+flashmap (0.3-2) testing; urgency=medium
+
+  * bump to bullseye
+
+ -- Hal Emmerich <hal@halemmerich.com>  Wed, 20 Oct 2020 16:03:09 -0500
+
+flashmap (0.3-1) stable; urgency=medium
+
+  * rebuild for arm64 support, need to keep .dsc to make uploads properly
+
+ -- Hal Emmerich <hal@halemmerich.com>  Sun, 19 Jul 2020 16:03:09 -0500
+
+flashmap (0.3) stable; urgency=medium
+
+  * Initial release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Sun, 14 Jun 2020 15:12:07 -0500

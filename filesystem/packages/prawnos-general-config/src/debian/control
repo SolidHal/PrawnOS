@@ -1,0 +1,23 @@
+Source: flashmap
+Section: libs
+Priority: optional
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10),
+               clang,
+               uuid-dev,
+               meson,
+               pkg-config,
+               cmake,
+               libcmocka-dev,
+               cargo,
+               lcov
+Standards-Version: 4.3.0
+Homepage: https://github.com/dhendrix/flashmap
+Vcs-Browser: https://github.com/dhendrix/flashmap
+Vcs-Git: https://github.com/dhendrix/flashmap
+
+Package: flashmap
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: flashmap library for use with cros utils

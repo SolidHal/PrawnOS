@@ -5,7 +5,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
-PACKAGE_NAME := font-source-code-pro_$(VERSION)_all
+PACKAGE_NAME := prawnos-xfce-config_$(VERSION)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME)_all.deb
 CHANGES_NAME =: $(PACKAGE_NAME)_*.changes
 

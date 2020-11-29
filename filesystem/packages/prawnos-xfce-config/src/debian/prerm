@@ -1,0 +1,40 @@
+#!/bin/bash
+
+DIR=/etc/prawnos
+# revert xkb patches if applied
+PATCHED=$DIR/prawnos/xkb/.patched
+
+
+cleanup() {
+    set +e
+
+    cp -a $DIR/xkb/backup/* /usr/share/X11/xkb/rules/
+    echo "reverting patches during uninstall failed. Likely the xkb files were updated by a new xkb package. Reverted any changes made by this script."
+    rm $PATCHED
+    exit 0
+}
+
+trap cleanup INT TERM EXIT
+if [ -f "$PATCHED" ]; then
+# if the xkb files get updated by a new xkb package while this package is still installed, we will fail to reverse
+# these patches. In this case, there are actually no patches to remove so we should just restore what was there.
+
+    rm -rf $DIR/xkb/backup
+    mkdir -p $DIR/xkb/backup
+    cp -a /usr/share/X11/xkb/rules/* $DIR/xkb/backup/
+
+    patch -R /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
+    patch -R /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
+    patch -R /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
+    patch -R /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
+    patch -R /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
+    patch -R /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
+
+    patch -R /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
+    patch -R /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
+
+    rm -rf $DIR/xkb/backup
+    rm $PATCHED
+fi
+
+trap - INT TERM EXIT
