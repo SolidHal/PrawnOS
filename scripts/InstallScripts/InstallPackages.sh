@@ -116,6 +116,7 @@ fi
 if [ "$DE" = "xfce" ]
 then
   apt install -y ${xfce_debs_download[@]}
+  apt install -y ${prawnos_xfce_debs_prebuilt_download[@]}
 
   #install the keymap by patching xkb, then bindings work for any desktop environment
   cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
