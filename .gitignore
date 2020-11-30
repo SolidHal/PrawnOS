@@ -1,4 +1,5 @@
 build
 PrawnOS-initramfs.cpio.gz
 PrawnOS-Shiba-*
+.*.swp
 tmp.*
