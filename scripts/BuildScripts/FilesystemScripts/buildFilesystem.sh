@@ -311,6 +311,14 @@ echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
 
+# Add a file for release info to /etc/prawnos-release:
+if ! git describe --tags 2>/dev/null; then
+    # FIXME: if we care about this case, we'd need to add a VERSION file or similar to the rootdir
+    echo "unknown" > "$outmnt/etc/prawnos-release"
+else
+    printf "%s-%s\n" "$(git branch --show-current)" "$(git describe --tags)" > "$outmnt/etc/prawnos-release"
+fi
+
 # do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1
