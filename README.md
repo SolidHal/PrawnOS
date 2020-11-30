@@ -10,7 +10,7 @@ PrawnOS
 
 Supports the following Devices:
 * armhf cpu:
-    * Asus C201 (veyron-speedy)
+    * Asus C201 (C201P) (C201PA) (veyron-speedy)
     * Asus C100 (veyron-minnie)
 * arm64 cpu:
     * _BETA_ Samsung Chromebook Plus V1 (XE513C24) (gru-kevin)
