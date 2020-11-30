@@ -13,7 +13,7 @@ Supports the following Devices:
     * Asus C201 (veyron-speedy)
     * Asus C100 (veyron-minnie)
 * arm64 cpu:
-    * _BETA_ Samsung Chromebook Plus V1 (gru-kevin)
+    * _BETA_ Samsung Chromebook Plus V1 (XE513C24) (gru-kevin)
     * _ALPHA_ Asus C101p (gru-bob)
 
 Build Debian filesystem with:
