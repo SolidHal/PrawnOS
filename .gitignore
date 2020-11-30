@@ -1,4 +1,4 @@
-tmp.*
-PrawnOS-Shiba-*
-PrawnOS-initramfs.cpio.gz
 build
+PrawnOS-initramfs.cpio.gz
+PrawnOS-Shiba-*
+tmp.*
