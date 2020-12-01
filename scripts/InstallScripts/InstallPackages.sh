@@ -76,37 +76,32 @@ done
 #Set the timezone
 dpkg-reconfigure tzdata
 
+## GENERAL CONFIG
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
+DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config
 
-## GENERAL CONFIG
-
-dpkg -i /prawnos-general-config*.deb
-
-
-## DEVICE SPECIFIC
+## DEVICE SPECIFIC CONFIG
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 device_model=$(get_device)
 
 if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
 then
-    dpkg -i /prawnos-veyron-config*.deb
+    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-veyron-config
 fi
 
-#if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
-#then
-#nothing for now
-#dpkg -i /prawnos-gru-config*.deb
-#fi
-
+if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+then
+    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
+fi
 
 ## DE SPECIFIC
 if [ "$DE" = "gnome" ]
 then
 
-  apt install -y ${gnome_debs_download[@]}
+  DEBIAN_FRONTEND=noninteractive apt install -y ${gnome_debs_download[@]}
 
   #apply gsettings and tweaks changes
   cp $DIR/Gnome/prawnos-setting-schema/* /usr/share/glib-2.0/schemas/
@@ -129,27 +124,13 @@ then
   apt install -y ${prawnos_xfce_debs_prebuilt_download[@]}
 
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
-  # apt remove -y light-locker
-  # apt purge -y light-locker
+  apt remove -y light-locker
+  apt purge -y light-locker
 
   #Install packages not in an apt repo
   # TODO: likely drop this in favor of just using the upstream
   dpkg -i $DIR/xfce-themes/*
-
-  dpkg -i /prawnos-xfce-config*.deb /libinput-gestures*.deb
-
-  ###PLANK 
-  #Make plank autostart
-  # cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
-
-  #install plank launcher
-  # mkdir -p /etc/skel/.config/plank/dock1/launchers/
-  # cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
-
 fi
-
-
-
 
 apt clean -y && apt autoremove --purge -y
 
