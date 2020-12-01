@@ -26,6 +26,5 @@ DIR=/etc/prawnos
 # un-divert and un-symlink our files to their final locations. This undoes what postinst did
 if [ "$1" = remove ] ; then
 TARGET_PATH=/usr/share/images/desktop-base
-f=default
-undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+echo nothing to do here
 fi

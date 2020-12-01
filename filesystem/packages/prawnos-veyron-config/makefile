@@ -7,7 +7,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME := prawnos-veyron-config_$(VERSION)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME)_all.deb
-CHANGES_NAME =: $(PACKAGE_NAME)_*.changes
+CHANGES_NAME = $(PACKAGE_NAME)_*.changes
 
 default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 
