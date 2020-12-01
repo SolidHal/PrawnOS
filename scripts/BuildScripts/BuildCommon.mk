@@ -103,8 +103,15 @@ PRAWNOS_SUITE := Shiba
 endif
 
 PRAWNOS_GIT_SHA := $(shell git rev-parse HEAD)
+PRAWNOS_GIT_BRANCH := $(shell git branch --show-current)
 
+# If we're not on masteer, append the branch name/sha1 to the imagename
+ifeq ($(PRAWNOS_GIT_BRANCH),master)
 PRAWNOS_IMAGE := $(PRAWNOS_ROOT)/PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img
+else
+PRAWNOS_IMAGE := $(PRAWNOS_ROOT)/PrawnOS-$(PRAWNOS_SUITE)-$(TARGET)-git-$(PRAWNOS_GIT_BRANCH)-$(PRAWNOS_GIT_SHA).img
+endif
+
 PRAWNOS_IMAGE_GIT := $(PRAWNOS_ROOT)/PrawnOS-$(PRAWNOS_SUITE)-$(TARGET)-git-$(PRAWNOS_GIT_SHA).img
 PRAWNOS_IMAGE_GIT_GZ := $(PRAWNOS_IMAGE_GIT).gz
 PRAWNOS_IMAGE_BASE := $(PRAWNOS_IMAGE)-BASE
