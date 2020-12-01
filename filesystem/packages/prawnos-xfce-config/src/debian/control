@@ -9,7 +9,7 @@ Homepage: https://prawnos.com
 
 Package: prawnos-xfce-config
 Architecture: all
-Depends: ${misc:Depends}, xsecurelock
+Depends: ${misc:Depends}, xsecurelock, prawnos-general-config
 Pre-Depends:
 Conflicts: lightlocker
 Description: xfce configuration on prawnOS removes lightlocker, lightlocker has been broken for armhf for some time we use xsecurelock instead
