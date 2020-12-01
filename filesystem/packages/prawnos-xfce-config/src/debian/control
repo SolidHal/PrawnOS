@@ -1,6 +1,6 @@
 Source: prawnos-xfce-config
 Section: misc
-Priority: essential
+Priority: standard
 Maintainer: Hal Emmerich <hal@halemmerich.com>
 Uploaders: Hal Emmerich <hal@halemmerich.com>
 Build-Depends: debhelper (>= 10)
