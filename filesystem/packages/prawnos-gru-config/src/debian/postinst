@@ -16,10 +16,11 @@ divert_and_link() {
     FILE=$4
 
     dpkg-divert --add --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+    mkdir -p $TARGET_PATH
     [ \! -e $TARGET_PATH/$FILE -o -L $TARGET_PATH/$FILE ] && ln -sf $DIR/${PKG}/$TARGET_PATH/$FILE $TARGET_PATH/$FILE
 }
 
-PKG=prawnos-general-config
+PKG=prawnos-gru-config
 DIR=/etc/prawnos
 
 # divert and symlink our files to their final locations. This prevents other packages from overwriting our changes. 

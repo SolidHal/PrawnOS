@@ -24,3 +24,5 @@ src/debian/*
 /*.substvars
 /*.diff.gz
 /*.upload
+/*.tar.gz
+/*.dsc

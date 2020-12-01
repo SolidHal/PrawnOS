@@ -9,8 +9,9 @@ xfce-perchannel-xml/xsettings.xml /etc/prawnos/prawnos-xfce-config/etc/xdg/xfce4
 panel/default.xml /etc/prawnos/prawnos-xfce-config/etc/xdg/xfce4/panel/
 lightdm/lightdm-gtk-greeter.conf /etc/prawnos/prawnos-xfce-config/etc/lightdm/
 
+libinput-gestures/libinput-gestures.conf /etc/prawnos/prawnos-xfce-config/etc/
+
 # files we can just install
-libinput-gestures/libinput-gestures.conf /etc/
 libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
 brightness/backlight_* /usr/sbin/
 30-touchpad.conf /etc/X11/xorg.conf.d/

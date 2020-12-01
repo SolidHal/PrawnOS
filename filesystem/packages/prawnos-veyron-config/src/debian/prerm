@@ -20,12 +20,17 @@ undivert_and_unlink() {
     dpkg-divert --remove --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
 }
 
-PKG=prawnos-general-config
+PKG=prawnos-veyron-config
 DIR=/etc/prawnos
 
 # un-divert and un-symlink our files to their final locations. This undoes what postinst did
 if [ "$1" = remove ] ; then
-TARGET_PATH=/usr/share/images/desktop-base
-f=default
-undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+    TARGET_PATH=/etc/pulse
+    f=default.pa
+    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+
+
+    TARGET_PATH=/etc/pulse
+    f=daemon.conf
+    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
 fi

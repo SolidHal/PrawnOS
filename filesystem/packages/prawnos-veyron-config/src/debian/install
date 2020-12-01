@@ -1,8 +1,8 @@
 #files we must divert and symlink in the postinst/prerm
-wallpapers/default /etc/prawnos/prawnos-general-config/usr/share/images/desktop-base/
+default.pa /etc/prawnos/prawnos-veyron-config/etc/pulse/
+# Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
+daemon.conf /etc/prawnos/prawnos-veyron-config/etc/pulse/
 
 # files we can just install
-inputrc/.inputrc /etc/skel/
-firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-firefox-esr/prawn.cfg /usr/lib/firefox-esr/
-sysfs.conf /etc/
+headphone-acpi-toggle /etc/acpi/events/
+sound.sh /etc/acpi/

@@ -37,6 +37,8 @@ clean:
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
 	rm -rf *.buildinfo
+	rm -rf *.tar.gz
+	rm -rf *.dsc
 
 install:
 	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)

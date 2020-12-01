@@ -26,3 +26,5 @@ src/debian/*
 /*.diff.gz
 /*.upload
 /*.debian.tar.xz
+/*.tar.gz
+/*.dsc

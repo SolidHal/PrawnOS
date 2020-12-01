@@ -16,6 +16,7 @@ divert_and_link() {
     FILE=$4
 
     dpkg-divert --add --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+    mkdir -p $TARGET_PATH
     [ \! -e $TARGET_PATH/$FILE -o -L $TARGET_PATH/$FILE ] && ln -sf $DIR/${PKG}/$TARGET_PATH/$FILE $TARGET_PATH/$FILE
 }
 
@@ -26,6 +27,10 @@ DIR=/etc/prawnos
 if [ "$1" = configure ] ; then
 TARGET_PATH=/usr/share/images/desktop-base
 f=default
+divert_and_link $DIR $PKG $TARGET_PATH $f
+
+TARGET_PATH=/etc
+f=sysfs.conf
 divert_and_link $DIR $PKG $TARGET_PATH $f
 
 fi
