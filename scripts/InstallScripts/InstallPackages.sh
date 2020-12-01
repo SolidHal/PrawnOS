@@ -88,12 +88,12 @@ echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
 
 
 #install firefox-esr default settings
-cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+# cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+# cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
 
 
 #Copy in wallpapers
-rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
+# rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
 
 
 
@@ -147,6 +147,7 @@ then
   # TODO: likely drop this in favor of just using the upstream
   dpkg -i $DIR/xfce-themes/*
 
+  dpkg -i /prawnos-xfce-config*.deb /prawnos-general-config*.deb /libinput-gestures*.deb
   #Copy in xfce4 default settings
   # cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
   # cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
@@ -156,7 +157,6 @@ then
   # chmod 644 /etc/lightdm/icon.png
   # cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
 
-  dpkg -i /prawnos-xfce-config*.deb
 
 
   # handled as an xfce4 session configuration 
@@ -164,11 +164,11 @@ then
   # patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
 
   #Install libinput-gestures"packages"
-  cd $DIR/packages/
-  tar -xf libinput-gestures.tar.gz
-  cd libinput-gestures
-  make install
-  cd ..
+  # cd $DIR/packages/
+  # tar -xf libinput-gestures.tar.gz
+  # cd libinput-gestures
+  # make install
+  # cd ..
 
   #Add libinput-gestures config and autostart
   # cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
@@ -207,7 +207,6 @@ then
     echo "flat-volumes = no" > /etc/pulse/daemon.conf
     cp -rf $DIR/veyron/sound.sh /etc/acpi/sound.sh
     cp -rf $DIR/veyron/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
-    mkdir -p /etc/X11/xorg.conf.d/
 fi
 
 #if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
