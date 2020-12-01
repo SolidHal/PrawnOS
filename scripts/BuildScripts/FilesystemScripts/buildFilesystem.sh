@@ -294,6 +294,7 @@ cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTAL
 chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
 chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
+chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
 if [ $TARGET_ARCH = "armhf" ]
 then
     chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}

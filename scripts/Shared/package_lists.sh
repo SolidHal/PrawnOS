@@ -174,6 +174,12 @@ prawnos_xfce_debs_prebuilt_download=(
 )
 
 # packages built by prawnos, to be installed when running InstallPrawnOS
+# and choosing gnome
+prawnos_gnome_debs_prebuilt_download=(
+    prawnos-gnome-config
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
 prawnos_base_debs_prebuilt_download=(
     prawnos-general-config
 )
@@ -203,10 +209,14 @@ prawnos_mesa_prebuilt_install=(
     mesa-vulkan-drivers=20.2.1-100
 )
 
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on armhf devices
 prawnos_armhf_debs_prebuilt_download=(
     prawnos-veyron-config
 )
 
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on arm64 devices
 prawnos_arm64_debs_prebuilt_download=(
     prawnos-gru-config
 )

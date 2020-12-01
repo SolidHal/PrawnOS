@@ -101,16 +101,8 @@ fi
 if [ "$DE" = "gnome" ]
 then
 
-  DEBIAN_FRONTEND=noninteractive apt install -y ${gnome_debs_download[@]}
-
-  #apply gsettings and tweaks changes
-  cp $DIR/Gnome/prawnos-setting-schema/* /usr/share/glib-2.0/schemas/
-  glib-compile-schemas /usr/share/glib-2.0/schemas/
-
-  #remove the logo on gdm
-  cp $DIR/Gnome/greeter.dconf-defaults /etc/gdm3/greeter.dconf-defaults
-  dpkg-reconfigure gdm3
-
+  apt install -y ${gnome_debs_download[@]}
+  apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
 
   #TODO: debug why rotation is flipped
   # work around issue #234
