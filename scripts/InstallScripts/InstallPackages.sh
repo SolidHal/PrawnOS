@@ -121,7 +121,7 @@ then
 
   #Install packages not in an apt repo
   # TODO: likely drop this in favor of just using the upstream
-  dpkg -i $DIR/xfce-themes/*
+  # dpkg -i $DIR/xfce-themes/*
 fi
 
 apt clean -y && apt autoremove --purge -y
