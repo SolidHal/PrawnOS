@@ -1,0 +1,14 @@
+Source: prawnos-xfce-config
+Section: misc
+Priority: standard
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.3.0
+Homepage: https://prawnos.com
+
+Package: prawnos-xfce-config
+Architecture: all
+Depends: ${misc:Depends}, xsecurelock, libinput-gestures, prawnos-general-config
+Conflicts: lightlocker
+Description: xfce configuration on prawnOS removes lightlocker, lightlocker has been broken for armhf for some time we use xsecurelock instead

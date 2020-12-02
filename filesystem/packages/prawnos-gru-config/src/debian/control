@@ -1,0 +1,13 @@
+Source: prawnos-gru-config
+Section: misc
+Priority: standard
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.3.0
+Homepage: https://prawnos.com
+
+Package: prawnos-gru-config
+Architecture: all
+Depends: ${misc:Depends}
+Description: gru (samsung chromebook plus v1, asus c101) specific configuration files for PrawnOS

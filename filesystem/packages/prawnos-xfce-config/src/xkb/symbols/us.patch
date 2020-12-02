@@ -1,0 +1,31 @@
+--- /mnt/sd/xkborig/symbols/us	2019-02-11 00:00:00.000000000 +0100
++++ ../symbols/us	2020-04-01 07:33:21.065159427 +0200
+@@ -1642,6 +1642,28 @@
+     include "level3(ralt_switch)"
+ };
+ 
++
++// German characters for a asus chromebook added as third level symbols to US keyboard layout.
++partial alphanumeric_keys
++xkb_symbols "chromebook_de" {
++
++    include "us"
++    name[Group1]="German Characters for Chromebooks (US)";
++
++    key <AD03>	{ [         e,          E,     EuroSign,     Eacute ]	};
++
++    key <AC01>	{ [         a,          A,     adiaeresis,     Adiaeresis   ]	};
++    key <AD09>	{ [         o,          O,     odiaeresis,     Odiaeresis   ]	};
++    key <AD07>	{ [         u,          U,     udiaeresis,     Udiaeresis    ]	};
++
++    key <AC02>	{ [         s,          S,     ssharp,       ssharp   ]	};
++
++    include "level3(ralt_switch)"
++};
++
++
++
++
+ // 03 December 2017 - Added us(scn), please refer to
+ //                    Cadèmia Siciliana <l10n@cademiasiciliana.org>
+ partial alphanumeric_keys

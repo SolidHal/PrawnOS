@@ -1,0 +1,8 @@
+#files we must divert and symlink in the postinst/prerm
+default.pa /etc/prawnos/prawnos-veyron-config/etc/pulse/
+# Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
+daemon.conf /etc/prawnos/prawnos-veyron-config/etc/pulse/
+
+# files we can just install
+headphone-acpi-toggle /etc/acpi/events/
+sound.sh /etc/acpi/

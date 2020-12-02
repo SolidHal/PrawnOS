@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# need to do this since we added a new schema file, and now removed it
+glib-compile-schemas /usr/share/glib-2.0/schemas/

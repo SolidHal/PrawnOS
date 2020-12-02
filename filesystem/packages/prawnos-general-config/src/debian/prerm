@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e
+
+
+# files to un-divert and un-link are installed to the following directory:
+# $DIR/$PKG/$TARGET_PATH/$FILE
+# where:
+# DIR is usually /etc/prawnos
+# PKG is the name of the package
+# TARGET_PATH is usually file specific
+# FILE is the actual filename to un-divert/un-link
+
+undivert_and_unlink() {
+    DIR=$1
+    PKG=$2
+    TARGET_PATH=$3
+    FILE=$4
+
+    [ -L $TARGET_PATH/$FILE ] && rm $TARGET_PATH/$FILE
+    dpkg-divert --remove --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+}
+
+PKG=prawnos-general-config
+DIR=/etc/prawnos
+
+# un-divert and un-symlink our files to their final locations. This undoes what postinst did
+if [ "$1" = remove ] ; then
+TARGET_PATH=/usr/share/images/desktop-base
+f=default
+undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+
+TARGET_PATH=/etc
+f=sysfs.conf
+undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+fi

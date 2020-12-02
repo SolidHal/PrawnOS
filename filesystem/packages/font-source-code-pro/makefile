@@ -6,19 +6,18 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
 PACKAGE_NAME := font-source-code-pro_$(VERSION)_all
-PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
+PACKAGE_NAME_DEB := $(PACKAGE_NAME)_all.deb
+CHANGES_NAME = $(PACKAGE_NAME)_*.changes
 
 default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
 
 $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB): $(PACKAGE_NAME_DEB)
-	mkdir -p $(PRAWNOS_BUILD_DIRS)
+	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
 	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 $(PACKAGE_NAME_DEB):
 	@echo Building $@
 	cd src/; debuild -us -uc
-	mkdir -p $(PRAWNOS_LOCAL_APT_REPO)
-	cp $(PACKAGE_NAME_DEB) $(PRAWNOS_LOCAL_APT_REPO)
 
 .PHONY: full_build
 # includes the .orig.tar.gz in the changes file so it gets uploaded
@@ -44,4 +43,4 @@ install:
 
 .PHONY: upload
 upload:
-	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD) font-source-code-pro_$(VERSION)_*.changes
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPLOAD) $(CHANGES_NAME)

@@ -76,36 +76,33 @@ done
 #Set the timezone
 dpkg-reconfigure tzdata
 
+## GENERAL CONFIG
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
+DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config
 
+## DEVICE SPECIFIC CONFIG
+#Copy in acpi, pulse audio, trackpad settings, funtion key settings
+device_model=$(get_device)
 
+if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
+then
+    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-veyron-config
+fi
 
-#disable ertm for csr8510 bluetooth, issue #117
-echo "module/bluetooth/parameters/disable_ertm = 1" > /etc/sysfs.conf
+if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+then
+    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
+fi
 
+## DE SPECIFIC
 if [ "$DE" = "gnome" ]
 then
 
   apt install -y ${gnome_debs_download[@]}
-
-  #install firefox-esr default settings
-  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
-
-  #apply gsettings and tweaks changes
-  cp $DIR/Gnome/prawnos-setting-schema/* /usr/share/glib-2.0/schemas/
-  glib-compile-schemas /usr/share/glib-2.0/schemas/
-
-  #copy in wallpapers
-  rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
-
-  #remove the logo on gdm
-  cp $DIR/Gnome/greeter.dconf-defaults /etc/gdm3/greeter.dconf-defaults
-  dpkg-reconfigure gdm3
-
+  apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
 
   #TODO: debug why rotation is flipped
   # work around issue #234
@@ -118,100 +115,14 @@ then
   apt install -y ${xfce_debs_download[@]}
   apt install -y ${prawnos_xfce_debs_prebuilt_download[@]}
 
-  #install the keymap by patching xkb, then bindings work for any desktop environment
-  cp $DIR/xkb/compat/* /usr/share/X11/xkb/compat/
-  cp $DIR/xkb/keycodes/* /usr/share/X11/xkb/keycodes/
-  cp $DIR/xkb/symbols/* /usr/share/X11/xkb/symbols/
-
-  patch /usr/share/X11/xkb/rules/base < $DIR/xkb/rules/base.patch
-  patch /usr/share/X11/xkb/rules/base.lst < $DIR/xkb/rules/base.lst.patch
-  patch /usr/share/X11/xkb/rules/base.xml < $DIR/xkb/rules/base.xml.patch
-  patch /usr/share/X11/xkb/rules/evdev < $DIR/xkb/rules/evdev.patch
-  patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/xkb/rules/evdev.lst.patch
-  patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/xkb/rules/evdev.xml.patch
-
-  patch /usr/share/X11/xkb/symbols/gb < $DIR/xkb/symbols/gb.patch
-  patch /usr/share/X11/xkb/symbols/us < $DIR/xkb/symbols/us.patch
-
-  cp  $DIR/xkb/keyboard /etc/default/keyboard
-
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
   apt remove -y light-locker
   apt purge -y light-locker
 
   #Install packages not in an apt repo
-  dpkg -i $DIR/xfce-themes/*
-
-  #Copy in xfce4 default settings
-  cp -f $DIR/xfce-config/xfce-perchannel-xml/* /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
-  cp -f $DIR/xfce-config/panel/* /etc/xdg/xfce4/panel/
-
-  #Copy in lightdm/light greeter settings
-  cp -f $DIR/icons/icon-small.png /etc/lightdm/icon.png
-  chmod 644 /etc/lightdm/icon.png
-  cp -f $DIR/xfce-config/lightdm/* /etc/lightdm/
-
-
-  #Patch xflock4 to activate xsecurelock
-  patch /usr/bin/xflock4 < $DIR/xfce-config/xflock-xsecurelock.patch
-
-  #Copy in wallpapers
-  rm /usr/share/images/desktop-base/default && cp $DIR/wallpapers/* /usr/share/images/desktop-base/
-
-  #Install libinput-gestures and xfdashboard "packages"
-  cd $DIR/packages/
-  tar -xf libinput-gestures.tar.gz
-  cd libinput-gestures
-  make install
-  cd ..
-
-  #Add libinput-gestures config and autostart
-  cp $DIR/xfce-config/libinput-gestures/libinput-gestures.conf /etc/
-  cp $DIR/xfce-config/libinput-gestures/libinput-gestures.desktop /etc/xdg/autostart/
-
-  #Make plank autostart
-  cp $DIR/xfce-config/plank/plank.desktop /etc/xdg/autostart/
-
-  #install plank launcher
-  mkdir -p /etc/skel/.config/plank/dock1/launchers/
-  cp -rf $DIR/xfce-config/plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
-
-  #install firefox-esr default settings
-  cp $DIR/firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
-  cp $DIR/firefox-esr/prawn.cfg /usr/lib/firefox-esr/
-
-  #Install inputrc
-  cp -rf $DIR/xfce-config/inputrc/.inputrc /etc/skel/
-
-  #Install brightness control scripts
-  cp $DIR/xfce-config/brightness/backlight_* /usr/sbin/
-
-
-  #same bash trackpad config works well enough for both devices, but only useful on xfce
-  mkdir -p /etc/X11/xorg.conf.d/
-  cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
+  # TODO: likely drop this in favor of just using the upstream
+  # dpkg -i $DIR/xfce-themes/*
 fi
-
-
-#Copy in acpi, pulse audio, trackpad settings, funtion key settings
-device_model=$(get_device)
-
-if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
-then
-    cp -rf $DIR/veyron/default.pa /etc/pulse/default.pa
-    # Disable flat-volumes in pulseaudio, fixes broken sound for some sources in firefox
-    echo "flat-volumes = no" > /etc/pulse/daemon.conf
-    cp -rf $DIR/veyron/sound.sh /etc/acpi/sound.sh
-    cp -rf $DIR/veyron/headphone-acpi-toggle /etc/acpi/events/headphone-acpi-toggle
-    mkdir -p /etc/X11/xorg.conf.d/
-    cp -rf $DIR/30-touchpad.conf /etc/X11/xorg.conf.d/
-fi
-
-#if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
-#then
-    #nothing for now
-#fi
-
 
 apt clean -y && apt autoremove --purge -y
 

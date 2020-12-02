@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Plank
+Comment=Plank Dock
+Exec=/usr/bin/plank
+Type=Application
+NoDisplay=false
+Hidden=false

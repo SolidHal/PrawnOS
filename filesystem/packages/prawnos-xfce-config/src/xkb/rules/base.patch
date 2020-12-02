@@ -1,0 +1,37 @@
+--- /mnt/sd/xkborig/rules/base	2019-02-11 00:00:00.000000000 +0100
++++ base	2019-10-28 03:23:34.879813560 +0100
+@@ -939,7 +939,7 @@
+   btc5126t      =       +inet(nav_acpi_common)
+   btc9116u      =       +inet(btc9019u)
+   btc6301urf    =       +inet(media_nav_acpi_common)
+-  chromebook    =       +inet(chromebook)
++  
+   dellsk8125    =       +inet(dell)
+   dellsk8135    =       +inet(dell)
+   cherrybunlim  =       +inet(nav_common)
+@@ -1042,9 +1042,25 @@
+   *		jp		=	complete+japan
+   olpc          *               =       olpc
+   olpcm         *               =       olpc
++  chromebook              *               =       complete+chromebook
++  chromebook_ralt         *               =       complete+chromebook
++  chromebook_m            *               =       complete+chromebook
++  chromebook_m_ralt       *               =       complete+chromebook
++  chromebook_no_m         *               =       complete
+   *		*		=	complete
+ 
++
+ ! model		layout[1]	=	compat
++  chromebook              *       =       complete+chromebook
++  chromebook_ralt         *       =       complete+chromebook
++  chromebook_m            *       =       complete+chromebook
++  chromebook_m_ralt       *       =       complete+chromebook
++  chromebook_falco        *       =       complete+chromebook
++  chromebook_falco_ralt   *       =       complete+chromebook
++  chromebook_m_falco      *       =       complete+chromebook
++  chromebook_m_falco_ralt *       =       complete+chromebook
++  chromebook_no_m         *       =       complete
++
+   *		*		=	complete
+ 
+ ! model		=	types

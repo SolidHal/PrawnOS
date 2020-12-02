@@ -1,0 +1,14 @@
+Source: prawnos-gnome-config
+Section: misc
+Priority: standard
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.3.0
+Homepage: https://prawnos.com
+
+Package: prawnos-gnome-config
+Architecture: all
+Depends: ${misc:Depends}, prawnos-general-config
+Conflicts: lightlocker
+Description: gnome configuration for PrawnOS

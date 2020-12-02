@@ -1,0 +1,99 @@
+--- /mnt/sd/xkborig/rules/base.xml	2019-02-11 00:00:00.000000000 +0100
++++ base.xml	2020-04-01 07:32:24.703856077 +0200
+@@ -1318,10 +1318,66 @@
+     </model>
+     <model>
+       <configItem>
+-       <name>chromebook</name>
+-       <description>Chromebook</description>
+-       <vendor>Google</vendor>
+-     </configItem>
++        <name>chromebook</name>
++        <description>Chromebook (most models) | Search overlay</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_ralt</name>
++        <description>Chromebook (most models) | Right alt overlay</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_m</name>
++        <description>Chromebook (most models) | Search overlay | F keys mapped to media keys</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_m_ralt</name>
++        <description>Chromebook (most models) | Right alt overlay | F keys mapped to media keys</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_falco</name>
++        <description>Chromebook Falco/Pixel/Pixel2 | Search overlay</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_falco_ralt</name>
++        <description>Chromebook Falco/Pixel/Pixel2 | Right alt overlay</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_m_falco</name>
++        <description>Chromebook Falco/Pixel/Pixel2 | Search overlay | F keys mapped to media keys</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_m_falco_ralt</name>
++        <description>Chromebook Falco/Pixel/Pixel2 | Right alt overlay | F keys mapped to media keys</description>
++        <vendor>Google</vendor>
++      </configItem>
++    </model>
++    <model>
++      <configItem>
++        <name>chromebook_no_m</name>
++        <description>Chromebook (most models) | No overlay | F keys mapped to media keys</description>
++        <vendor>Google</vendor>
++      </configItem>
+     </model>
+     <model>
+       <configItem>
+@@ -1363,6 +1417,12 @@
+         </variant>
+         <variant>
+           <configItem>
++            <name>chromebook_de</name>
++            <description>English (US, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
++          <configItem>
+             <name>euro</name>
+             <description>English (US, euro on 5)</description>
+           </configItem>
+@@ -5480,6 +5540,12 @@
+           </configItem>
+         </variant>
+         <variant>
++          <configItem>
++            <name>chromebook_de</name>
++            <description>English (UK, German characters for Chromebooks)</description>
++          </configItem>
++        </variant>
++        <variant>
+           <configItem>
+             <name>intl</name>
+             <description>English (UK, intl., with dead keys)</description>
