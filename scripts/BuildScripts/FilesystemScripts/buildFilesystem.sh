@@ -236,9 +236,9 @@ mkdir -p $install_dir/resources
 mkdir -p $install_dir/scripts
 
 ## installation resources
-cp $build_resources/logo/icons/ascii/* $install_dir/resources
-cp $build_resources/partmaps/* $install_dir/resources
-cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources
+cp $build_resources/logo/icons/ascii/* $install_dir/resources/
+cp $build_resources/partmaps/* $install_dir/resources/
+cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources/
 
 ## installation scripts
 cp scripts/InstallScripts/* $install_dir/scripts/
@@ -246,7 +246,7 @@ cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $install_dir/scripts/
 ln -s $install_dir/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
 
 #Bring in the deb.prawnos.com gpg keyring
-chroot $outmnt apt-key add $install_dir/resources/deb.prawnos.com.gpg.key
+chroot $outmnt apt-key add /etc/prawnos/install/resources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
 #Setup the locale
