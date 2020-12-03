@@ -112,6 +112,7 @@ mount -o noatime ${outdev}p2 $outmnt
 
 #make a skeleton filesystem
 initramfs_src=$outmnt/etc/prawnos/initramfs_src
+initramfs_src_direct=/etc/prawnos/initramfs_src
 rm -rf $initramfs_src*
 mkdir -p $initramfs_src
 mkdir $initramfs_src/bin
@@ -140,8 +141,9 @@ initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
 #do so **automatigically**
 export -f chroot_get_libs
 export initramfs_binaries
+export initramfs_src_direct
 
-chroot $outmnt /bin/bash -c "chroot_get_libs /etc/prawnos/initramfs/initramfs_src $initramfs_binaries"
+chroot $outmnt /bin/bash -c "chroot_get_libs $initramfs_src_direct $initramfs_binaries"
 
 #have to add libgcc manually since ldd doesn't see it as a requirement :/
 armhf_libs=arm-linux-gnueabihf
