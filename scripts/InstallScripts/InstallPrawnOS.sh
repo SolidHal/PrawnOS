@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-RESOURCES=/InstallResources
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk(0/1) for an sd card
 BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
 
 ### SHARED CONST AND VARS
+RESOURCES=/etc/prawnos/install/resources
+SCRIPTS=/etc/prawnos/install/scripts
+
 # TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
 device_veyron_speedy="Google Speedy"
 device_veyron_minnie="Google Minnie"
@@ -327,7 +329,7 @@ expand() {
     while true; do
         read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
         case $ins in
-            [Yy]* ) /InstallResources/InstallPackages.sh; reboot;;
+            [Yy]* ) $SCRIPTS/InstallPackages.sh; reboot;;
             [Nn]* ) exit;;
             * ) echo "Please answer y or n";;
         esac
@@ -357,7 +359,7 @@ chroot_wrapper() {
 install_packages() {
     TARGET_MOUNT=$1
     echo "Installing Packages"
-    chroot_wrapper "$TARGET_MOUNT" ./InstallResources/InstallPackages.sh
+    chroot_wrapper "$TARGET_MOUNT" .$SCRIPTS/InstallPackages.sh
     desktop=true
 }
 
@@ -365,7 +367,7 @@ setup_hostname() {
     TARGET_MOUNT="$1"
 
     while true; do
-        read -r -p "Would you like to set a custom hostname (default: PrawnOS)? [Y/n]" response
+        read -r -p "Would you like to set a custom hostname (default: PrawnOS)? [y/n]" response
         case $response in
             [Yy]*)
                 echo "-----Enter hostname:-----"
@@ -420,7 +422,7 @@ welcome() {
     echo ""
     echo ""
 
-    cat /InstallResources/icons/ascii-icon.txt
+    cat $RESOURCES/ascii-icon.txt
     echo ""
     echo "*************Welcome To PrawnOS*************"
     echo ""

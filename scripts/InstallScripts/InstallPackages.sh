@@ -18,6 +18,9 @@
 
 
 ### SHARED CONST AND VARS
+RESOURCES=/etc/prawnos/install/resources
+SCRIPTS=/etc/prawnos/install/scripts
+
 # TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
 device_veyron_speedy="Google Speedy"
 device_veyron_minnie="Google Minnie"
@@ -57,11 +60,10 @@ get_sd_devname() {
 ### END SHARED CONST AND VARS
 
 
-DIR=/InstallResources
 # Import the package lists
-source $DIR/package_lists.sh
+source $SCRIPTS/package_lists.sh
 
-cat $DIR/icons/ascii-icon.txt
+cat $RESOURCES/ascii-icon.txt
 echo ""
 
 while true; do

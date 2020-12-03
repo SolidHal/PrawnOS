@@ -110,11 +110,8 @@ losetup -P $outdev $BASE
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 
-
-
-
 #make a skeleton filesystem
-initramfs_src=$outmnt/InstallResources/initramfs_src
+initramfs_src=$outmnt/etc/prawnos/initramfs_src
 rm -rf $initramfs_src*
 mkdir -p $initramfs_src
 mkdir $initramfs_src/bin
@@ -144,7 +141,7 @@ initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
 export -f chroot_get_libs
 export initramfs_binaries
 
-chroot $outmnt /bin/bash -c "chroot_get_libs /InstallResources/initramfs_src $initramfs_binaries"
+chroot $outmnt /bin/bash -c "chroot_get_libs /etc/prawnos/initramfs/initramfs_src $initramfs_binaries"
 
 #have to add libgcc manually since ldd doesn't see it as a requirement :/
 armhf_libs=arm-linux-gnueabihf
@@ -175,4 +172,8 @@ ln -s busybox bin/umount
 
 # store for kernel building
 find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
+
+# cleanup
+cd $OUT_DIR
+rm -rf $initramfs_src
 

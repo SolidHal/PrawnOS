@@ -204,8 +204,7 @@ WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or o
 
 Run:
 ```
-cd /
-./InstallPrawnOS.sh
+InstallPrawnOS
 ```
 Choose `Install` and follow the prompts. This will ask what device you want to install to and setup root encryption with a custom initramfs and dmcrypt/LUKS if you want.
 If you are curious how the initramfs, and root partition encryption work on PrawnOS check out the Initramfs and Encryption section in [DOCUMENTATION.md](DOCUMENTATION.md)
@@ -229,8 +228,7 @@ If you are running stock coreboot and haven't flashed Libreboot, you will first 
 At the prompt, login as root. The password is blank.
 Run:
 ```
-cd /
-./InstallPrawnOS.sh
+InstallPrawnOS
 ```
 Choose `Expand` at the prompt
 

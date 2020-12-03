@@ -85,9 +85,9 @@ outmnt=$(mktemp -d -p "$(pwd)")
 
 outdev=$(losetup -f)
 
-install_resources=$PRAWNOS_FILESYSTEM_RESOURCES/InstallResources
 build_resources=$PRAWNOS_FILESYSTEM_RESOURCES
 build_resources_apt=$build_resources/apt
+install_dir=$outmnt/etc/prawnos/install
 
 # Import the package lists, shared scripts
 source $PRAWNOS_SHARED_SCRIPTS/*
@@ -199,18 +199,7 @@ qemu-debootstrap --arch $TARGET_ARCH $DEBIAN_SUITE \
                  --cache-dir=$PRAWNOS_BUILD/debootstrap-apt-cache/
 
 chroot $outmnt passwd -d root
-
-#Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS > $outmnt/etc/hostname
-cp -R $install_resources/ $outmnt/InstallResources/
-# and the icons for the lockscreen and app menu
-mkdir $outmnt/InstallResources/icons/
-cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
-cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
-cp scripts/InstallScripts/* $outmnt/InstallResources/
-cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $outmnt/InstallResources/
-cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
-chmod +x $outmnt/*.sh
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -240,9 +229,24 @@ then
     cp $build_resources_apt/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
+
+#Add the items required for installation
+mkdir -p $install_dir
+mkdir -p $install_dir/resources
+mkdir -p $install_dir/scripts
+
+## installation resources
+cp $build_resources/logo/icons/ascii/* $install_dir/resources
+cp $build_resources/partmaps/* $install_dir/resources
+cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources
+
+## installation scripts
+cp scripts/InstallScripts/* $install_dir/scripts/
+cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $install_dir/scripts/
+ln -s $install_dir/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
+
 #Bring in the deb.prawnos.com gpg keyring
-cp $build_resources_apt/deb.prawnos.com.gpg.key $outmnt/InstallResources/
-chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
+chroot $outmnt apt-key add $install_dir/resources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
 #Setup the locale
