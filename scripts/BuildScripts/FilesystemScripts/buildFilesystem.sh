@@ -87,7 +87,6 @@ outdev=$(losetup -f)
 
 build_resources=$PRAWNOS_FILESYSTEM_RESOURCES
 build_resources_apt=$build_resources/apt
-install_dir=$outmnt/etc/prawnos/install
 
 # Import the package lists, shared scripts
 source $PRAWNOS_SHARED_SCRIPTS/*
@@ -230,6 +229,8 @@ then
 fi
 
 
+install_dir=$outmnt/etc/prawnos/install
+install_dir_direct=/etc/prawnos/install
 #Add the items required for installation
 mkdir -p $install_dir
 mkdir -p $install_dir/resources
@@ -243,7 +244,7 @@ cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources/
 ## installation scripts
 cp scripts/InstallScripts/* $install_dir/scripts/
 cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $install_dir/scripts/
-ln -s $install_dir/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
+ln -s $install_dir_direct/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
 
 #Bring in the deb.prawnos.com gpg keyring
 chroot $outmnt apt-key add /etc/prawnos/install/resources/deb.prawnos.com.gpg.key
