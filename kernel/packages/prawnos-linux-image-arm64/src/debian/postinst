@@ -11,7 +11,7 @@ set -e
 
 case "$1" in
     configure)
-        /etc/prawnos/kernel/install-prawnos-kernel.sh $KERNEL_IMAGE
+        /etc/prawnos/kernel/FlashKernelPartition.sh $KERNEL_IMAGE
         ;;
     abort-upgrade|abort-remove|abort-deconfigure)
         # Do nothing

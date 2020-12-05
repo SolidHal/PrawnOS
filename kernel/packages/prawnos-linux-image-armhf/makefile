@@ -4,7 +4,7 @@ PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 ifeq ($(TARGET),$(PRAWNOS_ARM64))
-$(error Cant built armhf kernel package with arm64 target)
+$(error Cant build armhf kernel package with arm64 target)
 endif
 
 #package specific vars
@@ -18,8 +18,9 @@ PACKAGE_NAME_DEB := $(PACKAGE_NAME).deb
 #uses only the upstream kernel version for the orig tar
 PACKAGE_NAME_ORIG := $(PACKAGE)_$(KVER)-$(PRAWNOS_KERNEL_VER)
 PACKAGE_NAME_ORIG_TAR := $(PACKAGE_NAME_ORIG).orig.tar.gz
+PACKAGE_NAME_ORIG_DIR := $(PACKAGE)_$(KVER)-$(PRAWNOS_KERNEL_VER)-orig
 
-ORIG := $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/orig
+ORIG := $(PRAWNOS_BUILD)/$(PACKAGE_NAME_ORIG_DIR)
 
 default: $(PACKAGE_NAME_DEB)
 
@@ -36,9 +37,10 @@ $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 
 $(PACKAGE_NAME_ORIG_TAR):
 	make -f $(PRAWNOS_KERNEL)/makefile kernel
+	mkdir $(ORIG)
 	cp $(PRAWNOS_KERNEL_BUILT) $(ORIG)/$(PACKAGE_NAME_ORIG)
+	cp $(PRAWNOS_KERNEL_RESOURCES_SHARED)/FlashKernelPartition.sh $(ORIG)/
 	tar -czf $(PACKAGE_NAME_ORIG_TAR) -C $(ORIG)/ .
-
 
 .PHONY: clean_all
 clean_all: clean clean_orig
@@ -58,7 +60,7 @@ clean:
 	rm -f src/debian/files
 	rm -rf src/debian/.debhelper
 # kernel package specific
-	rm -f orig/$(PACKAGE)_*-*
+	rm -f $(ORIG)
 
 #when just changing the debian package version, if we remake the orig as well then reprepro will complain on upload. So we might not always want to remove the orig.
 .PHONY: clean_orig

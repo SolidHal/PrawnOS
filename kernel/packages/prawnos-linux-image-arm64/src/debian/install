@@ -1,2 +1,2 @@
 prawnos-linux-image-arm64* boot
-install-prawnos-kernel.sh /etc/prawnos/kernel
+FlashKernelPartition.sh etc/prawnos/kernel

@@ -1,2 +1,2 @@
 prawnos-linux-image-armhf* boot
-install-prawnos-kernel.sh bin
+FlashKernelPartition.sh etc/prawnos/kernel

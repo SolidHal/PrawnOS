@@ -19,12 +19,50 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+
+### SHARED CONST AND VARS
+device_veyron_speedy="Google Speedy"
+device_veyron_minnie="Google Minnie"
+device_gru_kevin="Google Kevin"
+device_gru_bob="Google Bob"
+
+get_device() {
+    local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
+    echo $device
+}
+
+get_emmc_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk2;;
+        $device_veyron_minnie) local devname=mmcblk2;;
+        $device_gru_kevin) local devname=mmcblk0;;
+        $device_gru_bob) local devname=mmcblk0;;
+        * ) echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+
+
+get_sd_devname() {
+    local device=$(get_device)
+    case "$device" in
+        $device_veyron_speedy) local devname=mmcblk0;;
+        $device_veyron_minnie) local devname=mmcblk0;;
+        $device_gru_kevin) local devname=mmcblk1;;
+        $device_gru_bob) local devname=mmcblk1;;
+        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+    esac
+    echo $devname
+}
+### END SHARED CONST AND VARS
+
 # -----------------------------------------------
 #              STATIC CONFIGURATION
 # -----------------------------------------------
 #
 # eMMC device name
-emmc_devname=mmcblk2
+emmc_devname=$(get_emmc_devname)
 #
 # GPT partition type UUID for "ChromeOS kernel"
 ptype_kernel="FE3A2A5D-4F32-41A7-B725-ACCC3285A309"
@@ -124,9 +162,18 @@ echo "
  /!\\ !!! CAUTION !!! /!\\
 ----------------------------
 This will flash a new kernel image onto the running device's kernel partition: $kpart
-The detected running device is: $devtype.
+The detected running boot device is: $devtype.
+The device you are running is: $devname.
 DO NOT shutdown or reboot before completing the process!
 "
+
+printf "%s" "Do you want to continue? [y/N] "
+
+read ans
+
+[ "$ans" != "y" ] &&
+    [ "$ans" != "Y" ] &&
+    die "Aborted by user. Kernel partition unchanged." 1
 
 # put the kernel in the kernel partition
 #blank the kernel partition first, with 32MiB of zeros
