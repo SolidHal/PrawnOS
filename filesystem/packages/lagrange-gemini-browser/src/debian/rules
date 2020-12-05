@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+
+override_dh_auto_configure:
+	CFLAGS=-Wformat  cmake . -DENABLE_WINDOWPOS_FIX=YES -DENABLE_KERNING=NO -DENABLE_X11_SWRENDER=YES -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/
+
+override_dh_auto_build:
+	CFLAGS=-Wformat cmake --build .
