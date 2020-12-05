@@ -9,6 +9,3 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	CFLAGS=-Wformat cmake --build .
-
-# override_dh_auto_install:
-# 	cmake --build . --target install
