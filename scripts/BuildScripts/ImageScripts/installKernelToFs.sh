@@ -28,6 +28,32 @@ then
     echo "No filesystem image supplied"
     exit 1
 fi
+if [ -z "$3" ]
+then
+    echo "No target arch supplied"
+    exit 1
+fi
+if [ -z "$4" ]
+then
+    echo "No kernel build path supplied"
+    exit 1
+fi
+if [ -z "$5" ]
+then
+    echo "No kernel package path supplied"
+    exit 1
+fi
+if [ -z "$6" ]
+then
+    echo "No kernel package name supplied"
+    exit 1
+fi
+if [ -z "$7" ]
+then
+    echo "No kernel package debian supplied"
+    exit 1
+fi
+
 
 KVER=$1
 OUTNAME=$2
