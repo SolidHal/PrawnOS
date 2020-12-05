@@ -1,3 +1,9 @@
+prawnos-linux-image-armhf (5.9.12-1-1) stable; urgency=medium
+
+  * release 5.9.12-1-1
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 04 Dec 2020 18:26:14 -0800
+
 prawnos-linux-image-armhf (5.4.29-3-1) stable; urgency=medium
 
   * release 5.4.29-3-1
