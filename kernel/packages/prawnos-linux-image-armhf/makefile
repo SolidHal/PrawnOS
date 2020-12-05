@@ -8,7 +8,7 @@ $(error Cant build armhf kernel package with arm64 target)
 endif
 
 #package specific vars
-DEB_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_VER)
+DEB_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_DEB_VER)
 PRAWNOS_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_PRAWNOS_VER)
 PACKAGE := prawnos-linux-image-armhf
 PACKAGE_ARCH := armhf
