@@ -4,7 +4,7 @@ PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 ifeq ($(TARGET),$(PRAWNOS_ARMHF))
-$(error Cant built armhf kernel package with armhf target)
+$(error Cant built armhf kernel package with arm64 target)
 endif
 
 #package specific vars
