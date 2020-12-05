@@ -182,6 +182,7 @@ prawnos_gnome_debs_prebuilt_download=(
 # packages built by prawnos, to be installed when running InstallPrawnOS
 prawnos_base_debs_prebuilt_download=(
     prawnos-general-config
+    lagrange-gemini-browser
 )
 
 # packages built by prawnos, to be installed at build time
