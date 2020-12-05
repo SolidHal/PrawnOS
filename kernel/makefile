@@ -53,7 +53,11 @@ extract_ath9k: $(ATH9K_EXTRACTED)
 .PHONY: kernel_image_package
 kernel_image_package: $(PRAWNOS_KERNEL_BUILT)
 	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE)
+
+.PHONY: kernel_image_package_install
+kernel_image_package_install: kernel_image_package
 	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) install INSTALL_TARGET=$(PRAWNOS_BUILD)
+
 
 .PHONY: kernel_config
 kernel_config: $(KERNEL_PATCHED)

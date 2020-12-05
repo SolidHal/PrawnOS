@@ -126,6 +126,7 @@ kimg=$1
 
 rootfs=$(get_root_partition)
 devname=$(lsblk -no pkname $rootfs | head -n 1)
+model=$(get_device)
 devtype=
 kpart=
 
@@ -163,7 +164,7 @@ echo "
 ----------------------------
 This will flash a new kernel image onto the running device's kernel partition: $kpart
 The detected running boot device is: $devtype.
-The device you are running is: $devname.
+The model you are running is: $model.
 DO NOT shutdown or reboot before completing the process!
 "
 

@@ -28,13 +28,25 @@ then
 fi
 if [ -z "$2" ]
 then
-    echo "No kernel version supplied"
+    echo "No deb kernel version supplied"
+    exit 1
+fi
+if [ -z "$3" ]
+then
+    echo "No prawnos kernel version supplied"
+    exit 1
+fi
+if [ -z "$4" ]
+then
+    echo "No prawnos kernel image package path supplied"
     exit 1
 fi
 
 
 DEBSRC=$1
 DEBKVER=$2
+PRAWNOSKVER=$3
+PACKAGEPATH=$4
 
 cd $DEBSRC
 # check the supplied kver against the current kver

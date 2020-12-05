@@ -32,8 +32,10 @@ fi
 KVER=$1
 OUTNAME=$2
 TARGET=$3
-KERNEL_PACKAGE_PATH=$4
-KERNEL_PACKAGE=$5
+KERNEL_BUILD=$4
+KERNEL_PACKAGE_PATH=$5
+KERNEL_PACKAGE_NAME=$6
+KERNEL_PACKAGE_DEB=$7
 
 
 
@@ -85,21 +87,21 @@ kernel_size=65536
 #this is very very important, not doing this or using the incorrect kernel size can lead to very strange and difficult to debug issues
 dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
 #now write the new kernel
-dd if=build/$TARGET/linux-$KVER/vmlinux.kpart of=${outdev}p1
+dd if=$KERNEL_BUILD/vmlinux.kpart of=${outdev}p1
 
 #install the kernel image package to the chroot so it can be updated by apt later
 #need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
 #maybe it would make more sense to run this on install, but then a usb booting device couldn't upgrade its kernel
-#TODO uncomment and test once arm64 is done
-# cp $KERNEL_PACKAGE_PATH $outmnt/
-# chroot $outmnt dpkg --unpack $KERNEL_PACKAGE
-# chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE.postinst -f
-# chroot $outmnt dpkg --configure $KERNEL_PACKAGE
+cp $KERNEL_PACKAGE_PATH/$KERNEL_PACKAGE_DEB $outmnt/
+chroot $outmnt dpkg --unpack /$KERNEL_PACKAGE_DEB
+chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE_NAME.postinst
+chroot $outmnt dpkg --configure $KERNEL_PACKAGE_NAME
+chroot $outmnt rm /$KERNEL_PACKAGE_DEB
 
 #install the kernel modules and headers
 #we dont make any modules yet
 # make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_MOD_PATH=$outmnt modules_install
-make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
+make -C $KERNEL_BUILD ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
 # the ath9k firmware is built into the kernel image, so nothing else must be done
 
 umount -l $outmnt > /dev/null 2>&1
