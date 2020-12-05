@@ -285,6 +285,9 @@ apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 #Download the gnome packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
+#TODO remove once 3.38.2-1 or newer moves to bullseye, work around for #235
+chroot $outmnt apt install -y -t sid libmutter-7-0 gir1.2-mutter-7 mutter-common
+
 
 # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
 # if required
