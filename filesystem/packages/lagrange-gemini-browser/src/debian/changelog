@@ -1,0 +1,11 @@
+lagrange-gemini-browser (0.11.0-2) testing; urgency=medium
+
+  * fix install path
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 04 Dec 2020 17:03:09 -0500
+
+lagrange-gemini-browser (0.11.0-1) testing; urgency=medium
+
+  * initial release
+
+ -- Hal Emmerich <hal@halemmerich.com>  Thu, 03 Dec 2020 17:03:09 -0500
