@@ -65,15 +65,38 @@ mount -n -t devtmpfs devtmpfs  /dev
 
 # get the root device, so we can find the boot partiton
 UNPARSED=$(cmdline root)
+echo Unparsed cmdline rootdev: ${UNPARSED} > /dev/tty1
 ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-echo ${ROOT_PARTUUID} > /dev/tty1
+echo ROOT_PARTUUID: ${ROOT_PARTUUID} > /dev/tty1
+
 BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-echo ${BLKID} > /dev/tty1
+echo BLKID: ${BLKID} > /dev/tty1
+if [ -z "$BLKID" ]
+then
+  echo BLKID wasnt found yet, give the kernel a moment... > /dev/tty1
+  sleep 1
+  BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
+
+  if [ -z "$BLKID" ]
+  then
+    echo BLKID still not found, give the kernel one more moment... > /dev/tty1
+    sleep 1
+    BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
+
+    if [ -z "$BLKID" ]
+    then
+      echo FAILED TO FIND BLKID AFTER 2 SECONDS, PLEASE OPEN AN ISSUE WITH A SCREENSHOT OF THIS ERROR > /dev/tty1
+      rescue_shell
+    fi
+  fi
+fi
+
+echo BLKID: ${BLKID} > /dev/tty1
+
 #If its an mmcblk device, the kernel partiton will p1. If it is a usb device, the partiton will just be 1
 #Just want everything before the 1
 ROOT_DEV="${BLKID%1:*}"
-
-echo ${ROOT_DEV} > /dev/tty1
+echo ROOT_DEV: ${ROOT_DEV} > /dev/tty1
 
 # label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
 # you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
