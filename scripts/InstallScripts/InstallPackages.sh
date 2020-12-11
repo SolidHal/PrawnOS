@@ -112,6 +112,10 @@ then
   # work around issue #234
   apt remove -y iio-sensor-proxy
 
+  # remove some packages that we don't actually want.
+  #TODO: determine what packages recommends are bringing these in
+  apt remove -y gnome-software lilyterm
+
 fi
 
 if [ "$DE" = "xfce" ]
