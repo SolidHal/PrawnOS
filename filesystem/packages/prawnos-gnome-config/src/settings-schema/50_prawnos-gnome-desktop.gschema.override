@@ -25,3 +25,9 @@ picture-uri='file:///usr/share/images/desktop-base/default'
 disabled=['org.gnome.Nautilus.desktop', 'org.gnome.clocks.desktop', 'org.gnome.seahorse.Application.desktop', 'org.gnome.Terminal.desktop']
 sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gnome.Nautilus.desktop']
 
+[org.gnome.desktop.session]
+idle-delay=uint32 0
+
+[org.gnome.settings-daemon.plugins.power]
+sleep-inactive-ac-timeout=1800
+sleep-inactive-battery-timeout=1800
