@@ -150,8 +150,6 @@ gnome_debs_download=(
     gnome-logs
     gnome-session
     gnome-shell-extensions
-    gnome-software
-    gnome-software-plugin-flatpak
     gnome-system-monitor
     gnome-terminal
     gnome-tweaks
