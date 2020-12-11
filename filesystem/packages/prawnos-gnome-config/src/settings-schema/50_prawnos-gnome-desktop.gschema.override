@@ -21,3 +21,7 @@ picture-uri='file:///usr/share/images/desktop-base/default'
 [org.gnome.desktop.screensaver]
 picture-uri='file:///usr/share/images/desktop-base/default'
 
+[org.gnome.desktop.search-providers]
+disabled=['org.gnome.Nautilus.desktop', 'org.gnome.clocks.desktop', 'org.gnome.seahorse.Application.desktop', 'org.gnome.Terminal.desktop']
+sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gnome.Nautilus.desktop']
+
