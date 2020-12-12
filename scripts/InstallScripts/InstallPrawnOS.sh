@@ -337,6 +337,12 @@ expand() {
             * ) echo "Please answer y or n";;
         esac
     done
+
+    dmesg -D
+    welcome
+    setup_users
+    setup_hostname
+    dmesg -E
 }
 
 # helper for install_packages()/setup_users()
@@ -369,6 +375,8 @@ install_packages() {
 setup_hostname() {
     TARGET_MOUNT="$1"
 
+    #this works fine in the expansion use as TARGET_MOUNT is simply empty
+
     while true; do
         read -r -p "Would you like to set a custom hostname (default: PrawnOS)? [y/n]" response
         case $response in
@@ -391,12 +399,21 @@ setup_hostname() {
 setup_users() {
     TARGET_MOUNT="$1"
 
+    #handle when we use this for expansion
+    if [ -z "$TARGET_MOUNT" ]
+    then
+        CHROOT_PREFIX=""
+
+    else
+        CHROOT_PREFIX=chroot_wrapper "$TARGET_MOUNT"
+    fi
+
     # Have the user set a root password
     echo "-----Enter a password for the root user-----"
-    until chroot_wrapper "$TARGET_MOUNT" passwd
+    until $CHROOT_PREFIX passwd
     do
         echo "-----Enter a password for the root user-----"
-        chroot_wrapper "$TARGET_MOUNT" passwd
+        $CHROOT_PREFIX passwd
     done
 
     if [[ "$desktop" = "true" ]]; then
@@ -407,7 +424,7 @@ setup_users() {
                 #ensure no whitespace
                 case "$username" in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
             done
-        until chroot_wrapper "$TARGET_MOUNT" adduser "$username" --gecos "$username"
+        until $CHROOT_PREFIX adduser "$username" --gecos "$username"
         do
             while true; do
                 echo "-----Enter new username:-----"
@@ -416,9 +433,10 @@ setup_users() {
                 case "$username" in *\ *) echo usernames may not contain whitespace;;  *) break;; esac
             done
         done
-        chroot_wrapper "$TARGET_MOUNT" usermod -a -G sudo,netdev,input,video,bluetooth "$username"
+        $CHROOT_PREFIX usermod -a -G sudo,netdev,input,video,bluetooth "$username"
     fi
 }
+
 
 welcome() {
     echo ""
