@@ -12,6 +12,7 @@ Supports the following Devices:
 * armhf cpu:
     * Asus C201 (C201P) (C201PA) (veyron-speedy)
     * Asus C100 (veyron-minnie)
+    * _BETA_ Asus Chromebit CS10 (veyron-mickey)
 * arm64 cpu:
     * _BETA_ Samsung Chromebook Plus V1 (XE513C24) (gru-kevin)
     * _ALPHA_ Asus C101p (gru-bob)
