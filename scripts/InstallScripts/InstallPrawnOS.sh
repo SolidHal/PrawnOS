@@ -27,6 +27,7 @@ SCRIPTS=/etc/prawnos/install/scripts
 # TODO: when these scripts are packaged, place these in a shared script instead of in every file that needs them
 device_veyron_speedy="Google Speedy"
 device_veyron_minnie="Google Minnie"
+device_veyron_mickey="Google Mickey"
 device_gru_kevin="Google Kevin"
 device_gru_bob="Google Bob"
 
@@ -40,6 +41,7 @@ get_emmc_devname() {
     case "$device" in
         $device_veyron_speedy) local devname=mmcblk2;;
         $device_veyron_minnie) local devname=mmcblk2;;
+	$device_veyron_mickey) local devname=mmcblk2;;
         $device_gru_kevin) local devname=mmcblk1;;
         $device_gru_bob) local devname=mmcblk1;;
         * ) echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
@@ -53,6 +55,7 @@ get_sd_devname() {
     case "$device" in
         $device_veyron_speedy) local devname=mmcblk0;;
         $device_veyron_minnie) local devname=mmcblk0;;
+	$device_veyron_mickey) local devname=mmcblk0;;
         $device_gru_kevin) local devname=mmcblk0;;
         $device_gru_bob) local devname=mmcblk0;;
         * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
