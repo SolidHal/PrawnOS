@@ -54,6 +54,7 @@ base_debs_install=(
     libinput-tools
     libnss-systemd
     libpam-cap nftables
+    lsusb
     nano
     net-tools
     netcat-openbsd
