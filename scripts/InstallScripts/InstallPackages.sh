@@ -102,6 +102,11 @@ then
     DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
 fi
 
+
+# remove some packages that we don't actually want.
+#TODO: determine what packages recommends are bringing these in
+apt remove -y gnome-software lilyterm
+
 ## DE SPECIFIC
 if [ "$DE" = "gnome" ]
 then
@@ -115,9 +120,6 @@ then
   # work around issue #234
   apt remove -y iio-sensor-proxy
 
-  # remove some packages that we don't actually want.
-  #TODO: determine what packages recommends are bringing these in
-  apt remove -y gnome-software lilyterm
 
 fi
 
