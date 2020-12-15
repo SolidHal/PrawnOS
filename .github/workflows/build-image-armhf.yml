@@ -14,7 +14,7 @@ jobs:
         run: sudo dpkg -i ./tests/resources/qemu-user-static_5.1+dfsg-4+b1_amd64.deb && 
              docker run --mount type=bind,source=$PWD,target=/PrawnOS
              --privileged -v/dev:/dev debian:bullseye
-             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" armhf Shiba
+             /bin/bash /PrawnOS/tests/build.sh "$GITHUB_SHA" armhf Shiba image
       - name: publish image
         uses: actions/upload-artifact@v2
         with:
