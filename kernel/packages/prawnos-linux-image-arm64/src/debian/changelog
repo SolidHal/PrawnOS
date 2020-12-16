@@ -1,3 +1,9 @@
+prawnos-linux-image-arm64 (5.10.1-1-1) testing; urgency=medium
+
+  * release 5.10.1-1-1
+
+ -- Hal Emmerich <hal@halemmerich.com>  Tue, 15 Dec 2020 19:13:29 -0800
+
 prawnos-linux-image-arm64 (5.9.12-1-1) testing; urgency=medium
 
   * release 5.9.12-1-1
