@@ -21,7 +21,8 @@ plank/plank-launchers/* /etc/skel/.config/plank/dock1/launchers/
 xkb/compat/* /usr/share/X11/xkb/compat/
 xkb/keycodes/* /usr/share/X11/xkb/keycodes/
 xkb/symbols/* /usr/share/X11/xkb/symbols/
-xkb/keyboard /etc/default/keyboard
+
+xkb/keyboard /etc/default/
 
 # xkb patches, to be used during postinstall
 xkb/rules/base.patch /etc/prawnos/prawnos-xfce-config/xkb/patches/
