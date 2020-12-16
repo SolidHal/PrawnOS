@@ -54,16 +54,18 @@ base_debs_install=(
     libinput-tools
     libnss-systemd
     libpam-cap nftables
-    lsusb
+    lshw
     nano
     net-tools
     netcat-openbsd
     network-manager
     parted
+    pciutils
     psmisc
     rsync
     traceroute
     udev
+    usbutils
     uuid-runtime
     vim
     vboot-utils
