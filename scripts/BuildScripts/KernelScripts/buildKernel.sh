@@ -79,6 +79,7 @@ elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     IMAGE=Image
 else
     echo "no valid target arch specified"
+    exit 1
 fi
 
 #copy in the resources, initramfs
