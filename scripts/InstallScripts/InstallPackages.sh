@@ -78,7 +78,7 @@ dpkg-reconfigure tzdata
 
 ## GENERAL CONFIG
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y ${shared_desktop_debs_download[@]}
 DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
 DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config

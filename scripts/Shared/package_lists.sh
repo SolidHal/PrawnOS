@@ -73,8 +73,9 @@ base_debs_install=(
     xz-utils
 )
 
-# blueman can be moved to xfce only once gnome-bluetooth in settings works properly
-base_debs_download=(
+# packages installed for GUI installs (gnome/lxqt/xfce):
+# FIXME: blueman can be moved to xfce only once gnome-bluetooth in settings works properly
+shared_desktop_debs_download=(
     acpi-support
     alsa-utils
     anacron

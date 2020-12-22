@@ -276,7 +276,7 @@ chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
 #Download the shared packages to be installed by InstallPackages.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
+apt_install $PRAWNOS_BUILD $outmnt false ${shared_desktop_debs_download[@]}
 
 #DEs
 #Download the xfce packages to be installed by InstallPackages.sh:
