@@ -186,6 +186,8 @@ shared_desktop_debs_download=(
     dkms
     eject
     firefox-esr
+    gvfs-backends
+    gvfs-fuse
     iw
     keepassxc
     libegl-mesa0
