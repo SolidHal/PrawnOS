@@ -187,6 +187,7 @@ shared_desktop_debs_download=(
     eject
     firefox-esr
     iw
+    keepassxc
     libegl-mesa0
     libegl1-mesa
     libgl1-mesa-dri
