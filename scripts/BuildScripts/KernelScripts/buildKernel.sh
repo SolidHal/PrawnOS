@@ -21,29 +21,23 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ -z "$1" ]
-then
+if [ -z "$1" ]; then
     echo "No kernel version supplied"
     exit 1
-fi
-if [ -z "$2" ]
-then
+elif [ -z "$2" ]; then
     echo "No resources directory"
     exit 1
-fi
-if [ -z "$3" ]
-then
+elif [ -z "$3" ]; then
     echo "No build directory supplied"
     exit 1
-fi
-if [ -z "$4" ]
-then
+elif [ -z "$4" ]; then
     echo "No PrawnOS initramfs supplied"
     exit 1
-fi
-if [ -z "$" ]
-then
+elif [ -z "$5" ]; then
     echo "No PrawnOS target arch supplied"
+    exit 1
+elif [ -z "$6" ]; then
+    echo "No PrawnOS kernel config supplied"
     exit 1
 fi
 
@@ -52,7 +46,7 @@ RESOURCES=$2
 BUILD_DIR=$3
 INITRAMFS=$4
 TARGET=$5
-
+KERNEL_CONFIG=$6
 
 ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
@@ -84,7 +78,7 @@ fi
 
 #copy in the resources, initramfs
 cp $INITRAMFS .
-cp $RESOURCES/config .config
+cp "$KERNEL_CONFIG" .config
 cp $RESOURCES/kernel.its .
 make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
 make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
