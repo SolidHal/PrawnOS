@@ -1,10 +1,7 @@
 From 30dcb9e2d1af10290d0764860b47b6f4848a1b93 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Wed, 23 Dec 2020 10:03:26 -0800
-Subject: [PATCH 2/2] drm/rockchip: Only wait for panel ACK on PSR entry
-
-This patch was brought upstream already from chromium/rockchip but
-was done so incorrectly.
+Subject: [PATCH 2/2] bridge/analogix: Don't wait for panel ACK on PSR exit
 
 We currently wait for the panel to mirror our intended PSR state
 before continuing on both PSR enter and PSR exit. This is really
@@ -16,11 +13,12 @@ This patch changes the behavior such that we only wait for the
 panel to complete the PSR transition when we're entering PSR, and
 to skip verification when we're exiting.
 
-Without this, the system essentially freezes for ~100ms while it waits for
-confirmation that PSR is disabled. The most noticible behavior is the cursor jumping
-on quick inputs. 
+Without this, the system essentially freezes for ~100ms while it
+waits for confirmation that PSR is disabled. The most noticible
+behavior is the cursor jumping on quick inputs. 
 
 from: https://chromium.googlesource.com/chromiumos/third_party/kernel/+/e47a7da072d1a2ca8fdc62f3e32291c0d1a41145%5E%21/#F0
+Signed-off-by: Hal Emmerich <hal@halemmerich.com>
 ---
  drivers/gpu/drm/bridge/analogix/analogix_dp_core.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
