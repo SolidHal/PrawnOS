@@ -1,7 +1,7 @@
 From 30dcb9e2d1af10290d0764860b47b6f4848a1b93 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Wed, 23 Dec 2020 10:03:26 -0800
-Subject: [PATCH 2/2] bridge/analogix: Don't wait for panel ACK on PSR exit
+Subject: [PATCH 1/1] bridge/analogix: Don't wait for panel ACK on PSR exit
 
 We currently wait for the panel to mirror our intended PSR state
 before continuing on both PSR enter and PSR exit. This is really
