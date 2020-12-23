@@ -266,13 +266,21 @@ or they can be built individually by going to the specific package and running `
 
 once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
 
-- kernel packages are located under `filesystem/packages`
+- kernel packages are located under `kernel/packages`
 the kernel image package can be built by running `make` in the `prawnos-linux-image-armhf` directory
 once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
 
 ### use the PrawnOS APT repo to update the PrawnOS packages automatically
 
 `sudo apt upgrade` 
+
+## Upgrade PrawnOS kernel using specific vmlinux.kpart
+
+The kernel flashing script can be found at `/etc/prawnos/kernel/FlashKernelPartition.sh`
+Easily flash a specific kernel by running it like this:
+```
+/etc/prawnos/kernel/FlashKernelPartition.sh vmlinux.kpart
+```
 
 ## Documentation
 
