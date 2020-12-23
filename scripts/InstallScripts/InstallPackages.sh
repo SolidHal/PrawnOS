@@ -108,8 +108,6 @@ then
 
   apt install -y ${gnome_debs_download[@]}
   apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
-  #TODO remove once 3.38.2-1 or newer moves to bullseye, work around for #235
-  apt install -y -t sid libmutter-7-0 gir1.2-mutter-7 mutter-common
 
   #TODO: debug why rotation is flipped
   # work around issue #234
