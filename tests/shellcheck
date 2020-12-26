@@ -1,0 +1,90 @@
+#!/bin/bash
+# Wrapper around shellcheck
+#
+# Copyright (C) 2020 Austin English
+#
+# This software comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the GNU Lesser
+# Public License version 2.1 (or later), as published by the Free
+# Software Foundation. Please see the file COPYING for details.
+
+set -e
+set -x
+
+###################################################################################################
+# Helpers
+###################################################################################################
+
+w_die() {
+    echo "$* failed"
+    exit 1
+}
+
+w_try() {
+    "$@"
+    status=$?
+    if test ${status} -ne 0; then
+        w_die "Note: command $* returned status ${status}.  Aborting."
+    fi
+}
+
+###################################################################################################
+# Setup
+###################################################################################################
+
+if [ ! -f makefile ] ; then
+    w_die "$0 should be run from the top of the source tree"
+fi
+
+temp="$(mktemp -d)"
+
+trap 'rm -fr "$temp"' EXIT
+
+###################################################################################################
+# Test functions
+###################################################################################################
+
+# tests using shellcheck
+test_shellcheck() {
+    shellcheck="$(command -v shellcheck)"
+
+    if [ -z "$shellcheck" ]; then
+        apt-get -y install shellcheck
+    fi
+
+    echo "======================== Begin shellcheck version info ==========================="
+    "${shellcheck}" --version > /dev/null || w_die "shellcheck must be installed!"
+    "${shellcheck}" --version
+    echo "======================== End shellcheck version info ==========================="
+
+    echo "Checking ${shellscript} with shellcheck:"
+    # FIXME: just the errors, for now:
+    # FIXME: the SC2068 errors are likely legit (or should be explicitly silenced), but they count as errors
+    # so ignoring for now
+    w_try "${shellcheck}" -S error -e SC2068 "${shellscript}"
+}
+
+###################################################################################################
+
+# Test wrapper
+main() {
+    # Use git ls-files if available, this prevents 'finding' scripts that aren't checked into git.
+    # E.g., if patching foo fails, then foo.orig would also be 'found'.
+    # The find fallback is for non git users, e.g., distros packaging shellcheck or end users
+    # running shell-checks from a tarball download.
+    if [ -d .git ] ; then
+        files_to_check="$(git ls-files | xargs file | grep -e 'shell script' | cut -d : -f1)"
+    else
+        files_to_check="$(find . -type f -exec file {} \; | grep -e 'shell script' | cut -d : -f1)"
+    fi
+
+    # Generic shellscript checks:
+    for shellscript in ${files_to_check}; do
+        test_shellcheck
+    done
+}
+
+main
+
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
