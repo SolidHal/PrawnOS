@@ -1,0 +1,12 @@
+name: shellcheck
+
+on: [push, pull_request]
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v2
+      - name: run shellcheck
+        run: ./tests/shellcheck
