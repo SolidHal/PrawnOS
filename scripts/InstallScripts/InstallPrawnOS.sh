@@ -66,9 +66,9 @@ is_device_veyron() {
 # returns the full path to the emmc device, in the form /dev/mmcblk#
 get_emmc_devname() {
     local devname=$(find /dev -name "mmcblk*boot0" | sed "s/boot0//")
-    if [ -z "$devname" ]
-    then
-        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
+    if [ -z "$devname" ]; then
+        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"
+        exit 1
     fi
     echo $devname
 }
