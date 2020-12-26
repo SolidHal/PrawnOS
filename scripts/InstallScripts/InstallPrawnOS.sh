@@ -401,7 +401,7 @@ setup_users() {
         CHROOT_PREFIX=""
 
     else
-        CHROOT_PREFIX=chroot_wrapper "$TARGET_MOUNT"
+        CHROOT_PREFIX="chroot_wrapper $TARGET_MOUNT"
     fi
 
     # Have the user set a root password
