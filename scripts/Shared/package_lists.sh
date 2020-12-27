@@ -18,16 +18,7 @@
 # ======================================== Package Lists =========================================
 # ================================ KEEP THESE LISTS ALPHABETIZED! ================================
 
-
-debootstrap_debs_install=(
-    build-essential
-    ca-certificates
-    gnupg
-    init
-    locales
-    openssl
-)
-
+# packages shared by CLI/GUI installs:
 base_debs_install=(
     alsa-utils
     apt-utils
@@ -73,7 +64,114 @@ base_debs_install=(
     xz-utils
 )
 
-# packages installed for GUI installs (gnome/lxqt/xfce):
+# packages installed by debootstrap within chroot during build process:
+debootstrap_debs_install=(
+    build-essential
+    ca-certificates
+    gnupg
+    init
+    locales
+    openssl
+)
+
+# Packages installed for gnome desktop
+gnome_debs_download=(
+    dbus-user-session
+    dconf-cli
+    dconf-editor
+    eog
+    evince
+    file-roller
+    fonts-cantarell
+    gdm3
+    gedit
+    gnome-bluetooth
+    gnome-clocks
+    gnome-disk-utility
+    gnome-logs
+    gnome-session
+    gnome-shell-extensions
+    gnome-system-monitor
+    gnome-terminal
+    gnome-tweaks
+    materia-gtk-theme
+    nautilus
+    nautilus-admin
+    network-manager-gnome
+    network-manager-openvpn
+    network-manager-openvpn-gnome
+    pavucontrol-qt
+    seahorse
+)
+
+lxqt_debs_download=(
+    lightdm
+    lxqt
+    mousepad
+    network-manager-gnome
+    network-manager-openvpn
+    network-manager-openvpn-gnome
+    pavucontrol-qt
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on arm64 devices
+prawnos_arm64_debs_prebuilt_download=(
+    prawnos-gru-config
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on armhf devices
+prawnos_armhf_debs_prebuilt_download=(
+    prawnos-veyron-config
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# and choosing gnome
+prawnos_gnome_debs_prebuilt_download=(
+    prawnos-gnome-config
+)
+
+# these are only required when the debian mesa version is too old for us
+prawnos_mesa_prebuilt_install=(
+    libgbm1=20.2.1-100
+    libgl1-mesa-dri=20.2.1-100
+    libegl1-mesa=20.2.1-100
+    libegl-mesa0=20.2.1-100
+    libglapi-mesa=20.2.1-100
+    libgl1-mesa-glx=20.2.1-100
+    libgles2-mesa=20.2.1-100
+    libglx-mesa0=20.2.1-100
+    libosmesa6=20.2.1-100
+    libwayland-egl1-mesa=20.2.1-100
+    mesa-opencl-icd=20.2.1-100
+    mesa-va-drivers=20.2.1-100
+    mesa-vdpau-drivers=20.2.1-100
+    mesa-vulkan-drivers=20.2.1-100
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+prawnos_base_debs_prebuilt_download=(
+    prawnos-general-config
+    lagrange-gemini-browser
+)
+
+# packages built by prawnos, to be installed at build time
+prawnos_base_debs_prebuilt_install=(
+    font-source-code-pro
+    flashmap
+    mosys
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# and choosing xfce
+prawnos_xfce_debs_prebuilt_download=(
+    xsecurelock
+    prawnos-xfce-config
+    libinput-gestures
+)
+
+# packages installed for all GUI installs (gnome/lxqt/xfce):
 # FIXME: blueman can be moved to xfce only once gnome-bluetooth in settings works properly
 shared_desktop_debs_download=(
     acpi-support
@@ -126,102 +224,6 @@ xfce_debs_download=(
     xfce4-goodies
     xfce4-power-manager
     xfce4-terminal
-)
-
-lxqt_debs_download=(
-    lightdm
-    lxqt
-    mousepad
-    network-manager-gnome
-    network-manager-openvpn
-    network-manager-openvpn-gnome
-    pavucontrol-qt
-)
-
-gnome_debs_download=(
-    dbus-user-session
-    dconf-cli
-    dconf-editor
-    eog
-    evince
-    file-roller
-    fonts-cantarell
-    gdm3
-    gedit
-    gnome-bluetooth
-    gnome-clocks
-    gnome-disk-utility
-    gnome-logs
-    gnome-session
-    gnome-shell-extensions
-    gnome-system-monitor
-    gnome-terminal
-    gnome-tweaks
-    materia-gtk-theme
-    nautilus
-    nautilus-admin
-    network-manager-gnome
-    network-manager-openvpn
-    network-manager-openvpn-gnome
-    pavucontrol-qt
-    seahorse
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-# and choosing xfce
-prawnos_xfce_debs_prebuilt_download=(
-    xsecurelock
-    prawnos-xfce-config
-    libinput-gestures
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-# and choosing gnome
-prawnos_gnome_debs_prebuilt_download=(
-    prawnos-gnome-config
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-prawnos_base_debs_prebuilt_download=(
-    prawnos-general-config
-    lagrange-gemini-browser
-)
-
-# packages built by prawnos, to be installed at build time
-prawnos_base_debs_prebuilt_install=(
-    font-source-code-pro
-    flashmap
-    mosys
-)
-
-# these are only required when the debian mesa version is too old for us
-prawnos_mesa_prebuilt_install=(
-    libgbm1=20.2.1-100
-    libgl1-mesa-dri=20.2.1-100
-    libegl1-mesa=20.2.1-100
-    libegl-mesa0=20.2.1-100
-    libglapi-mesa=20.2.1-100
-    libgl1-mesa-glx=20.2.1-100
-    libgles2-mesa=20.2.1-100
-    libglx-mesa0=20.2.1-100
-    libosmesa6=20.2.1-100
-    libwayland-egl1-mesa=20.2.1-100
-    mesa-opencl-icd=20.2.1-100
-    mesa-va-drivers=20.2.1-100
-    mesa-vdpau-drivers=20.2.1-100
-    mesa-vulkan-drivers=20.2.1-100
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-# on armhf devices
-prawnos_armhf_debs_prebuilt_download=(
-    prawnos-veyron-config
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-# on arm64 devices
-prawnos_arm64_debs_prebuilt_download=(
-    prawnos-gru-config
 )
 
 # ====================================== END Package Lists =======================================
