@@ -1,5 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
 
+set -e
 
 # This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
