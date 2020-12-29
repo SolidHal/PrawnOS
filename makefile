@@ -80,28 +80,30 @@ clean_all: clean_most clean_ath9k clean_pbuilder
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
 .PHONY: kernel_install
-kernel_install: #Targets an already built .img and swaps the old kernel with the newly compiled kernel
-#TODO: uncomment when we have an arm64 bit kernel image
-# $(MAKE) kernel_image_package
-	$(PRAWNOS_IMAGE_SCRIPTS_INSTALL_KERNEL) $(KVER) $(PRAWNOS_IMAGE) $(TARGET) $(PRAWNOS_BUILD) prawnos-linux-image-$(TARGET)*.deb
+kernel_install: #Targets the PrawnOS image and installs a kernel
+	$(MAKE) kernel_image_package_install
 
 .PHONY: kernel_update
 kernel_update:
 	$(MAKE) clean_image
 	$(MAKE) clean_kernel
 	$(MAKE) initramfs
-	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
-	$(MAKE) kernel_install
+	$(MAKE) kernel_image_package_install
 
 .PHONY: image
 image:
 	$(MAKE) clean_image
 	$(MAKE) filesystem
 	$(MAKE) initramfs
-	$(MAKE) kernel
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
-	$(MAKE) kernel_install
+	$(MAKE) kernel_image_package_install
+
+
+# $PDEV should be passed like PDEV=/dev/sdb
+.PHONY: write_image
+write_image: $(PRAWNOS_IMAGE)
+	$(PRAWNOS_IMAGE_SCRIPTS_WRITE_IMAGE) $(PRAWNOS_IMAGE) $(PDEV)
 
 .PHONE: release
 release: $(PRAWNOS_IMAGE_GIT_GZ)
@@ -122,7 +124,7 @@ install_dependencies:
 	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
     bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
     debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
-    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev make \
     parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 
 .PHONY: install_dependencies_yes

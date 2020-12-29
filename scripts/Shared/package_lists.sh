@@ -54,15 +54,18 @@ base_debs_install=(
     libinput-tools
     libnss-systemd
     libpam-cap nftables
+    lshw
     nano
     net-tools
     netcat-openbsd
     network-manager
     parted
+    pciutils
     psmisc
     rsync
     traceroute
     udev
+    usbutils
     uuid-runtime
     vim
     vboot-utils
@@ -70,11 +73,13 @@ base_debs_install=(
     xz-utils
 )
 
+# blueman can be moved to xfce only once gnome-bluetooth in settings works properly
 base_debs_download=(
     acpi-support
     alsa-utils
     anacron
     avahi-daemon
+    blueman
     bluetooth
     crda
     dbus-user-session
@@ -83,9 +88,16 @@ base_debs_download=(
     eject
     firefox-esr
     iw
+    libegl-mesa0
+    libegl1-mesa
+    libgl1-mesa-dri
+    libglapi-mesa
+    libglu1-mesa
+    libglx-mesa0
     libnss-mdns
     librsvg2-common
     libutempter0
+    libwayland-egl1-mesa
     sudo
     sysfsutils
     tasksel
@@ -93,15 +105,6 @@ base_debs_download=(
     xdg-utils
     xorg
     xserver-xorg-input-libinput
-)
-
-mesa_debs_download=(
-    libegl-mesa0
-    libegl1-mesa
-    libgl1-mesa-dri
-    libglapi-mesa
-    libglu1-mesa
-    libglx-mesa0
 )
 
 xfce_debs_download=(
@@ -144,13 +147,12 @@ gnome_debs_download=(
     fonts-cantarell
     gdm3
     gedit
+    gnome-bluetooth
     gnome-clocks
     gnome-disk-utility
     gnome-logs
     gnome-session
     gnome-shell-extensions
-    gnome-software
-    gnome-software-plugin-flatpak
     gnome-system-monitor
     gnome-terminal
     gnome-tweaks
@@ -167,18 +169,32 @@ gnome_debs_download=(
 # packages built by prawnos, to be installed when running InstallPrawnOS
 # and choosing xfce
 prawnos_xfce_debs_prebuilt_download=(
-    font-source-code-pro
     xsecurelock
+    prawnos-xfce-config
+    libinput-gestures
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# and choosing gnome
+prawnos_gnome_debs_prebuilt_download=(
+    prawnos-gnome-config
 )
 
 # packages built by prawnos, to be installed when running InstallPrawnOS
 prawnos_base_debs_prebuilt_download=(
+    prawnos-general-config
+    lagrange-gemini-browser
 )
 
 # packages built by prawnos, to be installed at build time
 prawnos_base_debs_prebuilt_install=(
+    font-source-code-pro
     flashmap
     mosys
+)
+
+# these are only required when the debian mesa version is too old for us
+prawnos_mesa_prebuilt_install=(
     libgbm1=20.2.1-100
     libgl1-mesa-dri=20.2.1-100
     libegl1-mesa=20.2.1-100
@@ -193,6 +209,18 @@ prawnos_base_debs_prebuilt_install=(
     mesa-va-drivers=20.2.1-100
     mesa-vdpau-drivers=20.2.1-100
     mesa-vulkan-drivers=20.2.1-100
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on armhf devices
+prawnos_armhf_debs_prebuilt_download=(
+    prawnos-veyron-config
+)
+
+# packages built by prawnos, to be installed when running InstallPrawnOS
+# on arm64 devices
+prawnos_arm64_debs_prebuilt_download=(
+    prawnos-gru-config
 )
 
 # ====================================== END Package Lists =======================================

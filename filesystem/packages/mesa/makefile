@@ -10,8 +10,18 @@ PACKAGE_NAME_DEB := $(PACKAGE_NAME).phonydeb
 
 PACKAGE_LOCAL_BUILD_DEPS :=
 
-default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
+## Disable mesa for now since the upstream debian is currently newer, and we don't need anything even newer
 
+default: skip
+# default: $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB)
+
+install: install_skip
+# install: install_real
+
+
+.PHONY: skip
+skip:
+	echo Skipping mesa build since upstream debian is newer
 
 $(PRAWNOS_LOCAL_APT_REPO)/$(PACKAGE_NAME_DEB): $(PRAWNOS_BUILD_DIRS) $(PACKAGE_NAME_DEB)
 	cp libgbm1_*_$(TARGET).deb $(PRAWNOS_LOCAL_APT_REPO)
@@ -47,7 +57,12 @@ clean:
 	rm -rf *.debian.tar.xz
 	rm -rf *.buildinfo
 
-install:
+.PHONY: install_skip
+install_skip:
+	echo Skipping mesa install since upstream debian is newer
+
+.PHONY: install_real
+install_real:
 	cp libgbm1_*_$(TARGET).deb $(INSTALL_TARGET)
 	cp libgl1-mesa-dri_*_$(TARGET).deb $(INSTALL_TARGET)
 	cp libegl1-mesa_*_$(TARGET).deb $(INSTALL_TARGET)

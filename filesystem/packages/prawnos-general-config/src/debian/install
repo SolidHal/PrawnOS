@@ -1,0 +1,8 @@
+#files we must divert and symlink in the postinst/prerm
+wallpapers/default /etc/prawnos/prawnos-general-config/usr/share/images/desktop-base/
+sysfs.conf /etc/prawnos/prawnos-general-config/etc/
+
+# files we can just install
+inputrc/.inputrc /etc/skel/
+firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
+firefox-esr/prawn.cfg /usr/lib/firefox-esr/

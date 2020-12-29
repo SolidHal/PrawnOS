@@ -1,0 +1,8 @@
+#files we must divert and symlink in the postinst/prerm
+
+# remove the logo on gdm
+greeter.dconf-defaults /etc/prawnos/prawnos-gnome-config/etc/gdm3/greeter.dconf-defaults
+
+# files we can just install
+# these ones required a schema recompile in postinst
+settings-schema/* /usr/share/glib-2.0/schemas/

@@ -85,7 +85,6 @@ outmnt=$(mktemp -d -p "$(pwd)")
 
 outdev=$(losetup -f)
 
-install_resources=$PRAWNOS_FILESYSTEM_RESOURCES/InstallResources
 build_resources=$PRAWNOS_FILESYSTEM_RESOURCES
 build_resources_apt=$build_resources/apt
 
@@ -179,7 +178,7 @@ create_image() {
 # create a 2.5GB image with the Chrome OS partition layout
 # Bumped to keep both Gnome and Xfce
 #TODO: change back to 40 (2GB)
-create_image $BASE $outdev 50M 50 $outmnt
+create_image $BASE $outdev 50M 60 $outmnt
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
@@ -199,18 +198,7 @@ qemu-debootstrap --arch $TARGET_ARCH $DEBIAN_SUITE \
                  --cache-dir=$PRAWNOS_BUILD/debootstrap-apt-cache/
 
 chroot $outmnt passwd -d root
-
-#Place the config files and installer script and give them the proper permissions
 echo -n PrawnOS > $outmnt/etc/hostname
-cp -R $install_resources/ $outmnt/InstallResources/
-# and the icons for the lockscreen and app menu
-mkdir $outmnt/InstallResources/icons/
-cp $build_resources/logo/icons/icon-small.png $outmnt/InstallResources/icons/
-cp $build_resources/logo/icons/ascii/* $outmnt/InstallResources/icons/
-cp scripts/InstallScripts/* $outmnt/InstallResources/
-cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $outmnt/InstallResources/
-cp scripts/InstallScripts/InstallPrawnOS.sh $outmnt/
-chmod +x $outmnt/*.sh
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -240,9 +228,26 @@ then
     cp $build_resources_apt/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
+
+install_dir=$outmnt/etc/prawnos/install
+install_dir_direct=/etc/prawnos/install
+#Add the items required for installation
+mkdir -p $install_dir
+mkdir -p $install_dir/resources
+mkdir -p $install_dir/scripts
+
+## installation resources
+cp $build_resources/logo/icons/ascii/* $install_dir/resources/
+cp $build_resources/partmaps/* $install_dir/resources/
+cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources/
+
+## installation scripts
+cp scripts/InstallScripts/* $install_dir/scripts/
+cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $install_dir/scripts/
+ln -s $install_dir_direct/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
+
 #Bring in the deb.prawnos.com gpg keyring
-cp $build_resources_apt/deb.prawnos.com.gpg.key $outmnt/InstallResources/
-chroot $outmnt apt-key add /InstallResources/deb.prawnos.com.gpg.key
+chroot $outmnt apt-key add /etc/prawnos/install/resources/deb.prawnos.com.gpg.key
 chroot $outmnt apt update
 
 #Setup the locale
@@ -270,14 +275,14 @@ chmod 644 $outmnt/etc/fstab
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
-#Download the shared packages to be installed by Install.sh:
+#Download the shared packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
-## DEs
-#Download the xfce packages to be installed by Install.sh:
+#DEs
+#Download the xfce packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
-#Download the gnome packages to be installed by Install.sh:
+#Download the gnome packages to be installed by InstallPackages.sh:
 apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
 
@@ -294,10 +299,25 @@ cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTAL
 chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
 chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
 chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
+chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
+if [ $TARGET_ARCH = "armhf" ]
+then
+    chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
+fi
 
-## GPU support
-#download mesa packages
-apt_install $PRAWNOS_BUILD $outmnt false ${mesa_debs_download[@]}
+if [ $TARGET_ARCH = "arm64" ]
+then
+    chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
+fi
+
+## PrawnOS mesa packages
+# PrawnOS only has specific mesa packages when the debian upstream versions are too old.
+# commented out until we need it again
+
+# chroot $outmnt apt install -y -d ${prawnos_mesa_prebuilt_install[@]}
+
+#Setup console font size
+cp -f $build_resources/console-font.sh $outmnt/etc/profile.d/console-font.sh
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests

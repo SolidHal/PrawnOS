@@ -1,0 +1,80 @@
+#!/bin/bash
+set -e
+
+cleanup() {
+    set +e
+
+    cp -a /etc/prawnos/xkb/backup/* /usr/share/X11/xkb/rules/
+    echo "PATCHING XKB FAILED DURING INSTALLATION, PATCHES LIKELY NO LONGER APPLY. RESTORED FILES."
+    exit 1
+}
+
+# files to divert and link are installed to the following directory:
+# $DIR/$PKG/$TARGET_PATH/$FILE
+# where:
+# DIR is usually /etc/prawnos
+# PKG is the name of the package
+# TARGET_PATH is usually file specific
+# FILE is the actual filename to divert/link
+divert_and_link() {
+    DIR=$1
+    PKG=$2
+    TARGET_PATH=$3
+    FILE=$4
+
+    dpkg-divert --add --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+    mkdir -p $TARGET_PATH
+    [ \! -e $TARGET_PATH/$FILE -o -L $TARGET_PATH/$FILE ] && ln -sf $DIR/${PKG}/$TARGET_PATH/$FILE $TARGET_PATH/$FILE
+}
+
+PKG=prawnos-xfce-config
+DIR=/etc/prawnos
+
+
+# divert and symlink our files to their final locations. This prevents other packages from overwriting our changes. 
+if [ "$1" = configure ] ; then
+
+    TARGET_PATH=/etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+    for f in xfce4-keyboard-shortcuts.xml xfce4-power-manager.xml xfce4-screensaver.xml xfce4-session.xml xfwm4.xml xsettings.xml
+    do
+        divert_and_link $DIR $PKG $TARGET_PATH $f
+    done
+
+    TARGET_PATH=/etc/xdg/xfce4/panel
+    f=default.xml
+    divert_and_link $DIR $PKG $TARGET_PATH $f
+
+    TARGET_PATH=/etc/lightdm
+    f=lightdm-gtk-greeter.conf
+    divert_and_link $DIR $PKG $TARGET_PATH $f
+
+    TARGET_PATH=/etc
+    f=libinput-gestures.conf
+    divert_and_link $DIR $PKG $TARGET_PATH $f
+
+fi
+
+# patch xkb if it isn't already
+PATCHED=$DIR/$PKG/xkb/.patched
+trap cleanup INT TERM EXIT
+if [ ! -f "$PATCHED" ]; then
+    # if the xkb patches don't apply, this is likely because newer xkb files are available and the patches need to be updated
+    # lets leave things in a reasonable state when this happens
+
+    rm -rf $DIR/$PKG/xkb/backup
+    mkdir -p $DIR/$PKG/xkb/backup
+    cp -a /usr/share/X11/xkb/rules/* $DIR/$PKG/xkb/backup/
+
+    patch /usr/share/X11/xkb/rules/base < $DIR/$PKG/xkb/patches/base.patch
+    patch /usr/share/X11/xkb/rules/base.lst < $DIR/$PKG/xkb/patches/base.lst.patch
+    patch /usr/share/X11/xkb/rules/base.xml < $DIR/$PKG/xkb/patches/base.xml.patch
+    patch /usr/share/X11/xkb/rules/evdev < $DIR/$PKG/xkb/patches/evdev.patch
+    patch /usr/share/X11/xkb/rules/evdev.lst < $DIR/$PKG/xkb/patches/evdev.lst.patch
+    patch /usr/share/X11/xkb/rules/evdev.xml < $DIR/$PKG/xkb/patches/evdev.xml.patch
+    patch /usr/share/X11/xkb/symbols/gb < $DIR/$PKG/xkb/patches/gb.patch
+    patch /usr/share/X11/xkb/symbols/us < $DIR/$PKG/xkb/patches/us.patch
+
+    touch $PATCHED
+fi
+
+trap - INT TERM EXIT

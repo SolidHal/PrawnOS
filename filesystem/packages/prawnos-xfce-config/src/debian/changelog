@@ -1,0 +1,11 @@
+prawnos-xfce-config (1.1) testing; urgency=medium
+
+  * Fix /etc/keyboard install location
+
+ -- Hal Emmerich <hal@halemmerich.com>  Tue, 15 Dec 2020 20:12:07 -0500
+
+prawnos-xfce-config (1.0) testing; urgency=medium
+
+  * Initial release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Sat, 28 Nov 2020 15:12:07 -0500

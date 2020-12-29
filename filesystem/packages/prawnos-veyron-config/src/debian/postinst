@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+
+# files to divert and link are installed to the following directory:
+# $DIR/$PKG/$TARGET_PATH/$FILE
+# where:
+# DIR is usually /etc/prawnos
+# PKG is the name of the package
+# TARGET_PATH is usually file specific
+# FILE is the actual filename to divert/link
+divert_and_link() {
+    DIR=$1
+    PKG=$2
+    TARGET_PATH=$3
+    FILE=$4
+
+    dpkg-divert --add --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+    mkdir -p $TARGET_PATH
+    [ \! -e $TARGET_PATH/$FILE -o -L $TARGET_PATH/$FILE ] && ln -sf $DIR/${PKG}/$TARGET_PATH/$FILE $TARGET_PATH/$FILE
+}
+
+PKG=prawnos-veyron-config
+DIR=/etc/prawnos
+
+# divert and symlink our files to their final locations. This prevents other packages from overwriting our changes. 
+if [ "$1" = configure ] ; then
+    TARGET_PATH=/etc/pulse
+    f=default.pa
+    divert_and_link $DIR $PKG $TARGET_PATH $f
+
+
+    TARGET_PATH=/etc/pulse
+    f=daemon.conf
+    divert_and_link $DIR $PKG $TARGET_PATH $f
+
+fi

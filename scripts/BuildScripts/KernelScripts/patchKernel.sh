@@ -41,8 +41,9 @@ if [ "$TARGET" == "$ARCH_ARMHF" ]; then
     for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
     for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
-    for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
-    # for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
+    #echo skip for now
+    #for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+    for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
     # for i in "$PATCHES"/cros-drm/*.patch; do echo $i; patch -p1 < $i; done
     # for i in "$PATCHES"/alarm/*.patch; do echo $i; patch -p1 < $i; done
 else

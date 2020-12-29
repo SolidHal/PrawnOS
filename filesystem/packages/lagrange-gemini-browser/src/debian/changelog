@@ -1,0 +1,21 @@
+lagrange-gemini-browser (0.12.0-1) testing; urgency=medium
+
+  * Subscribe to headings (e.g., Weiph/pikkulogs).
+  * New sidebar on the right; dual wield on large screens.
+  * MIME hooks: preprocess Gemini responses on client-side.
+  * Prominent TLS certificate warning.
+  * Bug fixes and smaller enhancements.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 04 Dec 2020 19:03:09 -0500
+
+lagrange-gemini-browser (0.11.0-2) testing; urgency=medium
+
+  * fix install path
+
+ -- Hal Emmerich <hal@halemmerich.com>  Fri, 04 Dec 2020 17:03:09 -0500
+
+lagrange-gemini-browser (0.11.0-1) testing; urgency=medium
+
+  * initial release
+
+ -- Hal Emmerich <hal@halemmerich.com>  Thu, 03 Dec 2020 17:03:09 -0500

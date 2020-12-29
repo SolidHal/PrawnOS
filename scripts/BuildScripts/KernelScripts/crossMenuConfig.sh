@@ -37,10 +37,16 @@ then
     echo "No TARGET supplied"
     exit 1
 fi
+if [ -z "$4" ]
+then
+    echo "No kernel config supplied"
+    exit 1
+fi
 
 RESOURCES=$1
 BUILD_DIR=$2
 TARGET=$3
+CONFIG=$4
 
 ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
@@ -58,6 +64,6 @@ else
     echo "no valid target arch specified"
 fi
 
-cp $RESOURCES/config .config
+cp $CONFIG .config
 make menuconfig ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILER .config
-cp .config $RESOURCES/config
+cp .config $CONFIG

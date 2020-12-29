@@ -1,0 +1,30 @@
+#since we have not changed upstream, and this is packaged don't keep the source files
+src/*
+!src/debian
+
+#only include specific /debian files
+src/debian/*
+!src/debian/compat
+!src/debian/changelog
+!src/debian/control
+!src/debian/rules
+!src/debian/copyright
+!src/debian/docs
+!src/debian/watch
+!src/debian/source
+!src/debian/source/format
+
+#generic packaging artifacts
+/debhelper-build-stamp
+/.debhelper
+/*.deb
+/*.build
+/*.buildinfo
+/*.changes
+/*.log
+/*.substvars
+/*.diff.gz
+/*.upload
+/*.debian.tar.xz
+/*.tar.gz
+/*.dsc

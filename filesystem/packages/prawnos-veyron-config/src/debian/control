@@ -1,0 +1,13 @@
+Source: prawnos-veyron-config
+Section: misc
+Priority: standard
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.3.0
+Homepage: https://prawnos.com
+
+Package: prawnos-veyron-config
+Architecture: all
+Depends: ${misc:Depends}
+Description: veyron (c100, c201) specific configuration files for PrawnOS

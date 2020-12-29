@@ -1,0 +1,84 @@
+#!/bin/bash
+set -e
+
+
+cleanup() {
+    set +e
+
+    cp -a /etc/prawnos/xkb/backup/* /usr/share/X11/xkb/rules/
+    echo "reverting patches during uninstall failed. Likely the xkb files were updated by a new xkb package. Reverted any changes made by this script."
+    rm $PATCHED
+    exit 0
+}
+
+
+# files to un-divert and un-link are installed to the following directory:
+# $DIR/$PKG/$TARGET_PATH/$FILE
+# where:
+# DIR is usually /etc/prawnos
+# PKG is the name of the package
+# TARGET_PATH is usually file specific
+# FILE is the actual filename to un-divert/un-link
+
+undivert_and_unlink() {
+    DIR=$1
+    PKG=$2
+    TARGET_PATH=$3
+    FILE=$4
+
+    [ -L $TARGET_PATH/$FILE ] && rm $TARGET_PATH/$FILE
+    dpkg-divert --remove --package ${PKG} --rename --divert $TARGET_PATH/$FILE.stock $TARGET_PATH/$FILE
+}
+
+PKG=prawnos-xfce-config
+DIR=/etc/prawnos
+
+# un-divert and un-symlink our files to their final locations. This undoes what postinst did
+if [ "$1" = remove ] ; then
+    TARGET_PATH=/etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+    for f in xfce4-keyboard-shortcuts.xml xfce4-power-manager.xml xfce4-screensaver.xml xfce4-session.xml xfwm4.xml xsettings.xml
+    do
+        undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+    done
+
+    TARGET_PATH=/etc/xdg/xfce4/panel
+    f=default.xml
+    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+
+    TARGET_PATH=/etc/lightdm
+    f=lightdm-gtk-greeter.conf
+    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+
+    TARGET_PATH=/etc
+    f=libinput-gestures.conf
+    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
+fi
+
+
+
+
+# revert xkb patches if applied
+PATCHED=$DIR/$PKG/xkb/.patched
+trap cleanup INT TERM EXIT
+if [ -f "$PATCHED" ]; then
+# if the xkb files get updated by a new xkb package while this package is still installed, we will fail to reverse
+# these patches. In this case, there are actually no patches to remove so we should just restore what was there.
+
+    rm -rf $DIR/$PKG/xkb/backup
+    mkdir -p $DIR/$PKG/xkb/backup
+    cp -a /usr/share/X11/xkb/rules/* $DIR/$PKG/xkb/backup/
+
+    patch -R /usr/share/X11/xkb/rules/base < $DIR/$PKG/xkb/patches/base.patch
+    patch -R  /usr/share/X11/xkb/rules/base.lst < $DIR/$PKG/xkb/patches/base.lst.patch
+    patch -R /usr/share/X11/xkb/rules/base.xml < $DIR/$PKG/xkb/patches/base.xml.patch
+    patch -R /usr/share/X11/xkb/rules/evdev < $DIR/$PKG/xkb/patches/evdev.patch
+    patch -R /usr/share/X11/xkb/rules/evdev.lst < $DIR/$PKG/xkb/patches/evdev.lst.patch
+    patch -R /usr/share/X11/xkb/rules/evdev.xml < $DIR/$PKG/xkb/patches/evdev.xml.patch
+    patch -R /usr/share/X11/xkb/symbols/gb < $DIR/$PKG/xkb/patches/gb.patch
+    patch -R /usr/share/X11/xkb/symbols/us < $DIR/$PKG/xkb/patches/us.patch
+
+    rm -rf $DIR/$PKG/xkb/backup
+    rm $PATCHED
+fi
+
+trap - INT TERM EXIT

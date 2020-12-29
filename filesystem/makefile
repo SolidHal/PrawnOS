@@ -16,11 +16,17 @@ PACKAGES_BUILT := $(PRAWNOS_LOCAL_APT_REPO)/.packages_built
 				pbuilder_update \
 				filesystem_packages \
 				filesystem_packages_clean \
-				filesystem_packages_install
+				filesystem_packages_install \
+				filesystem_apt_cache_clean
 
 ### Filesystem Image
 
 filesystem: $(PRAWNOS_IMAGE_BASE)
+
+
+filesystem_apt_cache_clean:
+	rm $(PRAWNOS_BUILD_CHROOT_APT_CACHE)/*
+	mkdir -p $(PRAWNOS_BUILD_CHROOT_APT_CACHE)
 
 ### Packages
 

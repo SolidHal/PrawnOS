@@ -6,14 +6,15 @@ PrawnOS
 </h1>
 
 
-#### A build system for making blobless Debian and mainline Linux kernel with support for dmcrypt/LUKS root partition encryption graphics acceleration using panfrost
+#### A build system for making blobless Debian and mainline Linux kernel with support for libre ath9k wireless, dmcrypt/LUKS root partition encryption, and graphics acceleration using panfrost
 
 Supports the following Devices:
 * armhf cpu:
-    * Asus C201 (veyron-speedy)
+    * Asus C201 (C201P) (C201PA) (veyron-speedy)
     * Asus C100 (veyron-minnie)
+    * _BETA_ Asus Chromebit CS10 (veyron-mickey)
 * arm64 cpu:
-    * _BETA_ Samsung Chromebook Plus V1 (gru-kevin)
+    * _BETA_ Samsung Chromebook Plus V1 (XE513C24) (gru-kevin)
     * _ALPHA_ Asus C101p (gru-bob)
 
 Build Debian filesystem with:
@@ -67,7 +68,7 @@ These packages are required:
         apt install --no-install-recommends --no-install-suggests \
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
         debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
-        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
+        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev make \
         parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev \
         vboot-kernel-utils wget
         apt install -t buster-backports qemu-user-static
@@ -204,8 +205,7 @@ WARNING! THIS WILL ERASE YOUR INTERNAL EMMC STORAGE (your Chrome OS install or o
 
 Run:
 ```
-cd /
-./InstallPrawnOS.sh
+InstallPrawnOS
 ```
 Choose `Install` and follow the prompts. This will ask what device you want to install to and setup root encryption with a custom initramfs and dmcrypt/LUKS if you want.
 If you are curious how the initramfs, and root partition encryption work on PrawnOS check out the Initramfs and Encryption section in [DOCUMENTATION.md](DOCUMENTATION.md)
@@ -229,8 +229,7 @@ If you are running stock coreboot and haven't flashed Libreboot, you will first 
 At the prompt, login as root. The password is blank.
 Run:
 ```
-cd /
-./InstallPrawnOS.sh
+InstallPrawnOS
 ```
 Choose `Expand` at the prompt
 
@@ -267,13 +266,21 @@ or they can be built individually by going to the specific package and running `
 
 once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
 
-- kernel packages are located under `filesystem/packages`
+- kernel packages are located under `kernel/packages`
 the kernel image package can be built by running `make` in the `prawnos-linux-image-armhf` directory
 once the `.deb` is built, move it to your PrawnOS device and run `sudo apt install ./<package-name>.deb`
 
 ### use the PrawnOS APT repo to update the PrawnOS packages automatically
 
 `sudo apt upgrade` 
+
+## Upgrade PrawnOS kernel using specific vmlinux.kpart
+
+The kernel flashing script can be found at `/etc/prawnos/kernel/FlashKernelPartition.sh`
+Easily flash a specific kernel by running it like this:
+```
+/etc/prawnos/kernel/FlashKernelPartition.sh vmlinux.kpart
+```
 
 ## Documentation
 
@@ -296,6 +303,8 @@ To begin with:
 `make image` builds the initramfs image, builds the kernel, builds the filesystem if a -BASE image doesn't exist, and combines the two into a new PrawnOS.img using kernel_install
 
 `make kernel_install` Installs a newly built kernel into a previously built PrawnOS.img-BASE.
+
+`make write_image PDEV=/dev/sdX` Does everything `make image` does but then also checks `/dev/sdX` is available and writes the image to it using a sane blocksize and runs sync
 
 
 You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Bullseye`.  For example, to use Debian sid, you can build with `sudo PRAWNOS_SUITE=sid make image`
@@ -348,7 +357,8 @@ sudo /InstallScripts/buildCrossystem.sh
 ### Build the WiFi dongle into the laptop
 
 Sick of having a USB dongle on the outside of your machine for wi-fi? Want to be able to use two USB devices at once without a hub? 
-Check out the instructions here: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
+Check out the instructions here for the c201: https://github.com/SolidHal/AsusC201-usb-wifi-from-webcam
+And here for the samsung chromebook plus v1: https://github.com/SolidHal/Samsung_Chromebook_plus_v1_wifi_from_webcam
 Warning: decent soldering skills required
 
 ## Troubleshooting

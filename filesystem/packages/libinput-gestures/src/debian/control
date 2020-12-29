@@ -1,0 +1,13 @@
+Source: libinput-gestures
+Section: misc
+Priority: optional
+Maintainer: Mark Blakeney
+Uploaders: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10),
+Standards-Version: 4.3.0
+Homepage: https://github.com/bulletmark/libinput-gestures
+
+Package: libinput-gestures
+Architecture: all
+Depends: ${misc:Depends}, ${shlibs:Depends}, wmctrl, xdotool, libinput-tools
+Description: gesture supprt for libinput
