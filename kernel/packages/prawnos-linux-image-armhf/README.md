@@ -11,7 +11,7 @@
 prawnos linux kernel images have 3 version numbers, each representing a different type of change. This is to keep versioning organized, and to make the debian packaging system happy. 
 
 the format is: 
-`prawnos-linus-image-armhf_<upstream_kver>-<prawnos_kver>-<debian_package_ver>`
+`prawnos-linux-image-armhf_<upstream_kver>-<prawnos_kver>-<debian_package_ver>`
 
 upstream_kver changes with a new version of the linux kernel
 prawnos_kver changes when new patches are added or a config change occurs
