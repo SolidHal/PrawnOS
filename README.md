@@ -251,7 +251,7 @@ Congratulations: you are done! Welcome to PrawnOS. You should probably change th
 If have a basic environment without xfce or lxqt you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
 ```
 nmcli device wifi list
-nmcli device wifi connect "Network_name" password "network_password"
+nmcli --ask device wifi connect "Network_name" # The --ask will prompt you for the password so it doesn't remain in your shell history 
 ```
 When that finishes, you should have access to the internet. 
 
