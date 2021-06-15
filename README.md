@@ -366,7 +366,7 @@ Warning: decent soldering skills required
 The pulse audio mixer will only run if you are logged in as a non-root account. This is an issue (feature?) of pulse audio
 
 ## Discussion, Support, and IRC
-IRC - You can find PrawnOS on the #prawnos channel on freenode
+IRC - You can find PrawnOS on the #prawnos channel on libera
 
 ## Credits and Legal Information
 
