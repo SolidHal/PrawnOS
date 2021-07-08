@@ -37,7 +37,7 @@ get_emmc_devname() {
     local devname=$(ls /dev/mmcblk* | grep -F boot0 | sed "s/boot0//")
     if [ -z "$devname" ]
     then
-        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
     fi
     echo $devname
 }
