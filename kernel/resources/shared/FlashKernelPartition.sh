@@ -42,15 +42,11 @@ get_emmc_devname() {
 }
 
 get_sd_devname() {
-    local device=$(get_device)
-    case "$device" in
-        $device_veyron_speedy) local devname=mmcblk0;;
-        $device_veyron_minnie) local devname=mmcblk0;;
-        $device_veyron_mickey) local devname="";;
-        $device_gru_kevin) local devname=mmcblk0;;
-        $device_gru_bob) local devname=mmcblk0;;
-        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
-    esac
+    local devname=$(ls /dev/mmcblk* | grep -v $(get_emmc_devname) | head -n1)
+    if [ -z "$devname" ]
+    then
+        echo "Unknown device! can't determine SD devname. Make sure the SD card is inserted. Please file an issue with the output of fdisk -l if you get this on a supported device with an SD card inserted"; exit 1;;
+    fi
     echo $devname
 }
 
