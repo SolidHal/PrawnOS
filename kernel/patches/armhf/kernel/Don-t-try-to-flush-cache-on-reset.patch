@@ -23,7 +23,7 @@ diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
 index 6f8ebd6c..186cf61b 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -2121,12 +2121,6 @@ static int mmc_reset(struct mmc_host *host)
+@@ -2206,12 +2206,6 @@ static int _mmc_hw_reset(struct mmc_host *host)
  {
  	struct mmc_card *card = host->card;
  
@@ -31,11 +31,11 @@ index 6f8ebd6c..186cf61b 100644
 -	 * In the case of recovery, we can't expect flushing the cache to work
 -	 * always, but we have a go and ignore errors.
 -	 */
--	mmc_flush_cache(host->card);
+-	_mmc_flush_cache(host);
 -
  	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
  	     mmc_can_reset(card)) {
  		/* If the card accept RST_n signal, send it. */
 -- 
-2.11.0
+2.30.2
 
