@@ -21,6 +21,13 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+#Ensure Sudo
+if [[ $EUID -ne 0 ]]; then
+    echo "Please run this script with sudo, or as root:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+
 if [ -z "$1" ]
 then
     echo "No PrawnOS image supplied"

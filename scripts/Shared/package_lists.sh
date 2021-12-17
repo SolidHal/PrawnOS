@@ -105,6 +105,7 @@ base_debs_download=(
     xdg-utils
     xorg
     xserver-xorg-input-libinput
+    xterm
 )
 
 xfce_debs_download=(

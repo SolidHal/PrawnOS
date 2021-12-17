@@ -1,3 +1,0 @@
-#Add testing
-# /etc/apt/preferences prevents this from updating the whole system
-deb http://deb.debian.org/debian/ bullseye main

@@ -40,7 +40,7 @@ get_emmc_devname() {
     local devname=$(ls /dev/mmcblk* | grep -F boot0 | sed "s/boot0//")
     if [ -z "$devname" ]
     then
-        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
+        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
     fi
     echo $devname
 }
@@ -91,6 +91,7 @@ main() {
 #Now to pick the install target: internal, sd, or usb
 #if target is usb, and boot device is usb, target is sdb
 #and whether to enable crypto
+#TODO the logic to get the emmc devname includes "/dev" while the logic for the sd dev name does not. fix this
 install() {
     echo "Pick an install target. This can be the Internal Emmc, an SD card, or a USB device"
     echo "Please ensure you have only have the booted device and the desired target device inserted."
@@ -98,7 +99,7 @@ install() {
     while true; do
         read -r -p "[I]nternal Emmc, [S]D card, or [U]SB device?: " ISU
         case $ISU in
-            [Ii]* ) TARGET=/dev/$(get_emmc_devname)p; TARGET_EMMC=true; break;;
+            [Ii]* ) TARGET=$(get_emmc_devname)p; TARGET_EMMC=true; break;;
             [Ss]* ) TARGET=/dev/$(get_sd_devname)p; TARGET_EMMC=false; break;;
             [Uu]* ) TARGET=USB; TARGET_EMMC=false; break;;
             * ) echo "Please answer I, S, or U";;
@@ -401,7 +402,7 @@ setup_users() {
         CHROOT_PREFIX=""
 
     else
-        CHROOT_PREFIX=chroot_wrapper "$TARGET_MOUNT"
+        CHROOT_PREFIX="chroot_wrapper ${TARGET_MOUNT}"
     fi
 
     # Have the user set a root password
