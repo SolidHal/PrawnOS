@@ -1,3 +1,9 @@
+prawnos-linux-image-armhf (5.15.6-1-1) testing; urgency=medium
+
+  * release 5.15.6-1-1
+
+ -- Hal Emmerich <hal@halemmerich.com>  Thu, 16 Dec 2021 22:21:21 -0800
+
 prawnos-linux-image-armhf (5.10.1-1-1) testing; urgency=medium
 
   * release 5.10.1-1-1
