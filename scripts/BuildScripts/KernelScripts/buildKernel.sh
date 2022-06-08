@@ -80,6 +80,19 @@ fi
 cp $INITRAMFS .
 cp "$KERNEL_CONFIG" .config
 cp $RESOURCES/kernel.its .
+
+# wifi firmware blob:
+# FIXME: brcm is only armhf, arm64 is unsupported for now:
+if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+    mkdir -p brcm
+    cp $RESOURCES/brcmfmac4354-sdio.bin brcm/
+    cp $RESOURCES/brcmfmac4354-sdio.txt brcm/
+    cp $RESOURCES/brcmfmac4354-sdio.txt 'brcm/brcmfmac4354-sdio.google,veyron-minnie-rev4.txt'
+else
+    echo "FIXME: no extra firmware (e.g., wifi) known for this target!"
+    sleep 10
+fi
+
 make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
 make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
