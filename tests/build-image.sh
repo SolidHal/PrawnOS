@@ -35,7 +35,13 @@ apt-get update
 ## even farther future TODO: break into tests for each package, step in build process
 
 #required basic dependencies for build system
-apt install -y make git
+apt install --no-install-recommends --no-install-suggests \
+    -y \
+    bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
+    debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-arm-none-eabi git gpg \
+    gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make parted patch \
+    pbuilder qemu-user-static sudo texinfo u-boot-tools udev vboot-kernel-utils wget
+
 
 make install_dependencies_yes TARGET=$TEST_TARGET
 
