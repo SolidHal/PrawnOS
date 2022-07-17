@@ -3,3 +3,4 @@ PrawnOS-initramfs.cpio.gz
 PrawnOS-Shiba-*
 .*.swp
 tmp.*
+__pycache__/
