@@ -36,10 +36,11 @@ get_device() {
 
 is_device_veyron() {
     local device=$(get_device)
-    list = "${device_veyron_speedy} ${device_veyron_minnie} ${device_veyron_mickey}"
+    list="${device_veyron_speedy} ${device_veyron_minnie} ${device_veyron_mickey}"
     for dev in $list
     do
         if [ "$device" == "$dev" ]
+        then
            echo "True"
         fi
     done
@@ -155,7 +156,7 @@ case "$devname" in
     mmcblk[0-9])
 	devtype="External SD card"
 	kpart=/dev/${devname}p$pnum_kernel
-	;;
+;;
     *)
 	die "FAILED to recognize booted device type $devname" 127
 esac
