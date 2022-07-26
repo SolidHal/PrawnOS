@@ -67,7 +67,7 @@ get_emmc_devname() {
     then
         echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
     fi
-    echo $devname
+    echo $(basename $devname)
 }
 
 get_sd_devname() {
