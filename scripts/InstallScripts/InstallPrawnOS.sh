@@ -355,7 +355,7 @@ expand() {
     while true; do
         read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
         case $ins in
-            [Yy]* ) $SCRIPTS/InstallPackages.sh; reboot;;
+            [Yy]* ) $SCRIPTS/InstallPackages.sh;;
             [Nn]* ) exit;;
             * ) echo "Please answer y or n";;
         esac
