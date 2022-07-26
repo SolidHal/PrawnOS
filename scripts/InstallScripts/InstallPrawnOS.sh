@@ -105,7 +105,9 @@ main() {
     echo "Expand or Install?: "
     echo "The currently booted device is ${BOOT_DEVICE_NO_P}"
     while true; do
+        dmesg -D
         read -r -p "[I]nstall or [E]xpand?" IE
+        dmesg -E
         case $IE in
             [Ii]* ) install; break;;
             [Ee]* ) expand; break;;
@@ -118,6 +120,7 @@ main() {
 #if target is usb, and boot device is usb, target is sdb
 #and whether to enable crypto
 install() {
+    dmesg -D
     echo "Pick an install target. This can be the Internal Emmc, an SD card, or a USB device"
     echo "Please ensure you have only have the booted device and the desired target device inserted."
     echo "The currently booted device is ${BOOT_DEVICE_NO_P}"
@@ -130,6 +133,7 @@ install() {
             * ) echo "Please answer I, S, or U";;
         esac
     done
+    dmesg -E
     if [[ $TARGET == "USB" ]]
     then
         if [[ $BOOT_DEVICE_NO_P == "/dev/sda" ]]
@@ -157,7 +161,9 @@ install() {
 
     #Now on to the installation, basically copy InstallToInternal.sh
     while true; do
+        dmesg -D
         read -r -p "This will ERASE ALL DATA ON ${TARGET_NO_P} and reboot when finished, do you want to continue? [y/N]" yn
+        dmesg -E
         case $yn in
             [Yy]* ) break;;
             [Nn]* ) exit;;
@@ -232,7 +238,9 @@ install() {
     echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
 
     while true; do
+        dmesg -D
         read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        dmesg -E
         case $ins in
             [Yy]* ) install_packages $INSTALL_MOUNT; break;;
             [Nn]* ) break;;
@@ -353,10 +361,12 @@ expand() {
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
     while true; do
+        dmesg -D
         read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        dmesg -E
         case $ins in
-            [Yy]* ) $SCRIPTS/InstallPackages.sh;;
-            [Nn]* ) exit;;
+            [Yy]* ) $SCRIPTS/InstallPackages.sh; break;;
+            [Nn]* ) break;;
             * ) echo "Please answer y or n";;
         esac
     done
