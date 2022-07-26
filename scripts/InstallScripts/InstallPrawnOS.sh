@@ -61,15 +61,17 @@ is_device_veyron() {
     echo "false"
 }
 
+# returns the full path to the emmc device, in the form /dev/mmcblk#
 get_emmc_devname() {
     local devname=$(find /dev -name "mmcblk*boot0" | sed "s/boot0//")
     if [ -z "$devname" ]
     then
         echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
     fi
-    echo $(basename $devname)
+    echo $devname
 }
 
+# returns the full path to the sd card device, in the form /dev/mmcblk#
 get_sd_devname() {
     local emmc=$(get_emmc_devname)
     devname=$(find /dev -name "mmcblk*" ! -iwholename "*${emmc}*" ! -name "*mmcblk*p*")
@@ -329,7 +331,7 @@ external_partition() {
 
 #simply expand to fill the current boot device
 expand() {
-    if [[ $BOOT_DEVICE == "/dev/$(get_emmc_devname)" ]]
+    if [[ $BOOT_DEVICE == "$(get_emmc_devname)" ]]
     then
         echo "Can't expand to fill internal emmc, install will have done this already"
         exit

@@ -46,6 +46,7 @@ is_device_veyron() {
     echo "False"
 }
 
+# returns the full path to the emmc device, in the form /dev/mmcblk#
 get_emmc_devname() {
     local devname=$(find /dev -name "mmcblk*boot0" | sed "s/boot0//")
     if [ -z "$devname" ]
@@ -55,6 +56,7 @@ get_emmc_devname() {
     echo $devname
 }
 
+# returns the full path to the sd card device, in the form /dev/mmcblk#
 get_sd_devname() {
     local emmc=$(get_emmc_devname)
     devname=$(find /dev -name "mmcblk*" ! -iwholename "*${emmc}*" ! -name "*mmcblk*p*")
