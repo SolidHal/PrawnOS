@@ -38,7 +38,7 @@ Don't want to use one of the two USB ports for the WiFi dongle? [check out this]
 Combined with Libreboot, an AR9271 or AR7010 WiFi dongle, and a libre OS (like Debian with the main repos, the one built by PrawnOS) the Asus c201 is a fully libre machine with no blobs, or microcode, or Intel Management Engine.
 
 ### WARNING: flashing libreboot to asus c201 chromebooks that have recently been updated to a new version of chromeOS may leave the device in a non-functional (bricked) state.
-If you do not have a way to recover your device by using an external flasher as described in the second part of this page https://libreboot.org/docs/install/c201.html it would be safest to wait until this issue is resolved. I have opened a bug with libreboot, which can be found here https://notabug.org/libreboot/libreboot/issues/666 If you have any information that may help with debugging, please post it there.
+If you do not have a way to recover your device by using an external flasher as described in the second part of this page https://libreboot.org/docs/install/c201.html it would be safest to wait until this issue is resolved. I have opened a bug with libreboot, which has been archived here https://notabug.org/libreboot/obsolete-repository-preserved-for-historical-purposes/issues/666 If you have any information that may help with debugging, please post it there.
 
 _The install process of PrawnOS does not flash your bios, so it is safe to use along with the default coreboot/depthcharge and does not risk bricking your device_
 
@@ -54,13 +54,9 @@ If you don't want to or can't build the image, you can find downloads under <rel
 
 ## Dependencies
 
-Building PrawnOS has been tested on Debian 10 Buster (in a VM).
+Building PrawnOS has been tested on Debian 11 Buster
 
-NOTE: _stretch doesn't work as the version of gcc-arm-none-eabi is too old_!
-
-NOTE: _buster requires backports to build packages because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109_
-
-Debian Bullseye or Buster with the Buster Backports repo are the only build environments that are supported.
+Debian Bullseye is the only build environment that is supported.
 These packages are required:
 
 <!-- Please keep the packages sorted (and in sync with ./tests/build-image.sh): -->
@@ -68,10 +64,8 @@ These packages are required:
         apt install --no-install-recommends --no-install-suggests \
         bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
         debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
-        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev make \
+        gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
         parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev \
-        vboot-kernel-utils wget
-        apt install -t buster-backports qemu-user-static
 ```
 
 ## Build
@@ -251,7 +245,7 @@ Congratulations: you are done! Welcome to PrawnOS. You should probably change th
 If have a basic environment without xfce or lxqt you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
 ```
 nmcli device wifi list
-nmcli device wifi connect "Network_name" password "network_password"
+nmcli --ask device wifi connect "Network_name" # The --ask will prompt you for the password so it doesn't remain in your shell history 
 ```
 When that finishes, you should have access to the internet. 
 
@@ -309,8 +303,9 @@ To begin with:
 
 You can use the environment variable `PRAWNOS_SUITE` to use a Debian suite other than `Bullseye`.  For example, to use Debian sid, you can build with `sudo PRAWNOS_SUITE=sid make image`
 
-You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://vwakviie2ienjx6t.onion/debian make image`.
+You can use the environment variable `PRAWNOS_DEBOOTSTRAP_MIRROR` to use a non-default Debian mirror with debootstrap.  For example, to use [Debian's Tor onion service mirror](https://onion.debian.org/) with debootstrap, you can build with `sudo PRAWNOS_DEBOOTSTRAP_MIRROR=http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian make image`.
 
+You can use the environment variable `PRAWNOS_KVER` to use a non-default kernel version.  For example, `sudo PRAWNOS_KVER=5.10.61 make image`.
 
 ### Crossystem / mosys
 
@@ -366,7 +361,7 @@ Warning: decent soldering skills required
 The pulse audio mixer will only run if you are logged in as a non-root account. This is an issue (feature?) of pulse audio
 
 ## Discussion, Support, and IRC
-IRC - You can find PrawnOS on the #prawnos channel on freenode
+IRC - You can find PrawnOS on the #prawnos channel on libera
 
 ## Credits and Legal Information
 

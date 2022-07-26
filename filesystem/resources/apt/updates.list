@@ -1,6 +1,5 @@
+deb http://ftp.us.debian.org/debian/ suite-updates main contrib
+deb-src http://ftp.us.debian.org/debian/ suite-updates main contrib
 
-deb http://ftp.us.debian.org/debian suite-updates main
-deb-src http://ftp.us.debian.org/debian suite-updates main
-
-deb http://security.debian.org/debian-security/ suite/updates main
-deb-src http://security.debian.org/debian-security/ suite/updates main
+deb http://security.debian.org/debian-security/ suite-security main
+deb-src http://security.debian.org/debian-security/ suite-security main

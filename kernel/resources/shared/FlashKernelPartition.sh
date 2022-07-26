@@ -27,13 +27,28 @@ device_veyron_mickey="Google Mickey"
 device_gru_kevin="Google Kevin"
 device_gru_bob="Google Bob"
 
+
 get_device() {
     local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
     echo $device
 }
 
+
+is_device_veyron() {
+    local device=$(get_device)
+    list = "${device_veyron_speedy} ${device_veyron_minnie} ${device_veyron_mickey}"
+    for dev in $list
+    do
+        if [ "$device" == "$dev" ]
+           echo "True"
+        fi
+    done
+    echo "False"
+}
+
+# returns the full path to the emmc device, in the form /dev/mmcblk#
 get_emmc_devname() {
-    local devname=$(ls /dev/mmcblk* | grep -F boot0 | sed "s/boot0//" | cut -d / -f 3)
+    local devname=$(find /dev -name "mmcblk*boot0" | sed "s/boot0//")
     if [ -z "$devname" ]; then
         echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"
         exit 1
@@ -41,16 +56,15 @@ get_emmc_devname() {
     echo $devname
 }
 
+# returns the full path to the sd card device, in the form /dev/mmcblk#
 get_sd_devname() {
-    local device=$(get_device)
-    case "$device" in
-        $device_veyron_speedy) local devname=mmcblk0;;
-        $device_veyron_minnie) local devname=mmcblk0;;
-        $device_veyron_mickey) local devname="";;
-        $device_gru_kevin) local devname=mmcblk0;;
-        $device_gru_bob) local devname=mmcblk0;;
-        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
-    esac
+    local emmc=$(get_emmc_devname)
+    devname=$(find /dev -name "mmcblk*" ! -iwholename "*${emmc}*" ! -name "*mmcblk*p*")
+
+    if [ -z "$devname" ]
+    then
+        echo "Unknown device! can't determine sd devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
+    fi
     echo $devname
 }
 

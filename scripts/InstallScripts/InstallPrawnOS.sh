@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
 
 #See the block of "echos" in main() for description of this script
 
@@ -18,7 +20,13 @@
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk(0/1) for an sd card
-BOOT_DEVICE=$(mount | head -n 1 | cut -d '2' -f 1)
+# mmc and sd devices use the "p" prefix for their partitions, so add the "p" if we are booting from
+# one of those
+BOOT_DEVICE_NO_P=/dev/$(eval $(lsblk -oMOUNTPOINT,PKNAME -P | grep 'MOUNTPOINT="/"'); echo $PKNAME)
+BOOT_DEVICE=$BOOT_DEVICE_NO_P
+if [[ "$BOOT_DEVICE_NO_P" == *"mmcblk"* ]]; then
+    BOOT_DEVICE=${BOOT_DEVICE_NO_P}p
+fi
 
 ### SHARED CONST AND VARS
 RESOURCES=/etc/prawnos/install/resources
@@ -31,13 +39,33 @@ device_veyron_mickey="Google Mickey"
 device_gru_kevin="Google Kevin"
 device_gru_bob="Google Bob"
 
+
 get_device() {
     local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
     echo $device
 }
 
+
+is_device_veyron() {
+    local device=$(get_device)
+    list=("${device_veyron_speedy}"
+          "${device_veyron_minnie}"
+          "${device_veyron_mickey}"
+         )
+    local IFS=""
+    for dev in ${list[*]}
+    do
+        if [[ "$device" == "$dev" ]]; then
+            echo "true"
+            exit 0
+        fi
+    done
+    echo "false"
+}
+
+# returns the full path to the emmc device, in the form /dev/mmcblk#
 get_emmc_devname() {
-    local devname=$(ls /dev/mmcblk* | grep -F boot0 | sed "s/boot0//" | cut -d / -f 3)
+    local devname=$(find /dev -name "mmcblk*boot0" | sed "s/boot0//")
     if [ -z "$devname" ]; then
         echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"
         exit 1
@@ -45,17 +73,15 @@ get_emmc_devname() {
     echo $devname
 }
 
-
+# returns the full path to the sd card device, in the form /dev/mmcblk#
 get_sd_devname() {
-    local device=$(get_device)
-    case "$device" in
-        $device_veyron_speedy) local devname=mmcblk0;;
-        $device_veyron_minnie) local devname=mmcblk0;;
-        $device_veyron_mickey) local devname="";;
-        $device_gru_kevin) local devname=mmcblk0;;
-        $device_gru_bob) local devname=mmcblk0;;
-        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
-    esac
+    local emmc=$(get_emmc_devname)
+    devname=$(find /dev -name "mmcblk*" ! -iwholename "*${emmc}*" ! -name "*mmcblk*p*")
+
+    if [ -z "$devname" ]
+    then
+        echo "Unknown device! can't determine sd devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
+    fi
     echo $devname
 }
 
@@ -77,7 +103,7 @@ main() {
     echo "---------------------------------------------------------------------------------------------------------------------"
     echo
     echo "Expand or Install?: "
-    echo "The currently booted device is ${BOOT_DEVICE}"
+    echo "The currently booted device is ${BOOT_DEVICE_NO_P}"
     while true; do
         read -r -p "[I]nstall or [E]xpand?" IE
         case $IE in
@@ -94,29 +120,24 @@ main() {
 install() {
     echo "Pick an install target. This can be the Internal Emmc, an SD card, or a USB device"
     echo "Please ensure you have only have the booted device and the desired target device inserted."
-    echo "The currently booted device is ${BOOT_DEVICE}"
+    echo "The currently booted device is ${BOOT_DEVICE_NO_P}"
     while true; do
         read -r -p "[I]nternal Emmc, [S]D card, or [U]SB device?: " ISU
         case $ISU in
-            [Ii]* ) TARGET=/dev/$(get_emmc_devname)p; TARGET_EMMC=true; break;;
-            [Ss]* ) TARGET=/dev/$(get_sd_devname)p; TARGET_EMMC=false; break;;
+            [Ii]* ) TARGET=$(get_emmc_devname)p; TARGET_EMMC=true; break;;
+            [Ss]* ) TARGET=$(get_sd_devname)p; TARGET_EMMC=false; break;;
             [Uu]* ) TARGET=USB; TARGET_EMMC=false; break;;
             * ) echo "Please answer I, S, or U";;
         esac
     done
     if [[ $TARGET == "USB" ]]
     then
-        if [[ $BOOT_DEVICE == "/dev/sda" ]]
+        if [[ $BOOT_DEVICE_NO_P == "/dev/sda" ]]
         then
             TARGET=/dev/sdb
         else
             TARGET=/dev/sda
         fi
-    fi
-    if [[ "$TARGET" == "$BOOT_DEVICE" ]]
-    then
-        echo "Can't install to booted device, please ensure you have *only* the booted device and target device inserted"
-        exit
     fi
 
     #cut off the "p" if we are using an sd card or internal emmc, doesn't change TARGET if we are using usb
@@ -126,6 +147,13 @@ install() {
         echo "${TARGET_NO_P} does not exist, have you plugged in your target sd card or usb device?"
         exit 1
     fi
+
+    if [[ "$TARGET_NO_P" == "$BOOT_DEVICE_NO_P" ]]
+    then
+        echo "Can't install to booted device, please ensure you have *only* the booted device and target device inserted"
+        exit
+    fi
+
 
     #Now on to the installation, basically copy InstallToInternal.sh
     while true; do
@@ -150,7 +178,7 @@ install() {
     fi
 
     #only use the emmc_partition function for "special cases", aka veyron devices
-    if [[ $TARGET == "/dev/mmcblk2p" ]] && $TARGET_EMMC
+    if $(is_device_veyron) && $TARGET_EMMC
     then
         emmc_partition
     else
@@ -247,17 +275,18 @@ emmc_partition() {
     #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
     dmesg -D
     echo Writing partition map to internal emmc
-    DISK_SZ="$(blockdev --getsz /dev/mmcblk2)"
+    local dev=$(get_emmc_devname)
+    DISK_SZ="$(blockdev --getsz ${dev})"
     echo Total disk size is: $DISK_SZ
     if [ $DISK_SZ = 30785536 ]
     then
         echo Detected Emmc Type 1
-        sfdisk /dev/mmcblk2 < $RESOURCES/mmc.partmap || true
+        sfdisk $dev < $RESOURCES/mmc.partmap || true
 
     elif [ $DISK_SZ = 30777344 ]
     then
         echo Detected Emmc Type 2
-        sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap || true
+        sfdisk $dev < $RESOURCES/mmc_type2.partmap || true
     else
         echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
         echo Try a fallback value? This will allow installation to continue, at the cost of a very small amount of disk space. This may not work.
@@ -266,7 +295,7 @@ emmc_partition() {
             case $yn,$REPLY in
                 Yes,*|*,Yes )
                     echo Trying Emmc Type 2
-                    sfdisk /dev/mmcblk2 < $RESOURCES/mmc_type2.partmap || true
+                    sfdisk $dev < $RESOURCES/mmc_type2.partmap || true
                     break
                     ;;
                 * )
@@ -304,9 +333,7 @@ external_partition() {
 
 #simply expand to fill the current boot device
 expand() {
-    # need to strip the "p" if BOOT_DEVICE is an sd card or emmc
-    BOOT_DEVICE_NO_P=$(echo $BOOT_DEVICE | cut -d 'p' -f 1)
-    if [[ $BOOT_DEVICE == "/dev/$(get_emmc_devname)" ]]
+    if [[ $BOOT_DEVICE == "$(get_emmc_devname)" ]]
     then
         echo "Can't expand to fill internal emmc, install will have done this already"
         exit
@@ -401,7 +428,7 @@ setup_users() {
         CHROOT_PREFIX=""
 
     else
-        CHROOT_PREFIX=chroot_wrapper "$TARGET_MOUNT"
+        CHROOT_PREFIX="chroot_wrapper ${TARGET_MOUNT}"
     fi
 
     # Have the user set a root password

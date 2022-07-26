@@ -117,14 +117,12 @@ $(PRAWNOS_IMAGE_GIT_GZ): $(PRAWNOS_IMAGE)
 
 #:::::::::::::::::::::::::::::: dependency management ::::::::::::::::::::::::::
 
-# this will only do everything right on bullseye due to https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=965109
-# see the README for how to build on buster
 .PHONY: install_dependencies
 install_dependencies:
 	apt install --no-install-recommends --no-install-suggests $(AUTO_YES) \
     bc binfmt-support bison build-essential bzip2 ca-certificates cgpt cmake cpio debhelper \
     debootstrap device-tree-compiler devscripts file flex g++ gawk gcc gcc-aarch64-linux-gnu \
-    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev make \
+    gcc-arm-none-eabi git gpg gpg-agent kmod libc-dev libncurses-dev libssl-dev lzip make \
     parted patch pbuilder qemu-user-static quilt rsync sudo texinfo u-boot-tools udev vboot-kernel-utils wget
 
 .PHONY: install_dependencies_yes

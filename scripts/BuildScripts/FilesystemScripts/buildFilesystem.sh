@@ -24,8 +24,7 @@ set -e
 
 
 #Ensure Sudo
-if [ ! $UID = "0" ]
-then
+if [[ $EUID -ne 0 ]]; then
     echo "Please run this script with sudo, or as root:"
     echo "sudo $0 $*"
     exit 1
@@ -181,7 +180,7 @@ create_image() {
 create_image $BASE $outdev 50M 60 $outmnt
 
 # use default debootstrap mirror if none is specified
-if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" = "" ]
+if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" == "" ]
 then
     PRAWNOS_DEBOOTSTRAP_MIRROR=http://ftp.us.debian.org/debian
 fi
@@ -190,12 +189,13 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 # need ca-certs, gnupg, openssl to handle https apt links and key adding for deb.prawnos.com
 printf -v debootstrap_debs_install_joined '%s,' "${debootstrap_debs_install[@]}"
-qemu-debootstrap --arch $TARGET_ARCH $DEBIAN_SUITE \
-                 --include ${debootstrap_debs_install_joined%,} \
+sudo debootstrap --arch=$TARGET_ARCH \
+                 --include=${debootstrap_debs_install_joined%,} \
                  --keyring=$build_resources_apt/debian-archive-keyring.gpg \
+                 --cache-dir=$PRAWNOS_BUILD/debootstrap-apt-cache/ \
+                 $DEBIAN_SUITE \
                  $outmnt \
                  $PRAWNOS_DEBOOTSTRAP_MIRROR \
-                 --cache-dir=$PRAWNOS_BUILD/debootstrap-apt-cache/
 
 chroot $outmnt passwd -d root
 echo -n PrawnOS > $outmnt/etc/hostname
@@ -213,19 +213,6 @@ then
     cp $build_resources_apt/sid.list $outmnt/etc/apt/sources.list.d/
     #setup apt pinning
     cp $build_resources_apt/sid.pref $outmnt/etc/apt/preferences.d/
-fi
-if [ "$DEBIAN_SUITE" = "buster" ]
-then
-    # sid and bullseye don't have backports or security; it's present for all other suites
-    cat $build_resources_apt/updates.list >> $outmnt/etc/apt/sources.list
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
-    cp $build_resources_apt/backports.list $outmnt/etc/apt/sources.list.d/
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/backports.list
-    cp $build_resources_apt/backports.pref $outmnt/etc/apt/preferences.d/
-    sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/preferences.d/backports.pref
-    # Install bullseye (testing) as an additional source
-    cp $build_resources_apt/bullseye.list $outmnt/etc/apt/sources.list.d/
-    cp $build_resources_apt/bullseye.pref $outmnt/etc/apt/preferences.d/
 fi
 
 

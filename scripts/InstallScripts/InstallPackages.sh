@@ -1,5 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
 
+set -e
 
 # This file is part of PrawnOS (https://www.prawnos.com)
 # Copyright (c) 2018 Hal Emmerich <hal@halemmerich.com>
@@ -32,30 +33,6 @@ get_device() {
     local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
     echo $device
 }
-
-get_emmc_devname() {
-    local devname=$(ls /dev/mmcblk* | grep -F boot0 | sed "s/boot0//" | cut -d / -f 3)
-    if [ -z "$devname" ]
-    then
-        echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"
-        exit 1
-    fi
-    echo $devname
-}
-
-get_sd_devname() {
-    local device=$(get_device)
-    case "$device" in
-        $device_veyron_speedy) local devname=mmcblk0;;
-        $device_veyron_minnie) local devname=mmcblk0;;
-        $device_veyron_mickey) local devname="";;
-        $device_gru_kevin) local devname=mmcblk0;;
-        $device_gru_bob) local devname=mmcblk0;;
-        * ) echo "Unknown device! can't determine sd card devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;;
-    esac
-    echo $devname
-}
-
 ### END SHARED CONST AND VARS
 
 

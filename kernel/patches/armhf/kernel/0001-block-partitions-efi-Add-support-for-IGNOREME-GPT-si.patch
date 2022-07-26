@@ -32,7 +32,7 @@ diff --git a/block/partitions/efi.c b/block/partitions/efi.c
 index 39f70d9..aa08380 100644
 --- a/block/partitions/efi.c
 +++ b/block/partitions/efi.c
-@@ -344,23 +344,34 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
+@@ -328,23 +332,32 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
   * @lba: logical block address of the GPT header to test
   * @gpt: GPT header ptr, filled on return.
   * @ptes: PTEs ptr, filled on return.
@@ -48,9 +48,9 @@ index 39f70d9..aa08380 100644
  {
  	u32 crc, origcrc;
  	u64 lastlba, pt_size;
- 
+-
 +	if (ignored)
-+		*ignored = 0;
++    *ignored = 0;
  	if (!ptes)
  		return 0;
  	if (!(*gpt = alloc_read_gpt_header(state, lba)))
@@ -58,18 +58,17 @@ index 39f70d9..aa08380 100644
  
  	/* Check the GUID Partition Table signature */
 -	if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
-+
-+	if (le64_to_cpu((*gpt)->signature) == GPT_HEADER_SIGNATURE_IGNORED) {
-+		pr_debug("GUID Partition Table at LBA %llu marked IGNOREME\n",
-+						(unsigned long long)lba);
-+		if (ignored)
-+			*ignored = 1;
-+		goto fail;
++  if (le64_to_cpu((*gpt)->signature) == GPT_HEADER_SIGNATURE_IGNORED) {
++		pr_warn("GUID Partition Table at LBA %llu marked IGNOREME\n",
++             (unsigned long long)lba);
++    if (ignored)
++      *ignored = 1;
++    goto fail;	
 +	} else if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
  		pr_debug("GUID Partition Table Header signature is wrong:"
  			 "%lld != %lld\n",
  			 (unsigned long long)le64_to_cpu((*gpt)->signature),
-@@ -597,7 +608,7 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
+@@ -581,7 +594,7 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
  static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
  			  gpt_entry **ptes)
  {
@@ -78,12 +77,12 @@ index 39f70d9..aa08380 100644
  	gpt_header *pgpt = NULL, *agpt = NULL;
  	gpt_entry *pptes = NULL, *aptes = NULL;
  	legacy_mbr *legacymbr;
-@@ -627,19 +638,20 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+@@ -613,13 +626,16 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
  	}
  
  	good_pgpt = is_gpt_valid(state, GPT_PRIMARY_PARTITION_TABLE_LBA,
 -				 &pgpt, &pptes);
-+			 &pgpt, &pptes, &pgpt_ignored);
++				 &pgpt, &pptes, &pgpt_ignored);
          if (good_pgpt)
  		good_agpt = is_gpt_valid(state,
  					 le64_to_cpu(pgpt->alternate_lba),
@@ -91,26 +90,50 @@ index 39f70d9..aa08380 100644
 -        if (!good_agpt && force_gpt)
 -                good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
 +					 &agpt, &aptes, NULL);
-+	if (!good_agpt && (force_gpt || pgpt_ignored))
-+		good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes, NULL);
++        if (!good_agpt && (force_gpt || pgpt_ignored)){
++          good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes, NULL);
++          if (!good_agpt)
++            pr_warn("Primary GPT invalid or ignored, but Alternate GPT is also invalid");
++        }
+ 
+ 	if (!good_agpt && force_gpt && fops->alternative_gpt_sector) {
+ 		sector_t agpt_sector;
+@@ -628,14 +644,15 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 		err = fops->alternative_gpt_sector(disk, &agpt_sector);
+ 		if (!err)
+ 			good_agpt = is_gpt_valid(state, agpt_sector,
+-						 &agpt, &aptes);
++						 &agpt, &aptes, NULL);
+ 	}
  
          /* The obviously unsuccessful case */
          if (!good_pgpt && !good_agpt)
                  goto fail;
  
 -        compare_gpts(pgpt, agpt, lastlba);
-+	if (!pgpt_ignored)
-+		compare_gpts(pgpt, agpt, lastlba);
++        if (!pgpt_ignored)
++            compare_gpts(pgpt, agpt, lastlba);
  
          /* The good cases */
          if (good_pgpt) {
-@@ -656,7 +668,8 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+@@ -643,8 +660,8 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+                 *ptes = pptes;
+                 kfree(agpt);
+                 kfree(aptes);
+-		if (!good_agpt)
+-                        pr_warn("Alternate GPT is invalid, using primary GPT.\n");
++                if (!good_agpt)
++                  pr_warn("Alternate GPT is invalid, using primary GPT.\n");
+                 return 1;
+         }
+         else if (good_agpt) {
+@@ -652,7 +669,8 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
                  *ptes = aptes;
                  kfree(pgpt);
                  kfree(pptes);
 -		pr_warn("Primary GPT is invalid, using alternate GPT.\n");
-+	pr_warn("Primary GPT is %s, using alternate GPT.\n",
-+		pgpt_ignored ? "being ignored" : "invalid");
++                pr_warn("Primary GPT is %s, using alternate GPT.\n",
++                        pgpt_ignored ? "being ignored" : "invalid");
                  return 1;
          }
  
