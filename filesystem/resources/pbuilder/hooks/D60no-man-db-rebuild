@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Don't rebuild man-db
 
 echo "I: Preseed man-db/auto-update to false"
