@@ -21,28 +21,23 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ -z "$1" ]
-then
+if [ -z "$1" ]; then
     echo "No kernel version supplied"
     exit 1
 fi
-if [ -z "$2" ]
-then
+if [ -z "$2" ]; then
     echo "No resources directory"
     exit 1
 fi
-if [ -z "$3" ]
-then
+if [ -z "$3" ]; then
     echo "No build directory supplied"
     exit 1
 fi
-if [ -z "$4" ]
-then
+if [ -z "$4" ]; then
     echo "No PrawnOS initramfs supplied"
     exit 1
 fi
-if [ -z "$" ]
-then
+if [ -z "$5" ]; then
     echo "No PrawnOS target arch supplied"
     exit 1
 fi
