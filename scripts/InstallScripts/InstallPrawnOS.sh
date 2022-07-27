@@ -237,16 +237,7 @@ install() {
     rm $INSTALL_MOUNT/etc/fstab
     echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
 
-    while true; do
-        dmesg -D
-        read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
-        dmesg -E
-        case $ins in
-            [Yy]* ) install_packages $INSTALL_MOUNT; break;;
-            [Nn]* ) break;;
-            * ) echo "Please answer y or n";;
-        esac
-    done
+    install_packages $INSTALL_MOUNT
 
     # final setup:
     dmesg -D
@@ -267,15 +258,7 @@ install() {
         cryptsetup luksClose luksroot
     fi
     echo "Please remove the booted device after power off is complete"
-    while true; do
-        read -r -p "Reboot? [y/N]" re
-        case $re in
-            [Yy]* ) reboot;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer y or n";;
-        esac
-    done
-
+    reboot_prompt
 }
 
 #Setup partition map on internal emmc
@@ -360,22 +343,14 @@ expand() {
     #Force the filesystem to fill the new partition
     resize2fs -f ${BOOT_DEVICE}2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
-    while true; do
-        dmesg -D
-        read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
-        dmesg -E
-        case $ins in
-            [Yy]* ) $SCRIPTS/InstallPackages.sh; break;;
-            [Nn]* ) break;;
-            * ) echo "Please answer y or n";;
-        esac
-    done
 
+    install_packages
     dmesg -D
     welcome
     setup_users
     setup_hostname
     dmesg -E
+    reboot_prompt
 }
 
 # helper for install_packages()/setup_users()
@@ -400,9 +375,33 @@ chroot_wrapper() {
 
 install_packages() {
     TARGET_MOUNT=$1
-    echo "Installing Packages"
-    chroot_wrapper "$TARGET_MOUNT" .$SCRIPTS/InstallPackages.sh
-    desktop=true
+
+    #handle when we use this for expansion
+    if [ -z "$TARGET_MOUNT" ]
+    then
+        CHROOT_PREFIX=""
+
+    else
+        CHROOT_PREFIX="chroot_wrapper ${TARGET_MOUNT}"
+    fi
+
+    while true; do
+        dmesg -D
+        read -r -p "Install a desktop environment and the supporting packages? [Y/n]" ins
+        dmesg -E
+        case $ins in
+            [Yy]* )
+                echo "Installing Packages"
+                $CHROOT_PREFIX .$SCRIPTS/InstallPackages.sh
+                desktop=true
+                break
+                ;;
+            [Nn]* )
+                break
+                ;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
 }
 
 setup_hostname() {
@@ -470,6 +469,17 @@ setup_users() {
     fi
 }
 
+reboot_prompt() {
+    while true; do
+        read -r -p "Reboot? [y/N]" re
+        case $re in
+            [Yy]* ) reboot;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer y or n";;
+        esac
+    done
+
+}
 
 welcome() {
     echo ""
