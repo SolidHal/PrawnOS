@@ -379,10 +379,11 @@ install_packages() {
     #handle when we use this for expansion
     if [ -z "$TARGET_MOUNT" ]
     then
-        CHROOT_PREFIX=""
+        INSTALL_PACKAGES_SCRIPT="/${SCRIPTS}/InstallPackages.sh"
 
     else
         CHROOT_PREFIX="chroot_wrapper ${TARGET_MOUNT}"
+        INSTALL_PACKAGES_SCRIPT="${CHROOT_PREFIX} .${SCRIPTS}/InstallPackages.sh"
     fi
 
     while true; do
@@ -392,7 +393,7 @@ install_packages() {
         case $ins in
             [Yy]* )
                 echo "Installing Packages"
-                $CHROOT_PREFIX .$SCRIPTS/InstallPackages.sh
+                $INSTALL_PACKAGES_SCRIPT
                 desktop=true
                 break
                 ;;
