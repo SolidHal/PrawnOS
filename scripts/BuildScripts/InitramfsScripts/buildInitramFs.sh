@@ -114,7 +114,11 @@ trap cleanup INT TERM EXIT
 
 losetup -P $outdev $BASE
 #mount the root filesystem
-mount -o noatime ${outdev}p2 $outmnt
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    mount -o noatime ${outdev}p3 $outmnt
+else
+    mount -o noatime ${outdev}p2 $outmnt
+fi
 
 #make a skeleton filesystem
 initramfs_src=$outmnt/etc/prawnos/initramfs_src
@@ -122,27 +126,25 @@ initramfs_src_direct=/etc/prawnos/initramfs_src
 rm -rf $initramfs_src*
 mkdir -p $initramfs_src
 mkdir $initramfs_src/bin
-mkdir $initramfs_src/dev
 mkdir $initramfs_src/etc
 mkdir $initramfs_src/newroot
 mkdir $initramfs_src/boot
-mkdir $initramfs_src/proc
-mkdir $initramfs_src/sys
 mkdir $initramfs_src/sbin
 mkdir $initramfs_src/run
 mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 
-mknod $initramfs_src/dev/console c 5 1
-mknod $initramfs_src/dev/null c 1 3
-mknod $initramfs_src/dev/tty c 5 0
-mknod $initramfs_src/dev/urandom c 1 9
-mknod $initramfs_src/dev/random c 1 8
-mknod $initramfs_src/dev/zero c 1 5
-
 
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
+
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    # network and ssh specific dirs
+    mkdir $initramfs_src/etc/ssh
+    mkdir -p $initramfs_src/usr/sbin
+    mkdir -p $initramfs_src/usr/bin
+    initramfs_binaries+=' /usr/sbin/ifconfig /usr/sbin/route /usr/sbin/sshd'
+fi
 
 #do so **automatigically**
 export -f chroot_get_libs
@@ -151,34 +153,107 @@ export initramfs_src_direct
 
 chroot $outmnt /bin/bash -c "chroot_get_libs $initramfs_src_direct $initramfs_binaries"
 
-#have to add libgcc manually since ldd doesn't see it as a requirement :/
+#have to add libgcc, libnss manually since ldd doesn't see it as a requirement :/
 armhf_libs=arm-linux-gnueabihf
 arm64_libs=aarch64-linux-gnu
 if [ "$TARGET" == "$ARCH_ARMHF" ]; then
     LIBS_DIR=$armhf_libs
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     LIBS_DIR=$arm64_libs
+elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    LIBS_DIR=$arm64_libs
 else
-    echo "no valid target arch specified"
+    echo "Cannot build initramfs: no valid target arch specified"
     exit 1
 fi
 cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/
+
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    cp -a $outmnt/lib/$LIBS_DIR/libnss* $initramfs_src/lib/$LIBS_DIR/
+
+    # add the console setup scripts
+    cp -r $RESOURCES/console_setup $initramfs_src/etc/
+    chmod +x $initramfs_src/etc/console_setup/console_setup.sh
+
+    # add glibc nsswitch conf
+    cp $outmnt/etc/nsswitch.conf $initramfs_src/etc/nsswitch.conf
+fi
 
 #add the init script
 cp $RESOURCES/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
 cp $initramfs_src/init $initramfs_src/sbin/init
 
-#compress and install
-rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
+
+pushd $(pwd)
 cd $initramfs_src
+# setup busybox links
 ln -s busybox bin/cat
 ln -s busybox bin/mount
 ln -s busybox bin/sh
 ln -s busybox bin/switch_root
 ln -s busybox bin/umount
 
-# store for kernel building
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    ln -s busybox bin/udhcpc
+fi
+popd
+
+
+# create root user
+echo 'root:x:0:' > $initramfs_src/etc/group
+echo 'root:x:0:0::/root:/bin/sh' > $initramfs_src/etc/passwd
+mkdir -p -m 0700 $initramfs_src/root
+
+# only support ssh in initramfs on server images
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    # minimal sshd server requires
+    # - sshd binary, and the libs ldd mentions
+    # - libnss*, otherwise it will always fail finding the privilege separation user
+    # - sshd user for privilege separation
+    # - psudo terminals: mount -t devpts none /dev/pts
+    #   - we mount these in the init script
+    # - sshd_config file
+    # - host keys
+    # - authorized_keys file
+    # - network initialization
+
+    # add the ssh config file
+    cp $RESOURCES/sshd_config $initramfs_src/etc/ssh/sshd_config
+
+    # add the udhcp simple script so we can get dhcp support
+    cp $RESOURCES/udhcp_simple.script $initramfs_src/bin/udhcp_simple.script
+
+    # create the sshd user/group/homedir
+    echo 'sshd:x:74:' >> $initramfs_src/etc/group
+    echo 'sshd:x:74:74::/run/sshd:/sbin/nologin' >> $initramfs_src/etc/passwd
+    mkdir -p -m 0755 $initramfs_src/run/sshd
+
+    # and tmpfiles entry
+    mkdir -p $initramfs_src/lib/tmpfiles.d/
+    echo "d /run/sshd 0755 root root -" > $initramfs_src/lib/tmpfiles.d/sshd-tmpfiles.conf
+
+    # install a profile for the root user
+    cp $RESOURCES/profile $initramfs_src/root/.profile
+
+    # install motd
+    cp $RESOURCES/motd $initramfs_src/etc/motd
+
+    # sshd requires /var/log/lastlog for tracking login information
+    mkdir -p -m 0755 $initramfs_src/var/log
+    touch $initramfs_src/var/log/lastlog
+
+    # create host key
+    mkdir -p $initramfs_src/etc/ssh/
+
+    # install decryption helper script
+    cp $RESOURCES/decrypt_root.sh $initramfs_src/root/decrypt_root.sh
+fi
+
+rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
+
+cd $initramfs_src
+# store for other parts of the build process
 find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
 
 # cleanup

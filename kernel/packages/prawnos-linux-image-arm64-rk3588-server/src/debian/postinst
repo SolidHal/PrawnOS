@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+if [ ! -d "/boot" ]; then
+    echo "/boot does not exist! Make sure the boot partition is mounted at /boot"
+    exit 1
+fi
+
+# ensure the new extlinux.conf still boots to the correct device
+# relies on preinst copying over the old extlinux.conf
+grep "root=DEV" /boot/extlinux/extlinux.conf.old >> /boot/extlinux/extlinux.conf || (echo "WARNING: No previous extlinux.conf, defaulting to sdboot" && echo "        append root=DEV=sdcard" >> /boot/extlinux/extlinux.conf)
+

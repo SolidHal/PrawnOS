@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+cp /boot/extlinux/extlinux.conf /boot/extlinux/extlinux.conf.old

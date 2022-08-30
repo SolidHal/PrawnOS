@@ -19,6 +19,7 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 include $(PRAWNOS_ROOT)/initramfs/makefile
 include $(PRAWNOS_ROOT)/kernel/makefile
 include $(PRAWNOS_ROOT)/filesystem/makefile
+include $(PRAWNOS_ROOT)/bootloader/makefile
 
 #Usage:
 #run make image
@@ -30,18 +31,20 @@ include $(PRAWNOS_ROOT)/filesystem/makefile
 #run kernel_inject
 
 
+
 #:::::::::::::::::::::::::::::: cleaning ::::::::::::::::::::::::::::::
 .PHONY: clean
 clean:
 	@echo "Enter one of the following:"
-	@echo "clean_image     : removes the built PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img"
-	@echo "clean_basefs    : removes the -BASE prawnos image which contains the base filesystem"
-	@echo "clean_pbuilder  : removes the pbuilder chroot used to build the prawnos packages locally located in build/$(TARGET)/prawnos-pbuilder-$(TARGET)-base.tgz"
-	@echo "clean_kernel    : removes the kernel build directory build/$(TARGET)/linux-<kver>"
-	@echo "clean_ath9k     : removes the ath9k firmware build directory build/shared/open-ath9k-htc-firmware"
-	@echo "clean_initramfs : removes the built initramfs image located in build/$(TARGET)/PrawnOS-initramfs.cpio.gz"
-	@echo "clean_most      : cleans kernel, initramfs, basefs, image. these are the most common items required to clean for a full rebuild."
-	@echo "clean_all       : runs all of the above clean commands, rarely needed. Most likely want clean_most"
+	@echo "clean_image      : removes the built PrawnOS-$(PRAWNOS_SUITE)-$(TARGET).img"
+	@echo "clean_basefs     : removes the -BASE prawnos image which contains the base filesystem"
+	@echo "clean_pbuilder   : removes the pbuilder chroot used to build the prawnos packages locally located in build/$(TARGET)/prawnos-pbuilder-$(TARGET)-base.tgz"
+	@echo "clean_kernel     : removes the kernel build directory build/$(TARGET)/linux-<kver>"
+	@echo "clean_bootloader : removes the kernel build directory build/$(TARGET)/bootloader"
+	@echo "clean_ath9k      : removes the ath9k firmware build directory build/shared/open-ath9k-htc-firmware"
+	@echo "clean_initramfs  : removes the built initramfs image located in build/$(TARGET)/PrawnOS-initramfs.cpio.gz"
+	@echo "clean_most       : cleans kernel, initramfs, basefs, image, bootloader. these are the most common items required to clean for a full rebuild."
+	@echo "clean_all        : runs all of the above clean commands, rarely needed. Most likely want clean_most"
 
 .PHONY: clean_image
 clean_image:
@@ -56,7 +59,7 @@ clean_pbuilder:
 	rm -f $(PBUILDER_CHROOT)
 
 .PHONY: clean_most
-clean_most: clean_kernel clean_initramfs clean_image clean_basefs
+clean_most: clean_kernel clean_initramfs clean_image clean_basefs clean_bootloader
 	@echo "cleaned kernel, initramfs, basefs, image"
 
 .PHONY: clean_all
@@ -65,7 +68,6 @@ clean_all: clean_most clean_ath9k clean_pbuilder
 
 #:::::::::::::::::::::::::::::: kernel ::::::::::::::::::::::::::::::::::::
 #included from kernel/makefile
-
 
 #:::::::::::::::::::::::::::::: initramfs :::::::::::::::::::::::::::::::::
 #included from initramfs/makefile
@@ -76,6 +78,9 @@ clean_all: clean_most clean_ath9k clean_pbuilder
 
 #:::::::::::::::::::::::::::::: packages ::::::::::::::::::::::::::::::::
 #included from filesystem/makefile
+
+#:::::::::::::::::::::::::::::: bootloader ::::::::::::::::::::::::::::::::
+#included from bootloader/makefile
 
 #:::::::::::::::::::::::::::::: image management ::::::::::::::::::::::::::
 
@@ -91,6 +96,27 @@ kernel_update:
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_image_package_install
 
+
+.PHONY: bootloader_install
+bootloader_install: #Targets the PrawnOS image and installs a bootloader
+ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
+	$(MAKE) bootloader_image_package_install
+else
+	echo "No bootloader to install for target ${TARGET}"
+endif
+
+.PHONY: bootloader_update
+bootloader_update:
+ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
+	$(MAKE) clean_image
+	$(MAKE) clean_bootloader
+	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
+	$(MAKE) kernel_image_package_install
+	$(MAKE) bootloader_image_package_install
+else
+	echo "No bootloader to update for target ${TARGET}"
+endif
+
 .PHONY: image
 image:
 	$(MAKE) clean_image
@@ -98,7 +124,9 @@ image:
 	$(MAKE) initramfs
 	cp $(PRAWNOS_IMAGE_BASE) $(PRAWNOS_IMAGE)
 	$(MAKE) kernel_image_package_install
-
+ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
+	$(MAKE) bootloader_image_package_install
+endif
 
 # $PDEV should be passed like PDEV=/dev/sdb
 .PHONY: write_image

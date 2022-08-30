@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+UBOOT_IMAGE="/etc/prawnos/uboot/uboot.img"
+
+set -e
+
+case "$1" in
+    configure)
+        /etc/prawnos/kernel/FlashBootloaderPartition.sh $UBOOT_IMAGE
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Do nothing
+        ;;
+    *)
+        echo "Unrecognized postinst argument '$1'"
+        ;;
+esac

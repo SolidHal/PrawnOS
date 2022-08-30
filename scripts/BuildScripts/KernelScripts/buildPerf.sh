@@ -70,7 +70,7 @@ elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     KERNEL_ARCH=$ARCH_ARM64
 else
-    echo "no valid target arch specified"
+    echo "Cannot build perf: no valid target arch specified"
     exit 1
 fi
 

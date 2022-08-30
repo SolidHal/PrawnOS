@@ -3,9 +3,8 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
-
-ifeq ($(TARGET),$(PRAWNOS_ARM64))
-$(error Cant built armhf kernel package with arm64 target)
+ifneq ($(TARGET),$(PRAWNOS_ARMHF))
+$(error Cant built armhf kernel package with non armhf target)
 endif
 
 #package specific vars
@@ -26,7 +25,7 @@ default: $(PACKAGE_NAME_DEB)
 $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 	@echo Building $@
 # keep the /debian files up to date with the current kernel version
-	$(PRAWNOS_KERNEL_SCRIPTS_UPDATE_DEB_FILES) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/src $(VERSION)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPDATE_DEB_FILES) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/src $(VERSION)
 
 	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD) $(PACKAGE_NAME_DEB) \
                                             $(PBUILDER_VARS) \

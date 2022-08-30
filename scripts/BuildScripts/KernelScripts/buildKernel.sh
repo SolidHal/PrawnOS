@@ -55,7 +55,9 @@ ARCH_ARM64=arm64
 MAX_KERNEL_SIZE=$(expr 65536 \* 512)
 
 cd $BUILD_DIR
-make mrproper
+
+### Uncomment to have the build clean the kernel every time
+# make mrproper
 
 #this arch nonsense is obnoxious.
 # armhf is just "arm" to the kernel and vbutil,
@@ -66,41 +68,69 @@ if [ "$TARGET" == "$ARCH_ARMHF" ]; then
     KERNEL_ARCH=arm
     VBUTIL_ARCH=$KERNEL_ARCH
     IMAGE=zImage
+    BOOTLOADER=coreboot
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     KERNEL_ARCH=$ARCH_ARM64
     VBUTIL_ARCH=aarch64
     IMAGE=Image
+    BOOTLOADER=coreboot
+elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    KERNEL_ARCH=$ARCH_ARM64
+    IMAGE=Image
+    BOOTLOADER=uboot
 else
-    echo "no valid target arch specified"
+    echo "Cannot build kernel: no valid target arch specified"
     exit 1
 fi
 
-#copy in the resources, initramfs
-cp $INITRAMFS .
+#copy in the config
 cp "$KERNEL_CONFIG" .config
-cp $RESOURCES/kernel.its .
-make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
-make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
-mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
-dd if=/dev/zero of=bootloader.bin bs=512 count=1
-vbutil_kernel --pack vmlinux.kpart \
-              --version 1 \
-              --vmlinuz vmlinux.uimg \
-              --arch $VBUTIL_ARCH \
-              --keyblock /usr/share/vboot/devkeys/kernel.keyblock \
-              --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
-              --config $RESOURCES/cmdline \
-              --bootloader bootloader.bin
 
-RESULT=$?
-if [ ! $RESULT -eq 0 ]; then
-    rm -f vmlinux.kpart
-fi
+if [ "$BOOTLOADER" == "coreboot" ]; then
 
-KERNEL_SIZE=$(stat -c %s "vmlinux.kpart")
-if [ "$KERNEL_SIZE" -gt "$MAX_KERNEL_SIZE" ]; then
-    mv vmlinux.kpart oversized_vmlinux.kpart
-    echo "kernel larger than max kernel size!"
+    #copy in the resources, initramfs
+    cp $INITRAMFS .
+    cp $RESOURCES/kernel.its .
+
+    make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
+    make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
+    mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
+    dd if=/dev/zero of=bootloader.bin bs=512 count=1
+    vbutil_kernel --pack vmlinux.kpart \
+                  --version 1 \
+                  --vmlinuz vmlinux.uimg \
+                  --arch $VBUTIL_ARCH \
+                  --keyblock /usr/share/vboot/devkeys/kernel.keyblock \
+                  --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk \
+                  --config $RESOURCES/cmdline \
+                  --bootloader bootloader.bin
+
+    RESULT=$?
+    if [ ! $RESULT -eq 0 ]; then
+        rm -f vmlinux.kpart
+    fi
+
+    KERNEL_SIZE=$(stat -c %s "vmlinux.kpart")
+    if [ "$KERNEL_SIZE" -gt "$MAX_KERNEL_SIZE" ]; then
+        mv vmlinux.kpart oversized_vmlinux.kpart
+        echo "kernel larger than max kernel size!"
+        exit 1
+    fi
+
+elif [ "$BOOTLOADER" == "uboot" ]; then
+    make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
+    make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
+
+    # vmlinux.kpart is the build complete flag to stay consistent with the other platforms
+    # though it is unused for uboot
+    # dtb is /arch/arm64/boot/dts/rockchip/rk3588-firefly-itx-3588j.dtb
+    # Actual kernel image is arch/arm64/boot/Image
+    touch vmlinux.kpart
+else
+    echo "no valid target bootloader"
     exit 1
 fi
+
+
