@@ -14,25 +14,25 @@ Signed-off-by: SolidHal <hal@halemmerich.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 5bc585e8..39e16e48 100644
+index 23fcb7a..243a90d 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1033,6 +1033,7 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+@@ -993,6 +993,7 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
  		return -EEXIST;
-   }
+ 
  	md->reset_done |= type;
 +retry:
- 	err = mmc_hw_reset(host);
+ 	err = mmc_hw_reset(host->card);
  	/* Ensure we switch back to the correct partition */
- 	if (err != -EOPNOTSUPP) {
-@@ -1050,6 +1051,10 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 	if (err) {
+@@ -1010,6 +1011,10 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
  			return -ENODEV;
  		}
  	}
-+  if (err){
-+    /* Try one last time, just in case. The emmc can be touchy */
-+    goto retry;
-+  }
++	if (err){
++		/* Try one last time, just in case. The emmc can be touchy */
++		goto retry;
++	}
  	return err;
  }
  
