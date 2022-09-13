@@ -23,111 +23,26 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-echo In PrawnOS Init
-
-#add this to start shell at desired point
-rescue_shell() {
-    [ "${1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
-    [ "${1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
-    echo "Something went wrong. Dropping to a shell." > /dev/tty1
-    exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
-}
-
-#used to parse the kernel cmdline
-cmdline() {
-    local value
-    value=" $(cat /proc/cmdline) "
-    value="${value##* ${1}=}"
-    value="${value%% *}"
-    [ "${value}" != "" ] && echo "${value}"
-}
-
-#used to get the uuid of the root partiton since findfs isn't in debian busybox-static
-rootpartuuid() {
-    local value
-    value=$1
-    value="${value%/*}"
-    value="${value#*=}"
-    [ "${value}" != "" ] && echo "${value}"
-}
-
-# a clever portable shell script to detect occurances of a substring in a string
-# occur <string> <substring> (optional count)
-# if optional count is not provided:
-# returns 1 if substring is not in string
-# returns 0 otherwise
-# if optional count is provided:
-# returns 1 if substring occurs in string < optional count
-# returns 0 otherwise
-occur() {
-    while case "$1" in (*"$2"*) set -- \
-        "${1#*"$2"}" "$2" "${3:-0}" "$((${4:-0}+1))";;
-        (*) return "$((${4:-0}<${3:-1}))";;esac
-        do : "${_occur:+$((_occur=$4))}";done
-}
+# create anything that we need, but doesn't exist
+[ -d /dev ] || mkdir -m 0755 /dev
+[ -d /root ] || mkdir -m 0700 /root
+[ -d /sys ] || mkdir /sys
+[ -d /proc ] || mkdir /proc
+[ -d /tmp ] || mkdir /tmp
 
 # mount the bare necesities
-mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
+mount -n -t proc     proc      /proc
 mount -n -t devtmpfs devtmpfs  /dev
 
-# get the root device, so we can find the boot partiton
-UNPARSED=$(cmdline root)
-echo Unparsed cmdline rootdev: ${UNPARSED} > /dev/tty1
-ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
-echo ROOT_PARTUUID: ${ROOT_PARTUUID} > /dev/tty1
-
-BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-echo BLKID: ${BLKID} > /dev/tty1
-if [ -z "$BLKID" ]
-then
-  echo BLKID wasnt found yet, give the kernel a moment... > /dev/tty1
-  sleep 1
-  BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-
-  if [ -z "$BLKID" ]
-  then
-    echo BLKID still not found, give the kernel one more moment... > /dev/tty1
-    sleep 1
-    BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-
-    if [ -z "$BLKID" ]
-    then
-      echo FAILED TO FIND BLKID AFTER 2 SECONDS, PLEASE OPEN AN ISSUE WITH A SCREENSHOT OF THIS ERROR > /dev/tty1
-      rescue_shell
-    fi
-  fi
-fi
-
-echo BLKID: ${BLKID} > /dev/tty1
-
-# If it's an mmcblk device, the kernel partiton will be p1. If it is a usb device, the partiton will just be 1.
-# Just want everything before the 1
-ROOT_DEV="${BLKID%1:*}"
-echo ROOT_DEV: ${ROOT_DEV} > /dev/tty1
-
-# label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
-# you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
-if blkid | grep -q RESCUESHELL; then
-    rescue_shell debug
-fi
-
-
-if blkid ${ROOT_DEV}2 | grep -q crypto_LUKS; then
-    # decrypt and mount the root filesystem, disable kernel log messages to avoid clashing with the prompt
-    dmesg -n 2
-    echo "Opening encrypted root partition, this will take 30s..."
-    cryptsetup --tries 5 luksOpen ${ROOT_DEV}2 luksroot || rescue_shell
-    dmesg -n 7
-    mount /dev/mapper/luksroot /newroot
+if echo "/dev/console is Ok" > /dev/console;then
+	console_dev=/dev/console
 else
-    # mount the unencrypted root filesystem
-    [ -d "/newroot" ] || mkdir -p /newroot
-    mount ${ROOT_DEV}2 /newroot
+	console_dev=/dev/null
+	exec 0</dev/null
+	exec 1>/dev/null
+	exec 2>/dev/null
 fi
 
-umount /sys
-umount /proc
-
-#switch to the new rootfs
-exec switch_root /newroot /sbin/init
+## just a basic initramfs
+exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'

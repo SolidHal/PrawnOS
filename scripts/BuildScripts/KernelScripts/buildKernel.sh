@@ -52,19 +52,31 @@ ARCH_ARMHF=armhf
 ARCH_ARM64=arm64
 
 cd $BUILD_DIR
-make mrproper
+#TODO don't clean every time for now
+# make mrproper
 
 CROSS_COMPILER=aarch64-linux-gnu-
 KERNEL_ARCH=$ARCH_ARM64
-IMAGE=zImage
+IMAGE=Image
 
 #copy in the resources
 cp "$KERNEL_CONFIG" .config
+cp $INITRAMFS .
 
 
-make CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH oldconfig
 
-# make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
+make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
+
+# build device tree
+# TODO what does this do?
+# make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rk3588-firefly-itx-3588j.img
+# TODO do we need all of the dtbs built?
+make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
+make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH dtbs
+
+
+# want to copy out ./arch/arm64/boot/dts/rockchip/rk3588-firefly-itx-3588j.dtb
+# KERNEL IMAGE IS ACTUALLY arch/arm64/boot/Image not vmlinux
 
 #TODO figure out dts from stock build system
 # TODO looks like kernel.its is boot.its in the stock build, grab it
