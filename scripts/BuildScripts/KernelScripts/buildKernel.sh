@@ -70,9 +70,9 @@ make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
 # build device tree
 # TODO what does this do?
 # make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rk3588-firefly-itx-3588j.img
-# TODO do we need all of the dtbs built?
+# TODO do we need all of the dtbs built? Probably not
 make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
-make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH dtbs
+# make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH dtbs
 
 
 # want to copy out ./arch/arm64/boot/dts/rockchip/rk3588-firefly-itx-3588j.dtb

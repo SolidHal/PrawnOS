@@ -122,24 +122,13 @@ initramfs_src_direct=/etc/prawnos/initramfs_src
 rm -rf $initramfs_src*
 mkdir -p $initramfs_src
 mkdir $initramfs_src/bin
-mkdir $initramfs_src/dev
 mkdir $initramfs_src/etc
 mkdir $initramfs_src/newroot
 mkdir $initramfs_src/boot
-mkdir $initramfs_src/proc
-mkdir $initramfs_src/sys
 mkdir $initramfs_src/sbin
 mkdir $initramfs_src/run
 mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
-
-mknod $initramfs_src/dev/console c 5 1
-mknod $initramfs_src/dev/null c 1 3
-mknod $initramfs_src/dev/tty c 5 0
-mknod $initramfs_src/dev/urandom c 1 9
-mknod $initramfs_src/dev/random c 1 8
-mknod $initramfs_src/dev/zero c 1 5
-
 
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'

@@ -23,26 +23,17 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
-# create anything that we need, but doesn't exist
 [ -d /dev ] || mkdir -m 0755 /dev
-[ -d /root ] || mkdir -m 0700 /root
 [ -d /sys ] || mkdir /sys
 [ -d /proc ] || mkdir /proc
 [ -d /tmp ] || mkdir /tmp
 
-# mount the bare necesities
-mount -n -t sysfs    sysfs     /sys
+
 mount -n -t proc     proc      /proc
+mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
-if echo "/dev/console is Ok" > /dev/console;then
-	console_dev=/dev/console
-else
-	console_dev=/dev/null
-	exec 0</dev/null
-	exec 1>/dev/null
-	exec 2>/dev/null
-fi
+echo "TEST TEST TEST console fart" > /dev/console
+echo "TEST TEST TEST ttyS2 fart" > /dev/ttyS2
 
-## just a basic initramfs
-exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
+exec sh
