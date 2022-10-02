@@ -36,4 +36,10 @@ mount -n -t devtmpfs devtmpfs  /dev
 echo "TEST TEST TEST console fart" > /dev/console
 echo "TEST TEST TEST ttyS2 fart" > /dev/ttyS2
 
-exec sh
+ls /dev/
+
+ls /dev/mmc*
+
+blkid > /dev/ttyS2
+
+exec sh </dev/ttyS2 >/dev/ttyS2 2>&1
