@@ -33,13 +33,22 @@ mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
-echo "TEST TEST TEST console fart" > /dev/console
-echo "TEST TEST TEST ttyS2 fart" > /dev/ttyS2
+##TODO this doesn't actually let us interact with the console during init, debug
+# /etc/console_setup/console_setup.sh
 
-ls /dev/
+echo "TEST TEST TEST console fart"
 
-ls /dev/mmc*
+# TODO waiting for the sd card to be detected by the kernel... sleeping is lame
+# why isn't rootwait/root cmdline arg working here?
+sleep 2
 
-blkid > /dev/ttyS2
+blkid
 
-exec sh </dev/ttyS2 >/dev/ttyS2 2>&1
+mkdir /newroot
+mount  /dev/mmcblk2p2 /newroot
+
+umount /sys
+umount /proc
+
+#switch to the new rootfs
+exec switch_root /newroot /sbin/init

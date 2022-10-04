@@ -158,6 +158,11 @@ cp $RESOURCES/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
 cp $initramfs_src/init $initramfs_src/sbin/init
 
+# add the console setup scripts
+mkdir -p $initramfs_src/etc/
+cp -r $RESOURCES/console_setup $initramfs_src/etc/
+chmod +x $initramfs_src/etc/console_setup/console_setup.sh
+
 #compress and install
 rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
 cd $initramfs_src
