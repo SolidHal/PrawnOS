@@ -1,0 +1,13 @@
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 44fc570..487b0e0 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -378,8 +378,6 @@
+ 		reg-io-width = <4>;
+ 		clocks = <&cru SCLK_UART0>, <&cru PCLK_UART0>;
+ 		clock-names = "baudclk", "apb_pclk";
+-		dmas = <&dmac_peri 1>, <&dmac_peri 2>;
+-		dma-names = "tx", "rx";
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&uart0_xfer>;
+ 		status = "disabled";
