@@ -140,6 +140,11 @@ $(KERNEL_TAR_SIGNATURE): | $(PRAWNOS_BUILD_SOURCES)
 	wget $(WGET_OPTS) $(KERNEL_URL)/$(KERNEL_TAR_SIGNATURE_BASENAME) -O $(KERNEL_TAR_SIGNATURE)
 
 $(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE)
+## TODO: just use the git repo for arm64-rk3588 for now
+  ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+	git clone https://github.com/SolidHal/rk3588-kernel-libre $(PRAWNOS_BUILD)/linux-$(KVER)
+	touch $(KERNEL_EXTRACTED)
+  else
 	gpg --import $(KERNEL_PUBKEY)
 	case $(BLOBBY_BUILD) in \
 		0) \
@@ -158,6 +163,7 @@ $(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE)
 			exit 1 \
 			;; \
 	esac
+  endif
 
 $(KERNEL_TAR): | $(PRAWNOS_BUILD_LOGS) $(PRAWNOS_BUILD_SOURCES)
 	wget $(WGET_OPTS) $(KERNEL_URL)/$(KERNEL_BASENAME) -O $(KERNEL_TAR)

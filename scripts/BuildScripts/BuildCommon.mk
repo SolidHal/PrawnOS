@@ -4,17 +4,21 @@ BUILD_COMMON_MK := 1
 ### PRAWNOS TARGET ARCHS
 PRAWNOS_ARMHF := armhf
 PRAWNOS_ARM64 := arm64
+PRAWNOS_ARM64_RK3588_SERVER := arm64-rk3588-server
 
 # validate that target is set to something we support
 ifeq ($(TARGET),$(PRAWNOS_ARMHF))
 $(info TARGET is $(PRAWNOS_ARMHF))
 else ifeq ($(TARGET),$(PRAWNOS_ARM64))
 $(info TARGET is $(PRAWNOS_ARM64))
+else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+$(info TARGET is $(PRAWNOS_ARM64_RK3588_SERVER))
 else
 $(info TARGET is invalid)
 $(info Must specify a TARGET. Valid TARGETS are)
 $(info TARGET=armhf (Asus c201 aka veyron speedy, Asus c100 aka veyron minnie))
 $(info TARGET=arm64 (Asus c101 aka gru bob, Samsung Chromebook Plus aka gru kevin))
+$(info TARGET=arm64-rk3588-server (Firefly ITX-3588J))
 $(error Set a valid TARGET)
 endif
 
@@ -47,6 +51,17 @@ PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 
 ## ARM64 KERNEL VERSIONS
 else ifeq ($(TARGET),$(PRAWNOS_ARM64))
+KVER := 5.19.5
+PRAWNOS_KERNEL_VER := 1
+PRAWNOS_KERNEL_IMAGE_DEBVER := 1
+PRAWNOS_KERNEL_HEADERS_DEBVER := 1
+
+## TODO handle ARM64-rk3588-server differently for now
+## eventually combine the kernel build with the main ARM64 build
+## or properly package it seperately
+
+## ARM64_RK3588_SERVER KERNEL VERSIONS
+else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
 KVER := 5.19.5
 PRAWNOS_KERNEL_VER := 1
 PRAWNOS_KERNEL_IMAGE_DEBVER := 1
