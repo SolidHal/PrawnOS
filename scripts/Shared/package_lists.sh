@@ -37,6 +37,7 @@ base_debs_install=(
     ca-certificates
     cgpt
     cryptsetup
+    dpkg
     e2fsprogs-l10n
     gdisk
     git
@@ -63,6 +64,8 @@ base_debs_install=(
     pciutils
     psmisc
     rsync
+    sudo
+    sysfsutils
     traceroute
     udev
     usbutils
@@ -76,14 +79,12 @@ base_debs_install=(
 # blueman can be moved to xfce only once gnome-bluetooth in settings works properly
 base_debs_download=(
     acpi-support
-    alsa-utils
     anacron
     avahi-daemon
     blueman
     bluetooth
     crda
     dbus-user-session
-    dpkg
     dkms
     eject
     firefox-esr
@@ -98,8 +99,6 @@ base_debs_download=(
     librsvg2-common
     libutempter0
     libwayland-egl1-mesa
-    sudo
-    sysfsutils
     tasksel
     vlc
     xdg-utils

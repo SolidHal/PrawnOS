@@ -58,8 +58,14 @@ pbuilder_login: $(PBUILDER_CHROOT)
 ### REAL TARGETS
 
 $(PACKAGES_BUILT): $(PBUILDER_CHROOT) | $(PRAWNOS_LOCAL_APT_REPO)
+## TODO: don't need to build any package for the server image for now
+	ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+	@echo skipping building packages for TARGET $(PRAWNOS_ARM64_RK3588_SERVER)
+	touch $(PACKAGES_BUILT)
+	else
 	$(MAKE) -C $(PRAWNOS_FILESYSTEM_PACKAGES) all
 	touch $(PACKAGES_BUILT)
+	endif
 
 $(PBUILDER_CHROOT): | $(PRAWNOS_BUILD_CHROOT_APT_CACHE) $(PRAWNOS_BUILD_LOGS)
 	@echo BUILDING $(PBUILDER_CHROOT)

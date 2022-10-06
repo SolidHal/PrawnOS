@@ -80,6 +80,11 @@ PRAWNOS_FILESYSTEM_RESOURCES=$6
 TARGET_ARCH=$7
 PRAWNOS_BUILD=$8
 
+
+PRAWNOS_ARMHF="armhf"
+PRAWNOS_ARM64="arm64"
+PRAWNOS_ARM64_RK3588_SERVER="arm64-rk3588-server"
+
 outmnt=$(mktemp -d -p "$(pwd)")
 
 outdev=$(losetup -f)
@@ -102,6 +107,7 @@ cleanup() {
   umount -l $outmnt > /dev/null 2>&1
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
+
 
   #delete the base file, we didn't complete our work
   rm -rf $BASE
@@ -174,10 +180,39 @@ create_image() {
   mount -o noatime ${2}p2 $5
 }
 
-# create a 2.5GB image with the Chrome OS partition layout
-# Bumped to keep both Gnome and Xfce
-#TODO: change back to 40 (2GB)
-create_image $BASE $outdev 50M 60 $outmnt
+
+#layout the partitons and write filesystem information for uboot
+create_image_uboot() {
+    dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
+    parted --script $1 mklabel gpt
+    # make a roughtly 150MB boot partition
+    parted --script $1 mkpart sdboot 2048s 100MiB
+    parted --script $1 set 1 legacy_boot on
+    # use the rest for rootfs
+    parted --script $1 mkpart sdrootfs 100MiB 100%
+
+    losetup -P $2 $1
+    # mkfs, label the boot partition
+    mkfs.ext4 -L sdboot ${2}p1
+
+    # mkfs, label the rootfs partition
+    mkfs.ext4 -L sdrootfs ${2}p2
+
+    # don't need to mount the boot partition now since we don't touch it yet
+    # mount the rootfs partition
+    mount -o noatime ${2}p2 $5
+
+}
+
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    # server image is 1GB
+    create_image_uboot $BASE $outdev 50M 20 $outmnt
+else
+    # create a 2.5GB image with the Chrome OS partition layout
+    # Bumped to keep both Gnome and Xfce
+    #TODO: change back to 40 (2GB)
+    create_image $BASE $outdev 50M 60 $outmnt
+fi
 
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" == "" ]
@@ -262,46 +297,62 @@ chmod 644 $outmnt/etc/fstab
 chroot $outmnt apt-get autoremove --purge
 chroot $outmnt apt-get clean
 
-#Download the shared packages to be installed by InstallPackages.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
+prepare_laptop_packages() {
 
-#DEs
-#Download the xfce packages to be installed by InstallPackages.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
+    #Download the shared packages to be installed by InstallPackages.sh:
+    apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
-#Download the gnome packages to be installed by InstallPackages.sh:
-apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
+    #DEs
+    #Download the xfce packages to be installed by InstallPackages.sh:
+    apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
+
+    #Download the gnome packages to be installed by InstallPackages.sh:
+    apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
 
-# we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
-# if required
-# this gets tricky when we build some of the dependencies. To avoid issues
-# first, manually cache the deb
-# apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
-# copy into /var/cache/apt/archives to place it in the cache
-#next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
+    # we want to include all of our built packages in the apt cache for installation later, but we want to let apt download dependencies
+    # if required
+    # this gets tricky when we build some of the dependencies. To avoid issues
+    # first, manually cache the deb
+    # apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
+    # copy into /var/cache/apt/archives to place it in the cache
+    #next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
 
-#Copy the built prawnos debs over to the image, and update apts cache
-cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
-chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
-chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
-chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
-chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
-if [ $TARGET_ARCH = "armhf" ]
-then
-    chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
+    #Copy the built prawnos debs over to the image, and update apts cache
+    cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
+    chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
+    chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
+    chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
+    chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
+    if [ $TARGET_ARCH = "armhf" ]
+    then
+        chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
+    fi
+
+    if [ $TARGET_ARCH = "arm64" ]
+    then
+        chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
+    fi
+
+    ## PrawnOS mesa packages
+    # PrawnOS only has specific mesa packages when the debian upstream versions are too old.
+    # commented out until we need it again
+
+    # chroot $outmnt apt install -y -d ${prawnos_mesa_prebuilt_install[@]}
+
+}
+
+prepare_server_packages() {
+    echo "No server packages to prepare"
+}
+
+
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    prepare_server_packages
+else
+    prepare_laptop_packages
 fi
 
-if [ $TARGET_ARCH = "arm64" ]
-then
-    chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
-fi
-
-## PrawnOS mesa packages
-# PrawnOS only has specific mesa packages when the debian upstream versions are too old.
-# commented out until we need it again
-
-# chroot $outmnt apt install -y -d ${prawnos_mesa_prebuilt_install[@]}
 
 #Setup console font size
 cp -f $build_resources/console-font.sh $outmnt/etc/profile.d/console-font.sh
