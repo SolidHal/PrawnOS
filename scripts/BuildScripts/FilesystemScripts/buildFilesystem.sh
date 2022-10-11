@@ -153,7 +153,6 @@ apt_install() {
 
   retry_until chroot $outmnt apt install -y -d ${package_list[@]}
 
-  cp "$outmnt/var/cache/apt/archives/"* "$PRAWNOS_BUILD/chroot-apt-cache/" || true
   if [ "$install" = true ]; then
       retry_until chroot $outmnt apt install -y ${package_list[@]}
   fi
@@ -205,13 +204,18 @@ create_image_uboot() {
 }
 
 if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
-    # server image is 1GB
-    create_image_uboot $BASE $outdev 50M 20 $outmnt
+    # server image is ~1.5GB
+    create_image_uboot $BASE $outdev 50M 30 $outmnt
 else
     # create a 2.5GB image with the Chrome OS partition layout
     # Bumped to keep both Gnome and Xfce
     #TODO: change back to 40 (2GB)
     create_image $BASE $outdev 50M 60 $outmnt
+fi
+
+
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    TARGET_ARCH="arm64"
 fi
 
 # use default debootstrap mirror if none is specified
@@ -280,7 +284,7 @@ chroot $outmnt locale-gen
 cp "$PRAWNOS_BUILD/chroot-apt-cache/"* "$outmnt/var/cache/apt/archives/" || true
 
 echo IMAGE SIZE
-df -h
+df -h $outmnt
 
 #Make apt retry on download failure
 chroot $outmnt echo "APT::Acquire::Retries \"3\";" > /etc/apt/apt.conf.d/80-retries
@@ -293,11 +297,8 @@ apt_install $PRAWNOS_BUILD $outmnt true ${base_debs_install[@]}
 cp -f $build_resources/external_fstab $outmnt/etc/fstab
 chmod 644 $outmnt/etc/fstab
 
-#Cleanup to reduce install size
-chroot $outmnt apt-get autoremove --purge
-chroot $outmnt apt-get clean
-
 prepare_laptop_packages() {
+    apt_install $PRAWNOS_BUILD $outmnt true ${laptop_base_debs_install[@]}
 
     #Download the shared packages to be installed by InstallPackages.sh:
     apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
@@ -343,7 +344,7 @@ prepare_laptop_packages() {
 }
 
 prepare_server_packages() {
-    echo "No server packages to prepare"
+    apt_install $PRAWNOS_BUILD $outmnt true ${server_base_debs_install[@]}
 }
 
 
@@ -352,6 +353,10 @@ if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
 else
     prepare_laptop_packages
 fi
+
+#Cleanup to reduce install size
+chroot $outmnt apt-get autoremove --purge
+chroot $outmnt apt-get clean
 
 
 #Setup console font size
@@ -363,6 +368,9 @@ echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
+
+echo IMAGE SIZE
+df -h $outmnt
 
 # do a non-error cleanup
 umount -l $outmnt > /dev/null 2>&1
