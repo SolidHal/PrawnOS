@@ -150,11 +150,11 @@ Log in as 'root', there is no password. Finally, enable booting PrawnOS from USB
 
 To enable booting unsigned media:
 
-`# crosssystem dev_boot_signed_only=0`
+`# crossystem dev_boot_signed_only=0`
 
 To enable USB booting:
 
-`# crosssystem dev_boot_usb=1`
+`# crossystem dev_boot_usb=1`
 
 Finally, reboot or shutdown the system:
 
