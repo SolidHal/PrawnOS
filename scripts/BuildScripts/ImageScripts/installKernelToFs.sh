@@ -81,8 +81,13 @@ ARCH_ARM64=arm64
 if [ "$TARGET" == "$ARCH_ARMHF" ]; then
     # kernel doesn't differentiate between arm and armhf
     KERNEL_ARCH=arm
+    BOOTLOADER=coreboot
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     KERNEL_ARCH=$ARCH_ARM64
+    BOOTLOADER=coreboot
+elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    KERNEL_ARCH=$ARCH_ARM64
+    BOOTLOADER=uboot
 else
     echo "no valid target arch specified"
 fi
@@ -114,29 +119,52 @@ losetup -P $outdev $OUTNAME
 #mount the root filesystem
 mount -o noatime ${outdev}p2 $outmnt
 
-# put the kernel in the kernel partition, modules in /lib/modules and AR9271
-# firmware in /lib/firmware
-kernel_size=65536
-#blank the kernel partition first, with of zeros
-#this is very very important, not doing this or using the incorrect kernel size can lead to very strange and difficult to debug issues
-dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
-#now write the new kernel
-dd if=$KERNEL_BUILD/vmlinux.kpart of=${outdev}p1
+if [ "$BOOTLOADER" == "coreboot" ]; then
+    # put the kernel in the kernel partition, modules in /lib/modules and AR9271
+    # firmware in /lib/firmware
+    kernel_size=65536
+    #blank the kernel partition first, with of zeros
+    #this is very very important, not doing this or using the incorrect kernel size can lead to very strange and difficult to debug issues
+    dd if=/dev/zero of=${outdev}p1 conv=notrunc bs=512 count=$kernel_size
+    #now write the new kernel
+    dd if=$KERNEL_BUILD/vmlinux.kpart of=${outdev}p1
 
-#install the kernel image package to the chroot so it can be updated by apt later
-#need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
-#maybe it would make more sense to run this on install, but then a usb booting device couldn't upgrade its kernel
-cp $KERNEL_PACKAGE_PATH/$KERNEL_PACKAGE_DEB $outmnt/
-chroot $outmnt dpkg --unpack /$KERNEL_PACKAGE_DEB
-chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE_NAME.postinst
-chroot $outmnt dpkg --configure $KERNEL_PACKAGE_NAME
-chroot $outmnt rm /$KERNEL_PACKAGE_DEB
+    #install the kernel image package to the chroot so it can be updated by apt later
+    #need to do funky things to avoid running the postinst script that dds the kernel to the kernel partition
+    #maybe it would make more sense to run this on install, but then a usb booting device couldn't upgrade its kernel
+    cp $KERNEL_PACKAGE_PATH/$KERNEL_PACKAGE_DEB $outmnt/
+    chroot $outmnt dpkg --unpack /$KERNEL_PACKAGE_DEB
+    chroot $outmnt rm /var/lib/dpkg/info/$KERNEL_PACKAGE_NAME.postinst
+    chroot $outmnt dpkg --configure $KERNEL_PACKAGE_NAME
+    chroot $outmnt rm /$KERNEL_PACKAGE_DEB
 
-#install the kernel modules and headers
-#we dont make any modules yet
-# make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_MOD_PATH=$outmnt modules_install
-make -C $KERNEL_BUILD ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
-# the ath9k firmware is built into the kernel image, so nothing else must be done
+    #install the kernel modules and headers
+    #we dont make any modules yet
+    # make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_MOD_PATH=$outmnt modules_install
+    make -C $KERNEL_BUILD ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
+    # the ath9k firmware is built into the kernel image, so nothing else must be done
+
+
+elif [ "$BOOTLOADER" == "uboot" ]; then
+    #mount the boot filesystem
+    chroot $outmnt mkdir -p /boot
+    mount ${outdev}p1 $outmnt/boot
+
+    #install the kernel image package to the chroot
+    cp $KERNEL_PACKAGE_PATH/$KERNEL_PACKAGE_DEB $outmnt/
+    chroot $outmnt dpkg --install /$KERNEL_PACKAGE_DEB
+    chroot $outmnt rm /$KERNEL_PACKAGE_DEB
+
+    #install the kernel modules and headers
+    #TODO we dont make any modules yet
+    # make -C build/$TARGET/linux-$KVER ARCH=$KERNEL_ARCH INSTALL_MOD_PATH=$outmnt modules_install
+    #TODO we dont make any modules yet
+    # make -C $KERNEL_BUILD ARCH=$KERNEL_ARCH INSTALL_HDR_PATH=$outmnt/usr/src/linux-$KVER-gnu headers_install
+
+else
+    echo "no valid target bootloader"
+    exit 1
+fi
 
 umount -l $outmnt > /dev/null 2>&1
 rmdir $outmnt > /dev/null 2>&1

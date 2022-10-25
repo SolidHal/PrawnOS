@@ -118,15 +118,18 @@ if [ "$BOOTLOADER" == "coreboot" ]; then
 
 elif [ "$BOOTLOADER" == "uboot" ]; then
     #copy in the resources
-    #TODO use different initramfs for rk3588 image
     cp "$KERNEL_CONFIG" .config
     #TODO use different initramfs for rk3588 image, don't bake it into the kernel?
     cp $INITRAMFS .
 
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
-    # TODO want to copy out ./arch/arm64/boot/dts/rockchip/rk3588-firefly-itx-3588j.dtb
-    # TODO KERNEL IMAGE IS ACTUALLY arch/arm64/boot/Image not vmlinux
+
+    # vmlinux.kpart is the build complete flag to stay consistent with the other platforms
+    # though it is unused for uboot
+    # dtb is /arch/arm64/boot/dts/rockchip/rk3588-firefly-itx-3588j.dtb
+    # Actual kernel image is arch/arm64/boot/Image
+    touch vmlinux.kpart
 else
     echo "no valid target bootloader"
     exit 1

@@ -1,0 +1,12 @@
+Source: prawnos-linux-image-arm64
+Section: kernel
+Priority: required
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: prawnos-linux-image-arm64
+Architecture: arm64
+Depends: ${misc:Depends} coreutils
+Description: the PrawnOS linux kernel distribution. Made up of linux-libre, ath9k firmware, PrawnOS initramfs, and varying numbers of patches

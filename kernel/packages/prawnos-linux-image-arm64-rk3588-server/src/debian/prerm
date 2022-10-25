@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+ensure_exists() {
+    if [ ! -f "$1" ]; then
+        echo "$1 does not exist! Is /boot mounted?"
+        exit 1
+    fi
+}
+
+ensure_exists /boot/Image
+ensure_exists /boot/kernel.dtb
+ensure_exists /boot/initrd
+ensure_exists /boot/extlinux/extlinux.conf

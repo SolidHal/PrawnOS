@@ -1,0 +1,5 @@
+prawnos-linux-image-arm64-rk3588-server (5.19.5-1-1) stable; urgency=medium
+
+  * Initial packaged release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Tue, 25 Oct 2022 22:29:42 -0700
