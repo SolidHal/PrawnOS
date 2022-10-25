@@ -147,8 +147,10 @@ if [ "$TARGET" == "$ARCH_ARMHF" ]; then
     LIBS_DIR=$armhf_libs
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     LIBS_DIR=$arm64_libs
+elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    LIBS_DIR=$arm64_libs
 else
-    echo "no valid target arch specified"
+    echo "Cannot build initramfs: no valid target arch specified"
     exit 1
 fi
 cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/

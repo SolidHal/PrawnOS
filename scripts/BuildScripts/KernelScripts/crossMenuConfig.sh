@@ -60,8 +60,11 @@ if [ "$TARGET" == "$ARCH_ARMHF" ]; then
 elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     ARCH=$ARCH_ARM64
+elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
 else
-    echo "no valid target arch specified"
+    echo "Cannot run cross make menuconfig: no valid target arch specified"
 fi
 
 cp $CONFIG .config

@@ -49,7 +49,7 @@ $(PACKAGE_NAME_ORIG_TAR):
 	cp $(PRAWNOS_KERNEL_RK3588_BUILT) $(ORIG)/Image
 	cp $(PRAWNOS_KERNEL_DTB_RK3588_FIREFLY_BUILT) $(ORIG)/kernel.dtb
 	cp $(PRAWNOS_INITRAMFS_IMAGE) $(ORIG)/initrd
-	cp $(KERNEL_RESOURCES)/extlinux/extlinux.conf $(ORIG)/extlinux.conf
+	cp $(PRAWNOS_KERNEL_RESOURCES)/extlinux.conf $(ORIG)/extlinux.conf
 	tar -czf $(PACKAGE_NAME_ORIG_TAR) -C $(ORIG)/ .
 
 

@@ -49,6 +49,6 @@ elif [ "$TARGET" == "$ARCH_ARM64" ]; then
 elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
     echo skip for now, we are just using a git repo for the source
 else
-    echo "no valid target arch specified"
+    echo "Cannot patch kernel: no valid target arch specified"
     exit 1
 fi

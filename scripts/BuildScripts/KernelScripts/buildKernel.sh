@@ -80,7 +80,7 @@ elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
     IMAGE=Image
     BOOTLOADER=uboot
 else
-    echo "no valid target arch specified"
+    echo "Cannot build kernel: no valid target arch specified"
     exit 1
 fi
 

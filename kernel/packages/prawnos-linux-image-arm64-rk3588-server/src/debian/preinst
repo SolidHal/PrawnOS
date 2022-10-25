@@ -2,21 +2,14 @@
 
 set -e
 
-ensure_exists() {
-    if [ ! -f "$1" ]; then
-        echo "$1 does not exist! Is /boot mounted?"
-        exit 1
-    fi
-}
-
-ensure_exists /boot/Image
-ensure_exists /boot/kernel.dtb
-ensure_exists /boot/initrd
-ensure_exists /boot/extlinux/extlinux.conf
+if [ ! -d "/boot" ]; then
+    echo "/boot does not exist! Make sure the boot partition is mounted at /boot"
+    exit 1
+fi
 
 #TODO move these files as a backup extlinux boot option, for now just copy them for manual recovery
 mkdir -p /boot/oldkernel
-cp /boot/Image /boot/oldkernel/
-cp /boot/kernel.dtb /boot/oldkernel/
-cp /boot/initrd /boot/oldkernel/
-cp /boot/extlinux/extlinux.conf /boot/oldkernel/
+cp /boot/Image /boot/oldkernel/ 2>/dev/null || true
+cp /boot/kernel.dtb /boot/oldkernel/ 2>/dev/null || true
+cp /boot/initrd /boot/oldkernel/ 2>/dev/null || true
+cp /boot/extlinux/extlinux.conf /boot/oldkernel/ 2>/dev/null || true
