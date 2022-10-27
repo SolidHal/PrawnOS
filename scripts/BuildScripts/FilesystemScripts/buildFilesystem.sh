@@ -294,8 +294,13 @@ chroot $outmnt apt update
 apt_install $PRAWNOS_BUILD $outmnt true ${base_debs_install[@]}
 
 #add the live-boot fstab
-cp -f $build_resources/external_fstab $outmnt/etc/fstab
-chmod 644 $outmnt/etc/fstab
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    cp -f $build_resources/external_fstab_server $outmnt/etc/fstab
+    chmod 644 $outmnt/etc/fstab
+else
+    cp -f $build_resources/external_fstab $outmnt/etc/fstab
+    chmod 644 $outmnt/etc/fstab
+fi
 
 prepare_laptop_packages() {
     apt_install $PRAWNOS_BUILD $outmnt true ${laptop_base_debs_install[@]}
@@ -368,6 +373,12 @@ echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
 
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
+
+#Setup systemd-networkd networking on the server image
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    cp -f $build_resources/20-dhcp-server.network $outmnt/etc/systemd/network/20-dhcp-server.network
+fi
+
 
 echo IMAGE SIZE
 df -h $outmnt
