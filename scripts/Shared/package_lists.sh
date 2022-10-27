@@ -80,6 +80,7 @@ laptop_base_debs_install=(
 )
 
 server_base_debs_install=(
+    openssh-server
 )
 
 # blueman can be moved to xfce only once gnome-bluetooth in settings works properly

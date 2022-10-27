@@ -236,11 +236,21 @@ sudo debootstrap --arch=$TARGET_ARCH \
                  $outmnt \
                  $PRAWNOS_DEBOOTSTRAP_MIRROR \
 
-chroot $outmnt passwd -d root
+
+# create a user "prawn" with password "prawn" so the server is accessible over ssh
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    useradd -m -U -s /bin/bash --password $(openssl passwd -1 "prawn") prawn
+    usermod -a -G sudo,netdev,input,video prawn
+else
+    chroot $outmnt passwd -d root
+fi
+
+
 echo -n PrawnOS > $outmnt/etc/hostname
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
+#We replace hosts with a valid entry at the end of the build
 cp /etc/hosts $outmnt/etc/
 cp $build_resources_apt/sources.list $outmnt/etc/apt/sources.list
 cp $build_resources_apt/prawnos.list $outmnt/etc/apt/sources.list.d/
