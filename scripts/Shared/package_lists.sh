@@ -59,6 +59,7 @@ base_debs_install=(
     net-tools
     netcat-openbsd
     network-manager
+    ntp
     parted
     pciutils
     psmisc
