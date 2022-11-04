@@ -239,8 +239,8 @@ sudo debootstrap --arch=$TARGET_ARCH \
 
 # create a user "prawn" with password "prawn" so the server is accessible over ssh
 if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
-    useradd -m -U -s /bin/bash --password $(openssl passwd -1 "prawn") prawn
-    usermod -a -G sudo,netdev,input,video prawn
+    chroot $outmnt useradd -m -U -s /bin/bash --password $(openssl passwd -1 "prawn") prawn
+    chroot $outmnt usermod -a -G sudo,netdev,input,video prawn
 else
     chroot $outmnt passwd -d root
 fi
