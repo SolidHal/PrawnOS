@@ -34,5 +34,26 @@ TODO:
 1) test sata: DONE
 2) test pcie: DONE
 3) test m.2: DONE
-4) test emmc install & boot
-5) start looking at uboot
+4) test usb: DONE
+5) test fan controller: DONE
+6) test emmc install & boot
+  - mount & write sd card boot part to emmc boot part
+  - remove partitions 4-7, create a root fs partition
+  - copy the sd root fs to it, like the prawnos installer does
+7) start looking at uboot
+  - create a package with prawnos partitions, stock uboot that we can restore in maskrom if necessary
+TODO: theory: if emmc p1 is not bootable, it might try p2 instead? copy p1 to p2 before testing uboot images
+
+
+# Fan issues
+
+the cooling-levels of the fan don't seem to be properly changing with the trips/temps
+```
+cat /sys/class/thermal/cooling_device0/cur_state
+```
+stays at 0
+even when
+```
+cat /sys/class/thermal/thermal_zone0/temp
+```
+goes over a temp trip, defined in the dtsi soc_thermal table
