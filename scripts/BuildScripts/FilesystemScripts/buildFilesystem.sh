@@ -184,22 +184,24 @@ create_image() {
 create_image_uboot() {
     dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
     parted --script $1 mklabel gpt
+    # make a 4MB uboot partition
+    parted --script $1 mkpart uboot 16384s 24575s
     # make a roughtly 150MB boot partition
-    parted --script $1 mkpart sdboot 2048s 100MiB
-    parted --script $1 set 1 legacy_boot on
+    parted --script $1 mkpart sdboot 24576s 221183s
+    parted --script $1 set 2 legacy_boot on
     # use the rest for rootfs
-    parted --script $1 mkpart sdrootfs 100MiB 100%
+    parted --script $1 mkpart sdrootfs 221184s 100%
 
     losetup -P $2 $1
     # mkfs, label the boot partition
-    mkfs.ext4 -L sdboot ${2}p1
+    mkfs.ext4 -L sdboot ${2}p2
 
     # mkfs, label the rootfs partition
-    mkfs.ext4 -L sdrootfs ${2}p2
+    mkfs.ext4 -L sdrootfs ${2}p3
 
     # don't need to mount the boot partition now since we don't touch it yet
     # mount the rootfs partition
-    mount -o noatime ${2}p2 $5
+    mount -o noatime ${2}p3 $5
 
 }
 
