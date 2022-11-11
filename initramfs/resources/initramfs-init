@@ -23,6 +23,18 @@
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+echo In PrawnOS Init
+
+#used to parse the kernel cmdline
+cmdline() {
+    local value
+    value=" $(cat /proc/cmdline) "
+    value="${value##* ${1}=}"
+    value="${value%% *}"
+    [ "${value}" != "" ] && echo "${value}"
+}
+
+
 [ -d /dev ] || mkdir -m 0755 /dev
 [ -d /sys ] || mkdir /sys
 [ -d /proc ] || mkdir /proc
@@ -33,19 +45,38 @@ mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
-##TODO this doesn't actually let us interact with the console during init, debug
-# /etc/console_setup/console_setup.sh
-
-echo "TEST TEST TEST console fart"
-
 # TODO waiting for the sd card to be detected by the kernel... sleeping is lame
 # why isn't rootwait/root cmdline arg working here?
 sleep 2
 
-blkid
 
-mkdir /newroot
-mount  /dev/mmcblk2p2 /newroot
+# get the root device, so we can find the boot partiton
+STORAGENODE=$(cmdline root)
+
+#TODO it would be nice if uboot put a root=/dev/mmc* on the cmdline for us
+if echo $STORAGENODE | grep -q "DEV=sdcard"; then
+  echo "Booting from sd..."
+  BLKID=$(/sbin/blkid | grep "sdrootfs" )
+
+elif echo $STORAGENODE | grep -q "DEV=emmc"; then
+  echo "Booting from emmc..."
+  BLKID=$(/sbin/blkid | grep "emmcrootfs" )
+
+else
+  echo $STORAGENODE is not a valid boot device
+  exit 1
+
+fi
+
+
+echo BLKID: $BLKID
+# strip off everything after the colon
+ROOTFS="${BLKID%:*}"
+echo ROOTFS: $ROOTFS
+
+# mount & boot
+mkdir -p /newroot
+mount  $ROOTFS /newroot || mount /dev/mmcblk2p2 /newroot
 
 umount /sys
 umount /proc

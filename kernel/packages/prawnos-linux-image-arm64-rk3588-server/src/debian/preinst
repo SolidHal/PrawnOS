@@ -8,6 +8,7 @@ if [ ! -d "/boot" ]; then
 fi
 
 #TODO move these files as a backup extlinux boot option, for now just copy them for manual recovery
+# For now postinst also relies on the old extlinux.conf to setup its root dev correctly
 mkdir -p /boot/oldkernel
 cp /boot/Image /boot/oldkernel/ 2>/dev/null || true
 cp /boot/kernel.dtb /boot/oldkernel/ 2>/dev/null || true
