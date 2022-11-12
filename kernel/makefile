@@ -1,8 +1,10 @@
 ifndef KERNEL_MK
 KERNEL_MK := 1
+
 ifndef PRAWNOS_ROOT
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 endif
+
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 include $(PRAWNOS_ROOT)/initramfs/makefile
 
@@ -189,4 +191,4 @@ $(PRAWNOS_KERNEL_BUILT): $(KERNEL_ATH9K_INSTALLED) $(PRAWNOS_INITRAMFS_IMAGE)
 	rm -rf $(KERNEL_BUILD_LOG)
 	$(PRAWNOS_KERNEL_SCRIPTS_BUILD) $(KVER) $(KERNEL_RESOURCES) $(PRAWNOS_KERNEL_BUILD) $(PRAWNOS_INITRAMFS_IMAGE) $(TARGET) $(KERNEL_CONFIG) 2>&1 | tee $(KERNEL_BUILD_LOG)
 
-endif
+endif ## KERNEL_MK
