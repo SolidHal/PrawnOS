@@ -28,35 +28,35 @@ then
 fi
 if [ -z "$2" ]
 then
-    echo "No deb kernel version supplied"
+    echo "No deb version supplied"
     exit 1
 fi
 if [ -z "$3" ]
 then
-    echo "No prawnos kernel version supplied"
+    echo "No prawnos version supplied"
     exit 1
 fi
 if [ -z "$4" ]
 then
-    echo "No prawnos kernel image package path supplied"
+    echo "No prawnos image package path supplied"
     exit 1
 fi
 
 
 DEBSRC=$1
-DEBKVER=$2
-PRAWNOSKVER=$3
+DEBVER=$2
+PRAWNOSDEBVER=$3
 PACKAGEPATH=$4
 
 cd $DEBSRC
 # check the supplied kver against the current kver
-CUR_DEBKVER=$(dpkg-parsechangelog --show-field Version)
+CUR_DEBVER=$(dpkg-parsechangelog --show-field Version)
 
-if [ "$DEBKVER" != "$CUR_DEBKVER" ]; then
-    debchange --no-conf --newversion $DEBKVER -M release $DEBKVER
+if [ "$DEBVER" != "$CUR_DEBVER" ]; then
+    debchange --no-conf --newversion $DEBVER -M release $DEBVER
     debchange --no-conf --release "" -M
-    echo Updated kernel package to $DEBKVER
+    echo Updated package to $DEBVER
 else
-    echo Kept kernel package at $DEBKVER
+    echo Kept package at $DEBVER
 fi
 

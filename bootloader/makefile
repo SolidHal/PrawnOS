@@ -32,7 +32,7 @@ patch_bootloader: $(BOOTLOADER_PATCHED)
 .PHONY: bootloader_image_package
 bootloader_image_package: $(PRAWNOS_BOOTLOADER_BUILT)
 ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
-	$(MAKE) -C $(PRAWNOS_BOOTLOADER_PACKAGE_IMAGE)
+	$(MAKE) -C $(PRAWNOS_BOOTLOADER_UBOOT_PACKAGE_IMAGE)
 else
   echo "No bootloader package to build for target ${TARGET}"
 endif
@@ -40,7 +40,7 @@ endif
 .PHONY: bootloader_image_package_install
 bootloader_image_package_install: bootloader_image_package
 ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
-	$(MAKE) -C $(PRAWNOS_BOOTLOADER_PACKAGE_IMAGE) install INSTALL_TARGET=$(PRAWNOS_BUILD)
+	$(MAKE) -C $(PRAWNOS_BOOTLOADER_UBOOT_PACKAGE_IMAGE) install INSTALL_TARGET=$(PRAWNOS_BUILD)
 else
   echo "No bootloader package to install for target ${TARGET}"
 endif

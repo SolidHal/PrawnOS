@@ -1,0 +1,5 @@
+prawnos-uboot-image-arm64-rk3588-server (2023.01-rc1-1-1) stable; urgency=medium
+
+  * Initial packaged release.
+
+ -- Hal Emmerich <hal@halemmerich.com>  Wed, 16 Nov 2022 22:29:42 -0700

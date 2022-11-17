@@ -3,15 +3,9 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
-ifeq ($(TARGET),$(PRAWNOS_ARMHF))
-$(error Cant build armhf kernel package with arm64 rk3588 server target)
+ifneq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+$(error Cant build arm64 rk3588 server bootloader package with non arm64 rk3588 server target)
 endif
-
-ifeq ($(TARGET),$(PRAWNOS_ARM64))
-$(error Cant build arm64 kernel package with arm64 rk3588 server target)
-endif
-
-# TODO: modify this to work with the server kernel
 
 #package specific vars
 DEB_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_DEB_VER)
@@ -35,7 +29,7 @@ default: $(PACKAGE_NAME_DEB)
 $(PACKAGE_NAME_DEB): $(PACKAGE_NAME_ORIG_TAR)
 	@echo Building $@
 	$(MAKE) clean
-	$(PRAWNOS_KERNEL_SCRIPTS_UPDATE_DEB_FILES) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/src $(DEB_VERSION) $(PRAWNOS_VERSION) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)
+	$(PRAWNOS_PACKAGE_SCRIPTS_UPDATE_DEB_FILES) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)/src $(DEB_VERSION) $(PRAWNOS_VERSION) $(PRAWNOS_KERNEL_PACKAGE_IMAGE)
 	$(PRAWNOS_PACKAGE_SCRIPTS_PBUILD) $(PACKAGE_NAME_DEB) \
                                             $(PBUILDER_VARS) \
                                             $(PRAWNOS_LOCAL_APT_VARS) \

@@ -116,10 +116,12 @@ trap cleanup INT TERM EXIT
 #Mount the build filesystem image
 
 losetup -P $outdev $OUTNAME
-#mount the root filesystem
-mount -o noatime ${outdev}p2 $outmnt
 
 if [ "$BOOTLOADER" == "coreboot" ]; then
+
+    #mount the root filesystem
+    mount -o noatime ${outdev}p2 $outmnt
+
     # put the kernel in the kernel partition, modules in /lib/modules and AR9271
     # firmware in /lib/firmware
     kernel_size=65536
@@ -146,9 +148,12 @@ if [ "$BOOTLOADER" == "coreboot" ]; then
 
 
 elif [ "$BOOTLOADER" == "uboot" ]; then
+    #mount the root filesystem
+    mount -o noatime ${outdev}p3 $outmnt
+
     #mount the boot filesystem
     chroot $outmnt mkdir -p /boot
-    mount ${outdev}p1 $outmnt/boot
+    mount ${outdev}p2 $outmnt/boot
 
     #install the kernel image package to the chroot
     cp $KERNEL_PACKAGE_PATH/$KERNEL_PACKAGE_DEB $outmnt/

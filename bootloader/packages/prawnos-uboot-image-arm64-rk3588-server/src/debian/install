@@ -1,0 +1,2 @@
+uboot.img etc/prawnos/uboot
+FlashBootloaderPartition.sh etc/prawnos/uboot
