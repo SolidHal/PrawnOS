@@ -41,4 +41,8 @@ BUILD_DIR=$3
 UBOOT_CONFIG=$4
 
 # TODO copy in config, build uboot
-# TODO then need to setup a package, like we have for the kernel, for uboot as well
+
+# TODO in the u-boot tree
+# make distclean
+# CROSS_COMPILE=aarch64-linux-gnu- make rk3588_defconfig firefly-linux.config
+# CROSS_COMPILE=aarch64-linux-gnu- make all
