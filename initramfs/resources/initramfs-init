@@ -45,8 +45,12 @@ mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
+
+
+
 # TODO waiting for the sd card to be detected by the kernel... sleeping is lame
 # why isn't rootwait/root cmdline arg working here?
+echo "Waiting for the kenrel to see the boot device..."
 sleep 2
 
 
@@ -56,11 +60,13 @@ STORAGENODE=$(cmdline root)
 #TODO it would be nice if uboot put a root=/dev/mmc* on the cmdline for us
 if echo $STORAGENODE | grep -q "DEV=sdcard"; then
   echo "Booting from sd..."
-  BLKID=$(/sbin/blkid | grep "sdrootfs" )
+  ROOT_BLKID=$(/sbin/blkid | grep "sdrootfs" )
+  BOOT_BLKID=$(/sbin/blkid | grep "sdboot" )
 
 elif echo $STORAGENODE | grep -q "DEV=emmc"; then
   echo "Booting from emmc..."
-  BLKID=$(/sbin/blkid | grep "emmcrootfs" )
+  ROOT_BLKID=$(/sbin/blkid | grep "emmcrootfs" )
+  BOOT_BLKID=$(/sbin/blkid | grep "emmcboot" )
 
 else
   echo $STORAGENODE is not a valid boot device
@@ -68,15 +74,41 @@ else
 
 fi
 
-
-echo BLKID: $BLKID
+echo ROOT_BLKID: $ROOT_BLKID
 # strip off everything after the colon
-ROOTFS="${BLKID%:*}"
+ROOTFS="${ROOT_BLKID%:*}"
 echo ROOTFS: $ROOTFS
+
+echo BOOT_BLKID: $BOOT_BLKID
+# strip off everything after the colon
+BOOTFS="${BOOT_BLKID%:*}"
+echo BOOTFS: $BOOTFS
+
+# mount /boot so we can read configuration
+mkdir -p /boot
+mount $BOOTFS /boot
+
+# setup network
+/usr/sbin/ifconfig eth0 up
+/usr/sbin/ifconfig eth1 up
+udhcpc --retries 5 --quit --script /bin/udhcp_simple.script
+echo "dhcp complete. Configuration:"
+/usr/sbin/ifconfig
+
+# mount pseudoterminal, start sshd
+mkdir /dev/pts
+mount -t devpts none /dev/pts
+/usr/sbin/sshd
+
+#TODO remove, just for debug
+exec /bin/sh
+
+#TODO remove, just here for now to test ssh
+sleep 120
 
 # mount & boot
 mkdir -p /newroot
-mount  $ROOTFS /newroot || mount /dev/mmcblk2p2 /newroot
+mount  $ROOTFS /newroot || mount /dev/mmcblk2p3 /newroot
 
 umount /sys
 umount /proc
