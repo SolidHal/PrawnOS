@@ -227,7 +227,9 @@ install() {
     done
 
     echo Creating ext4 filesystem on root partition
-    mkfs.ext4 -F -b 1024 $ROOT_PARTITION
+    # zero out the start to avoid mkfs asking if we really want to overwrite
+    dd if=/dev/zero of=${ROOT_PARTITION} bs=512 count=1k
+    mkfs.ext4 -b 1024 $ROOT_PARTITION
     INSTALL_MOUNT=/mnt/install_mount
     mkdir -p $INSTALL_MOUNT/
     mount $ROOT_PARTITION $INSTALL_MOUNT/
