@@ -34,6 +34,27 @@ cmdline() {
     [ "${value}" != "" ] && echo "${value}"
 }
 
+# start an ssh server
+ssh_server() {
+    # setup network
+    /usr/sbin/ifconfig eth0 up
+    /usr/sbin/ifconfig eth1 up
+    udhcpc --retries 5 --quit --script /bin/udhcp_simple.script
+    echo "dhcp complete. Configuration:"
+    /usr/sbin/ifconfig
+
+    # mount pseudoterminal, start sshd
+    mkdir /dev/pts
+    mount -t devpts none /dev/pts
+    /usr/sbin/sshd
+}
+
+rescue_shell() {
+   ssh_server
+   echo "sshd server started, entering rescueshell..."
+   /bin/sh
+}
+
 
 [ -d /dev ] || mkdir -m 0755 /dev
 [ -d /sys ] || mkdir /sys
@@ -45,14 +66,13 @@ mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
-
-
+mkdir -p /newroot
+mkdir -p /boot
 
 # TODO waiting for the sd card to be detected by the kernel... sleeping is lame
 # why isn't rootwait/root cmdline arg working here?
-echo "Waiting for the kenrel to see the boot device..."
+echo "Waiting for the kernel to see the boot device..."
 sleep 2
-
 
 # get the root device, so we can find the boot partiton
 STORAGENODE=$(cmdline root)
@@ -85,31 +105,26 @@ BOOTFS="${BOOT_BLKID%:*}"
 echo BOOTFS: $BOOTFS
 
 # mount /boot so we can read configuration
-mkdir -p /boot
-mount $BOOTFS /boot
+mount $BOOTFS /boot || rescue_shell
 
-# setup network
-/usr/sbin/ifconfig eth0 up
-/usr/sbin/ifconfig eth1 up
-udhcpc --retries 5 --quit --script /bin/udhcp_simple.script
-echo "dhcp complete. Configuration:"
-/usr/sbin/ifconfig
+if blkid $ROOTFS | grep -q crypto_LUKS; then
+    # start the ssh server so a user can decrypt and mount the root filesystem
+    ssh_server
 
-# mount pseudoterminal, start sshd
-mkdir /dev/pts
-mount -t devpts none /dev/pts
-/usr/sbin/sshd
+    echo "CRYPTO_ROOTFS=${ROOTFS}" >> /root/.profile
+    echo "sshd server started, waiting for decryption of ${ROOTFS}"
+    # disable kernel log messages to avoid clashing with the prompt
+    dmesg -n 2
+    # start shell to allow for local decryption
+    export CRYPTO_ROOTFS=${ROOTFS}
+    /bin/sh
+else
+    # mount the unencrypted root filesystem
+    mount $ROOTFS /newroot || rescue_shell
+fi
 
-#TODO remove, just for debug
-exec /bin/sh
-
-#TODO remove, just here for now to test ssh
-sleep 120
-
-# mount & boot
-mkdir -p /newroot
-mount  $ROOTFS /newroot || mount /dev/mmcblk2p3 /newroot
-
+# /dev/pts may not be mounted
+umount /dev/pts || true
 umount /sys
 umount /proc
 

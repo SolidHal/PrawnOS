@@ -235,6 +235,13 @@ if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
     # install a profile for the root user
     cp $RESOURCES/profile $initramfs_src/root/.profile
 
+    # Add command to unlock luks volumes to shell history for easier use
+    echo /root/decrypt_root.sh >> $initramfs_src/root/.ash_history
+    chmod 600 $initramfs_src/root/.ash_history
+
+    # install motd
+    cp $RESOURCES/motd $initramfs_src/etc/motd
+
     # sshd requires /var/log/lastlog for tracking login information
     mkdir -p -m 0755 $initramfs_src/var/log
     touch $initramfs_src/var/log/lastlog
@@ -245,6 +252,8 @@ if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
     #TODO don't use weak crypto keys
     ssh-keygen -q -t rsa -f $initramfs_src/etc/ssh/ssh_host_rsa_key -C "" -N ""
 
+    # install decryption helper script
+    cp $RESOURCES/decrypt_root.sh $initramfs_src/root/decrypt_root.sh
 fi
 
 rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
