@@ -389,6 +389,7 @@ chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
 #Setup systemd-networkd networking on the server image
 if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
     cp -f $build_resources/20-dhcp-server.network $outmnt/etc/systemd/network/20-dhcp-server.network
+    chroot $outmnt systemctl enable systemd-networkd
 fi
 
 
