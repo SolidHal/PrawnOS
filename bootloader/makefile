@@ -34,7 +34,7 @@ bootloader_image_package: $(PRAWNOS_BOOTLOADER_BUILT)
 ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
 	$(MAKE) -C $(PRAWNOS_BOOTLOADER_UBOOT_PACKAGE_IMAGE)
 else
-  echo "No bootloader package to build for target ${TARGET}"
+	echo "No bootloader package to build for target ${TARGET}"
 endif
 
 .PHONY: bootloader_image_package_install
@@ -42,7 +42,7 @@ bootloader_image_package_install: bootloader_image_package
 ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
 	$(MAKE) -C $(PRAWNOS_BOOTLOADER_UBOOT_PACKAGE_IMAGE) install INSTALL_TARGET=$(PRAWNOS_BUILD)
 else
-  echo "No bootloader package to install for target ${TARGET}"
+	echo "No bootloader package to install for target ${TARGET}"
 endif
 
 
@@ -61,7 +61,7 @@ ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
 	git clone git@github.com:SolidHal/rk3588-u-boot.git $(PRAWNOS_BOOTLOADER_BUILD)
 	touch $(BOOTLOADER_EXTRACTED)
 else
-  echo "No bootloader source to extract for target ${TARGET}"
+	echo "No bootloader source to extract for target ${TARGET}"
 endif
 
 # TODO: once uboot is buildable, do that instead

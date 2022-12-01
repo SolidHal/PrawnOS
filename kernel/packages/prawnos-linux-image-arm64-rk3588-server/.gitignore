@@ -21,6 +21,7 @@ debhelper-build-stamp
 *.substvars
 *.diff.gz
 *.upload
+*.orig.tar.gz
 
 #kernel image specific ignores
 prawnos-linux-image-arm64-rk3588-server_*.debian.tar.xz

@@ -84,13 +84,15 @@ else
     exit 1
 fi
 
+#copy in the config
+cp "$KERNEL_CONFIG" .config
 
 if [ "$BOOTLOADER" == "coreboot" ]; then
 
     #copy in the resources, initramfs
     cp $INITRAMFS .
-    cp "$KERNEL_CONFIG" .config
     cp $RESOURCES/kernel.its .
+
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH DTC_FLAGS="-@" dtbs
     mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
@@ -117,11 +119,6 @@ if [ "$BOOTLOADER" == "coreboot" ]; then
     fi
 
 elif [ "$BOOTLOADER" == "uboot" ]; then
-    #copy in the resources
-    cp "$KERNEL_CONFIG" .config
-    #TODO use different initramfs for rk3588 image, don't bake it into the kernel?
-    cp $INITRAMFS .
-
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
 

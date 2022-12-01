@@ -102,7 +102,7 @@ bootloader_install: #Targets the PrawnOS image and installs a bootloader
 ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
 	$(MAKE) bootloader_image_package_install
 else
-  echo "No bootloader to install for target ${TARGET}"
+	echo "No bootloader to install for target ${TARGET}"
 endif
 
 .PHONY: bootloader_update
@@ -114,7 +114,7 @@ ifeq ($(TARGET), $(PRAWNOS_ARM64_RK3588_SERVER))
 	$(MAKE) kernel_image_package_install
 	$(MAKE) bootloader_image_package_install
 else
-  echo "No bootloader to update for target ${TARGET}"
+	echo "No bootloader to update for target ${TARGET}"
 endif
 
 .PHONY: image
