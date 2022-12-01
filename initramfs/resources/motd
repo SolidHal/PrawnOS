@@ -2,7 +2,7 @@ Welcome to the early boot SSH environment. You may type
 
     /root/decrypt_root.sh
 
-(or press "arrow up") to unlock your disks.
+to unlock your disks.
 
 This shell will terminate automatically a few seconds after the
 unlocking process has succeeded and when the boot proceeds.

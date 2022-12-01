@@ -66,33 +66,34 @@ mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
+# set the panic timeout so we reboot on failure
+echo "3" > /proc/sys/kernel/panic
+
 mkdir -p /newroot
 mkdir -p /boot
-
-# TODO waiting for the sd card to be detected by the kernel... sleeping is lame
-# why isn't rootwait/root cmdline arg working here?
-echo "Waiting for the kernel to see the boot device..."
-sleep 2
 
 # get the root device, so we can find the boot partiton
 STORAGENODE=$(cmdline root)
 
-#TODO it would be nice if uboot put a root=/dev/mmc* on the cmdline for us
-if echo $STORAGENODE | grep -q "DEV=sdcard"; then
-  echo "Booting from sd..."
-  ROOT_BLKID=$(/sbin/blkid | grep "sdrootfs" )
-  BOOT_BLKID=$(/sbin/blkid | grep "sdboot" )
+echo "Waiting for the kernel to see the boot device..."
+while [ -z "$ROOT_BLKID" ]; do
+    #TODO it would be nice if uboot put a root=/dev/mmc* on the cmdline for us
+    # instead of extlinux.conf appending it
+    if echo $STORAGENODE | grep -q "DEV=sdcard"; then
+        echo "Booting from sd..."
+        ROOT_BLKID=$(/sbin/blkid | grep "sdrootfs" )
+        BOOT_BLKID=$(/sbin/blkid | grep "sdboot" )
 
-elif echo $STORAGENODE | grep -q "DEV=emmc"; then
-  echo "Booting from emmc..."
-  ROOT_BLKID=$(/sbin/blkid | grep "emmcrootfs" )
-  BOOT_BLKID=$(/sbin/blkid | grep "emmcboot" )
+    elif echo $STORAGENODE | grep -q "DEV=emmc"; then
+        echo "Booting from emmc..."
+        ROOT_BLKID=$(/sbin/blkid | grep "emmcrootfs" )
+        BOOT_BLKID=$(/sbin/blkid | grep "emmcboot" )
 
-else
-  echo $STORAGENODE is not a valid boot device
-  exit 1
-
-fi
+    else
+        echo $STORAGENODE is not a valid boot device
+        exit 1
+    fi
+done
 
 echo ROOT_BLKID: $ROOT_BLKID
 # strip off everything after the colon
@@ -111,13 +112,29 @@ if blkid $ROOTFS | grep -q crypto_LUKS; then
     # start the ssh server so a user can decrypt and mount the root filesystem
     ssh_server
 
-    echo "CRYPTO_ROOTFS=${ROOTFS}" >> /root/.profile
-    echo "sshd server started, waiting for decryption of ${ROOTFS}"
+    echo "export CRYPTO_ROOTFS=${ROOTFS}" >> /root/.profile
+    echo "ssh server started, waiting for decryption of ${ROOTFS}"
+
     # disable kernel log messages to avoid clashing with the prompt
     dmesg -n 2
+
     # start shell to allow for local decryption
     export CRYPTO_ROOTFS=${ROOTFS}
-    /bin/sh
+    while [ ! -e /dev/mapper/luksroot ]
+    do
+      # don't busy wait too aggressively
+      sleep 1
+    done
+
+    # give time to ensure the luksroot dev is actually ready
+    sleep 1
+    dmesg -n 7
+    mount /dev/mapper/luksroot /newroot
+
+    # kill the ssh server and connection
+    echo "" > /dev/pts/0
+    echo "luksroot mounted, system booting, bye bye ssh!" > /dev/pts/0
+    ps | grep -ie sshd | grep -v grep | awk '{print $1}' | xargs kill
 else
     # mount the unencrypted root filesystem
     mount $ROOTFS /newroot || rescue_shell

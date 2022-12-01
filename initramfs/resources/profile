@@ -5,3 +5,4 @@ fi
 if [ -n "$TERM" ]; then
     export TERM=vt220
 fi
+
