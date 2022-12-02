@@ -89,6 +89,10 @@ clean_kernel:
 	rm -rf $(PRAWNOS_KERNEL_BUILD)
 	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
 
+.PHONY: clean_kernel_image_package
+clean_kernel_image_package:
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
+
 .PHONY: clean_ath9k
 clean_ath9k:
 	rm -rf $(PRAWNOS_ATH9K_BUILD)

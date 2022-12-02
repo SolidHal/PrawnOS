@@ -235,10 +235,6 @@ if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
     # install a profile for the root user
     cp $RESOURCES/profile $initramfs_src/root/.profile
 
-    # Add command to unlock luks volumes to shell history for easier use
-    echo /root/decrypt_root.sh >> $initramfs_src/root/.ash_history
-    chmod 600 $initramfs_src/root/.ash_history
-
     # install motd
     cp $RESOURCES/motd $initramfs_src/etc/motd
 
@@ -248,9 +244,6 @@ if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
 
     # create host key
     mkdir -p $initramfs_src/etc/ssh/
-    ssh-keygen -q -t ed25519 -f $initramfs_src/etc/ssh/ssh_host_ed25519_key -C "" -N ""
-    #TODO don't use weak crypto keys
-    ssh-keygen -q -t rsa -f $initramfs_src/etc/ssh/ssh_host_rsa_key -C "" -N ""
 
     # install decryption helper script
     cp $RESOURCES/decrypt_root.sh $initramfs_src/root/decrypt_root.sh
@@ -259,11 +252,6 @@ fi
 rm -rf $outmnt/boot/PrawnOS-initramfs.cpio.gz
 
 cd $initramfs_src
-# make the initramfs reproducable
-#TODO pipe in SOURCE_DATE_EPOCH instead of using a hardcoded value
-SOURCE_DATE_EPOCH="Wed Nov 23 20:43:23 PST 2022"
-find . -print0 | xargs -0r touch --no-dereference --date="${SOURCE_DATE_EPOCH}"
-
 # store for other parts of the build process
 find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
 
