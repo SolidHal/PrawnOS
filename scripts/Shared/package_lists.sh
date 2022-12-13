@@ -80,6 +80,7 @@ laptop_base_debs_install=(
 )
 
 server_base_debs_install=(
+    btrfs-progs
     openssh-server
 )
 
