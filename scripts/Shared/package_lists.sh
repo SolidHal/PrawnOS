@@ -40,6 +40,7 @@ base_debs_install=(
     e2fsprogs-l10n
     gdisk
     git
+    htop
     ifupdown
     inetutils-ping
     iproute2
