@@ -59,6 +59,7 @@ base_debs_install=(
     parted
     pciutils
     psmisc
+    ripgrep
     rsync
     sudo
     sysfsutils
