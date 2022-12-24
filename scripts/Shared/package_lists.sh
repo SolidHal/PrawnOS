@@ -57,6 +57,7 @@ base_debs_install=(
     nano
     net-tools
     netcat-openbsd
+    ntp
     parted
     pciutils
     psmisc
