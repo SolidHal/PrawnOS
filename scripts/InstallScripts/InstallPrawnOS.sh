@@ -22,7 +22,7 @@ set -e
 # Grab the boot device, which is either /dev/sda for usb or /dev/mmcblk(0/1) for an sd card
 # mmc and sd devices use the "p" prefix for their partitions, so add the "p" if we are booting from
 # one of those
-BOOT_DEVICE_NO_P=/dev/$(eval $(lsblk -oMOUNTPOINT,PKNAME -P | grep 'MOUNTPOINT="/"'); echo $PKNAME)
+BOOT_DEVICE_NO_P=/dev/$(eval $(lsblk -oMOUNTPOINT,PKNAME -P | grep 'MOUNTPOINT="/"'); echo "$PKNAME")
 BOOT_DEVICE=$BOOT_DEVICE_NO_P
 if [[ "$BOOT_DEVICE_NO_P" == *"mmcblk"* ]]; then
     BOOT_DEVICE=${BOOT_DEVICE_NO_P}p
@@ -42,7 +42,7 @@ device_gru_bob="Google Bob"
 
 get_device() {
     local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
-    echo $device
+    echo "$device"
 }
 
 
@@ -70,7 +70,7 @@ get_emmc_devname() {
         echo "Unknown device! can't determine emmc devname. Please file an issue with the output of fdisk -l if you get this on a supported device"
         exit 1
     fi
-    echo $devname
+    echo "$devname"
 }
 
 # returns the full path to the sd card device, in the form /dev/mmcblk#
@@ -82,7 +82,7 @@ get_sd_devname() {
     then
         echo "Unknown device! can't determine sd devname. Please file an issue with the output of fdisk -l if you get this on a supported device"; exit 1;
     fi
-    echo $devname
+    echo "$devname"
 }
 
 ### END SHARED CONST AND VARS
@@ -145,8 +145,8 @@ install() {
     fi
 
     #cut off the "p" if we are using an sd card or internal emmc, doesn't change TARGET if we are using usb
-    TARGET_NO_P=$(echo $TARGET | cut -d 'p' -f 1)
-    if [ ! -e $TARGET_NO_P ];
+    TARGET_NO_P=$(echo "$TARGET" | cut -d 'p' -f 1)
+    if [ ! -e "$TARGET_NO_P" ];
     then
         echo "${TARGET_NO_P} does not exist, have you plugged in your target sd card or usb device?"
         exit 1
@@ -173,14 +173,14 @@ install() {
 
     # Only try to unmount if the device is mounted
     # If it is, try anyway, the dd will (likely) take care of it anyway
-    if findmnt ${TARGET}1 > /dev/null
+    if findmnt "${TARGET}"1 > /dev/null
     then
-        umount ${TARGET}1 || /bin/true
+        umount "${TARGET}"1 || /bin/true
     fi
 
-    if findmnt ${TARGET}2 > /dev/null
+    if findmnt "${TARGET}"2 > /dev/null
     then
-    umount ${TARGET}2 || /bin/true
+    umount "${TARGET}"2 || /bin/true
     fi
 
     #only use the emmc_partition function for "special cases", aka veyron devices
@@ -188,16 +188,16 @@ install() {
     then
         emmc_partition
     else
-        external_partition $TARGET_NO_P
+        external_partition "$TARGET_NO_P"
     fi
 
     KERNEL_PARTITION=${TARGET}1
     ROOT_PARTITION=${TARGET}2
     CRYPTO=false
 
-    echo Writing kernel to partition $KERNEL_PARTITION
-    dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
-    dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
+    echo Writing kernel to partition "$KERNEL_PARTITION"
+    dd if=/dev/zero of="$KERNEL_PARTITION" bs=512 count=65536
+    dd if="${BOOT_DEVICE}"1 of="$KERNEL_PARTITION"
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
@@ -210,9 +210,9 @@ install() {
             # desktop cpu, manually supply -i 15000 for security at the cost of a slightly slower unlock
             dmesg -n 2
             echo "Enter the password you would like to use to unlock the encrypted root partition at boot"
-            cryptsetup -q -y -s 512 luksFormat -i 15000 $ROOT_PARTITION || exit 1
+            cryptsetup -q -y -s 512 luksFormat -i 15000 "$ROOT_PARTITION" || exit 1
             echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
-            cryptsetup luksOpen $ROOT_PARTITION luksroot || exit 1
+            cryptsetup luksOpen "$ROOT_PARTITION" luksroot || exit 1
             dmesg -n 7
             ROOT_PARTITION=/dev/mapper/luksroot
             break
@@ -227,10 +227,10 @@ install() {
     done
 
     echo Creating ext4 filesystem on root partition
-    mkfs.ext4 -F -b 1024 $ROOT_PARTITION
+    mkfs.ext4 -F -b 1024 "$ROOT_PARTITION"
     INSTALL_MOUNT=/mnt/install_mount
     mkdir -p $INSTALL_MOUNT/
-    mount $ROOT_PARTITION $INSTALL_MOUNT/
+    mount "$ROOT_PARTITION" $INSTALL_MOUNT/
     echo Syncing live root filesystem with new root filesystem, this will take about 4 minutes...
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / $INSTALL_MOUNT/
     #Remove the live-fstab and install a base fstab
@@ -246,10 +246,10 @@ install() {
     setup_hostname $INSTALL_MOUNT
     dmesg -E
 
-    umount $ROOT_PARTITION
+    umount "$ROOT_PARTITION"
 
     echo Running fsck
-    e2fsck -p -f $ROOT_PARTITION
+    e2fsck -p -f "$ROOT_PARTITION"
     if [[ $CRYPTO == "true" ]]
     then
         # unmount and close encrypted storage
@@ -267,17 +267,17 @@ emmc_partition() {
     dmesg -D
     echo Writing partition map to internal emmc
     local dev=$(get_emmc_devname)
-    DISK_SZ="$(blockdev --getsz ${dev})"
-    echo Total disk size is: $DISK_SZ
-    if [ $DISK_SZ = 30785536 ]
+    DISK_SZ="$(blockdev --getsz "${dev}")"
+    echo Total disk size is: "$DISK_SZ"
+    if [ "$DISK_SZ" = 30785536 ]
     then
         echo Detected Emmc Type 1
-        sfdisk $dev < $RESOURCES/mmc.partmap || true
+        sfdisk "$dev" < $RESOURCES/mmc.partmap || true
 
-    elif [ $DISK_SZ = 30777344 ]
+    elif [ "$DISK_SZ" = 30777344 ]
     then
         echo Detected Emmc Type 2
-        sfdisk $dev < $RESOURCES/mmc_type2.partmap || true
+        sfdisk "$dev" < $RESOURCES/mmc_type2.partmap || true
     else
         echo ERROR! Not a known EMMC type, please open an issue on github or send SolidHal an email with the Total disk size reported above
         echo Try a fallback value? This will allow installation to continue, at the cost of a very small amount of disk space. This may not work.
@@ -286,7 +286,7 @@ emmc_partition() {
             case $yn,$REPLY in
                 Yes,*|*,Yes )
                     echo Trying Emmc Type 2
-                    sfdisk $dev < $RESOURCES/mmc_type2.partmap || true
+                    sfdisk "$dev" < $RESOURCES/mmc_type2.partmap || true
                     break
                     ;;
                 * )
@@ -304,22 +304,22 @@ external_partition() {
     kernel_start=8192
     kernel_size=65536
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
-    sgdisk -Z $EXTERNAL_TARGET
-    partprobe $EXTERNAL_TARGET
+    sgdisk -Z "$EXTERNAL_TARGET"
+    partprobe "$EXTERNAL_TARGET"
     #make the base gpt partition map
-    parted --script $EXTERNAL_TARGET mklabel gpt
-    cgpt create $EXTERNAL_TARGET
+    parted --script "$EXTERNAL_TARGET" mklabel gpt
+    cgpt create "$EXTERNAL_TARGET"
     #must use cgpt to make the kernel partition, as we need the -S, -T, and -P variables
-    cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 $EXTERNAL_TARGET
+    cgpt add -i 1 -t kernel -b $kernel_start -s $kernel_size -l Kernel -S 1 -T 5 -P 10 "$EXTERNAL_TARGET"
     #Now the main filesystem
     #cgpt doesn't seem to handle this part correctly
-    sgdisk -N 2 $EXTERNAL_TARGET
+    sgdisk -N 2 "$EXTERNAL_TARGET"
     #Set the type to "data"
-    sgdisk -t 2:0700 $EXTERNAL_TARGET
+    sgdisk -t 2:0700 "$EXTERNAL_TARGET"
     #Name it "properly" - Probably not required, but looks nice
-    sgdisk -c 2:Root $EXTERNAL_TARGET
+    sgdisk -c 2:Root "$EXTERNAL_TARGET"
     #Reload the partition mapping
-    partprobe $EXTERNAL_TARGET
+    partprobe "$EXTERNAL_TARGET"
 }
 
 #simply expand to fill the current boot device
@@ -331,17 +331,17 @@ expand() {
     fi
     #Make the boot partition fille the whole drive
     #Delete the partition
-    sgdisk -d 2 $BOOT_DEVICE_NO_P
+    sgdisk -d 2 "$BOOT_DEVICE_NO_P"
     #Make new partition map entry, with full size
-    sgdisk -N 2 $BOOT_DEVICE_NO_P
+    sgdisk -N 2 "$BOOT_DEVICE_NO_P"
     #Set the type to "data"
-    sgdisk -t 2:0700 $BOOT_DEVICE_NO_P
+    sgdisk -t 2:0700 "$BOOT_DEVICE_NO_P"
     #Name it "properly" - Probably not required, but looks nice
-    sgdisk -c 2:Root $BOOT_DEVICE_NO_P
+    sgdisk -c 2:Root "$BOOT_DEVICE_NO_P"
     #Reload the partition mapping
-    partprobe $BOOT_DEVICE_NO_P
+    partprobe "$BOOT_DEVICE_NO_P"
     #Force the filesystem to fill the new partition
-    resize2fs -f ${BOOT_DEVICE}2
+    resize2fs -f "${BOOT_DEVICE}"2
     echo "/dev/${BOOT_DEVICE}2 / ext4 defaults,noatime 0 1" > /etc/fstab
 
     install_packages
@@ -362,7 +362,7 @@ chroot_wrapper() {
     mount --rbind /sys "$mountpoint/sys/"
     mount --rbind /dev "$mountpoint/dev/"
 
-    chroot "$mountpoint" $@
+    chroot "$mountpoint" "$@"
 
     umount "$mountpoint/proc/"
     mount --make-rprivate /sys

@@ -31,7 +31,7 @@ device_gru_bob="Google Bob"
 
 get_device() {
     local device=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
-    echo $device
+    echo "$device"
 }
 
 ### END SHARED CONST AND VARS
@@ -57,8 +57,8 @@ dpkg-reconfigure tzdata
 
 ## GENERAL CONFIG
 #Install shared packages
-DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
-DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
+DEBIAN_FRONTEND=noninteractive apt install -y "${base_debs_download[@]}"
+DEBIAN_FRONTEND=noninteractive apt install -y "${prawnos_base_debs_prebuilt_download[@]}"
 
 DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config
 
@@ -85,8 +85,8 @@ apt remove -y gnome-software lilyterm
 if [ "$DE" = "gnome" ]
 then
 
-  apt install -y ${gnome_debs_download[@]}
-  apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
+  apt install -y "${gnome_debs_download[@]}"
+  apt install -y "${prawnos_gnome_debs_prebuilt_download[@]}"
 
   #TODO: debug why rotation is flipped
   # work around issue #234
@@ -97,8 +97,8 @@ fi
 
 if [ "$DE" = "xfce" ]
 then
-  apt install -y ${xfce_debs_download[@]}
-  apt install -y ${prawnos_xfce_debs_prebuilt_download[@]}
+  apt install -y "${xfce_debs_download[@]}"
+  apt install -y "${prawnos_xfce_debs_prebuilt_download[@]}"
 
   # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
   apt remove -y light-locker
@@ -117,4 +117,3 @@ update-ca-certificates --fresh
 #enable periodic TRIM
 cp /lib/systemd/system/fstrim.{service,timer} /etc/systemd/system
 systemctl enable fstrim.timer
-
