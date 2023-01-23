@@ -25,6 +25,14 @@
 
 echo In PrawnOS Init
 
+#add this to start shell at desired point
+rescue_shell() {
+    [ "${1}" != "debug" ] && echo "Something went wrong. Dropping to a shell." > /dev/tty1
+    [ "${1}" == "debug" ] && echo "Debug flag detected, entering debug shell" > /dev/tty1
+    echo "Something went wrong. Dropping to a shell." > /dev/tty1
+    exec setsid /bin/sh -c 'exec /bin/sh </dev/tty1 >/dev/tty1 2>&1'
+}
+
 #used to parse the kernel cmdline
 cmdline() {
     local value
@@ -34,114 +42,90 @@ cmdline() {
     [ "${value}" != "" ] && echo "${value}"
 }
 
-# start an ssh server
-ssh_server() {
-    # setup network
-    /usr/sbin/ifconfig eth0 up
-    /usr/sbin/ifconfig eth1 up
-    udhcpc --retries 5 --quit --script /bin/udhcp_simple.script
-    echo "dhcp complete. Configuration:"
-    /usr/sbin/ifconfig
-
-    # mount pseudoterminal, start sshd
-    mkdir /dev/pts
-    mount -t devpts none /dev/pts
-    /usr/sbin/sshd
+#used to get the uuid of the root partiton since findfs isn't in debian busybox-static
+rootpartuuid() {
+    local value
+    value=$1
+    value="${value%/*}"
+    value="${value#*=}"
+    [ "${value}" != "" ] && echo "${value}"
 }
 
-rescue_shell() {
-   ssh_server
-   echo "sshd server started, entering rescueshell..."
-   /bin/sh
+# a clever portable shell script to detect occurances of a substring in a string
+# occur <string> <substring> (optional count)
+# if optional count is not provided:
+# returns 1 if substring is not in string
+# returns 0 otherwise
+# if optional count is provided:
+# returns 1 if substring occurs in string < optional count
+# returns 0 otherwise
+occur() {
+    while case "$1" in (*"$2"*) set -- \
+        "${1#*"$2"}" "$2" "${3:-0}" "$((${4:-0}+1))";;
+        (*) return "$((${4:-0}<${3:-1}))";;esac
+        do : "${_occur:+$((_occur=$4))}";done
 }
 
-
-[ -d /dev ] || mkdir -m 0755 /dev
-[ -d /sys ] || mkdir /sys
-[ -d /proc ] || mkdir /proc
-[ -d /tmp ] || mkdir /tmp
-
-
+# mount the bare necesities
 mount -n -t proc     proc      /proc
 mount -n -t sysfs    sysfs     /sys
 mount -n -t devtmpfs devtmpfs  /dev
 
-# set the panic timeout so we reboot on failure
-echo "3" > /proc/sys/kernel/panic
-
-mkdir -p /newroot
-mkdir -p /boot
-
 # get the root device, so we can find the boot partiton
-STORAGENODE=$(cmdline root)
+UNPARSED=$(cmdline root)
+echo Unparsed cmdline rootdev: ${UNPARSED} > /dev/tty1
+ROOT_PARTUUID=$(rootpartuuid $UNPARSED)
+echo ROOT_PARTUUID: ${ROOT_PARTUUID} > /dev/tty1
 
-echo "Waiting for the kernel to see the boot device..."
-while [ -z "$ROOT_BLKID" ]; do
-    #TODO it would be nice if uboot put a root=/dev/mmc* on the cmdline for us
-    # instead of extlinux.conf appending it
-    if echo $STORAGENODE | grep -q "DEV=sdcard"; then
-        echo "Booting from sd..."
-        ROOT_BLKID=$(/sbin/blkid | grep "sdrootfs" )
-        BOOT_BLKID=$(/sbin/blkid | grep "sdboot" )
+BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
+echo BLKID: ${BLKID} > /dev/tty1
+if [ -z "$BLKID" ]
+then
+  echo BLKID wasnt found yet, give the kernel a moment... > /dev/tty1
+  sleep 1
+  BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
 
-    elif echo $STORAGENODE | grep -q "DEV=emmc"; then
-        echo "Booting from emmc..."
-        ROOT_BLKID=$(/sbin/blkid | grep "emmcrootfs" )
-        BOOT_BLKID=$(/sbin/blkid | grep "emmcboot" )
-
-    else
-        echo $STORAGENODE is not a valid boot device
-        exit 1
-    fi
-done
-
-echo ROOT_BLKID: $ROOT_BLKID
-# strip off everything after the colon
-ROOTFS="${ROOT_BLKID%:*}"
-echo ROOTFS: $ROOTFS
-
-echo BOOT_BLKID: $BOOT_BLKID
-# strip off everything after the colon
-BOOTFS="${BOOT_BLKID%:*}"
-echo BOOTFS: $BOOTFS
-
-# mount /boot so we can read configuration
-mount $BOOTFS /boot || rescue_shell
-
-if blkid $ROOTFS | grep -q crypto_LUKS; then
-    # start the ssh server so a user can decrypt and mount the root filesystem
-    ssh_server
-
-    echo "export CRYPTO_ROOTFS=${ROOTFS}" >> /root/.profile
-    echo "ssh server started, waiting for decryption of ${ROOTFS}"
-
-    # disable kernel log messages to avoid clashing with the prompt
-    dmesg -n 2
-
-    # start shell to allow for local decryption
-    export CRYPTO_ROOTFS=${ROOTFS}
-    while [ ! -e /dev/mapper/luksroot ]
-    do
-      # don't busy wait too aggressively
-      sleep 1
-    done
-
-    # give time to ensure the luksroot dev is actually ready
+  if [ -z "$BLKID" ]
+  then
+    echo BLKID still not found, give the kernel one more moment... > /dev/tty1
     sleep 1
-    dmesg -n 7
-    mount /dev/mapper/luksroot /newroot
+    BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
 
-    # kill the ssh server and connection
-    echo "" > /dev/pts/0
-    echo "luksroot mounted, system booting, bye bye ssh!" > /dev/pts/0
-    ps | grep -ie sshd | grep -v grep | awk '{print $1}' | xargs kill
-else
-    # mount the unencrypted root filesystem
-    mount $ROOTFS /newroot || rescue_shell
+    if [ -z "$BLKID" ]
+    then
+      echo FAILED TO FIND BLKID AFTER 2 SECONDS, PLEASE OPEN AN ISSUE WITH A SCREENSHOT OF THIS ERROR > /dev/tty1
+      rescue_shell
+    fi
+  fi
 fi
 
-# /dev/pts may not be mounted
-umount /dev/pts || true
+echo BLKID: ${BLKID} > /dev/tty1
+
+# If it's an mmcblk device, the kernel partiton will be p1. If it is a usb device, the partiton will just be 1.
+# Just want everything before the 1
+ROOT_DEV="${BLKID%1:*}"
+echo ROOT_DEV: ${ROOT_DEV} > /dev/tty1
+
+# label any partition on the system with RESCUESHELL to enter the initramfs rescue shell before mount and root_switch.
+# you can do this with "cgpt add -i 1 -l RESCUESHELL /dev/sda" for example to label the first partiton of a usb drive.
+if blkid | grep -q RESCUESHELL; then
+    rescue_shell debug
+fi
+
+
+if blkid ${ROOT_DEV}2 | grep -q crypto_LUKS; then
+    # decrypt and mount the root filesystem, disable kernel log messages to avoid clashing with the prompt
+    dmesg -n 2
+    echo "Opening encrypted root partition, this will take 30s..."
+    cryptsetup --tries 5 luksOpen ${ROOT_DEV}2 luksroot || rescue_shell
+    dmesg -n 7
+    mount /dev/mapper/luksroot /newroot
+else
+    # mount the unencrypted root filesystem
+    [ -d "/newroot" ] || mkdir -p /newroot
+    mount ${ROOT_DEV}2 /newroot
+fi
+
 umount /sys
 umount /proc
 

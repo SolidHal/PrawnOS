@@ -7,7 +7,11 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 INITRAMFS_BUILD_LOG := $(PRAWNOS_BUILD_LOGS)/initramfs-log.txt
 
+ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources/$(TARGET)
+else
 INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources
+endif
 
 .PHONY: initramfs clean_initramfs
 

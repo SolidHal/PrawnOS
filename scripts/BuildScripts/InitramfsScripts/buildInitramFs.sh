@@ -151,8 +151,6 @@ export -f chroot_get_libs
 export initramfs_binaries
 export initramfs_src_direct
 
-ls $outmnt/bin
-
 chroot $outmnt /bin/bash -c "chroot_get_libs $initramfs_src_direct $initramfs_binaries"
 
 #have to add libgcc, libnss manually since ldd doesn't see it as a requirement :/
@@ -170,19 +168,22 @@ else
 fi
 cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/
 
-cp -a $outmnt/lib/$LIBS_DIR/libnss* $initramfs_src/lib/$LIBS_DIR/
+if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+    cp -a $outmnt/lib/$LIBS_DIR/libnss* $initramfs_src/lib/$LIBS_DIR/
+
+    # add the console setup scripts
+    cp -r $RESOURCES/console_setup $initramfs_src/etc/
+    chmod +x $initramfs_src/etc/console_setup/console_setup.sh
+
+    # add glibc nsswitch conf
+    cp $outmnt/etc/nsswitch.conf $initramfs_src/etc/nsswitch.conf
+fi
 
 #add the init script
 cp $RESOURCES/initramfs-init $initramfs_src/init
 chmod +x $initramfs_src/init
 cp $initramfs_src/init $initramfs_src/sbin/init
 
-# add the console setup scripts
-cp -r $RESOURCES/console_setup $initramfs_src/etc/
-chmod +x $initramfs_src/etc/console_setup/console_setup.sh
-
-# add glibc nsswitch conf
-cp $outmnt/etc/nsswitch.conf $initramfs_src/etc/nsswitch.conf
 
 pushd $(pwd)
 cd $initramfs_src
