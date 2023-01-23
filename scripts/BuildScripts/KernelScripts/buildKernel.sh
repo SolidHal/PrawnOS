@@ -55,7 +55,8 @@ ARCH_ARM64=arm64
 MAX_KERNEL_SIZE=$(expr 65536 \* 512)
 
 cd $BUILD_DIR
-#TODO don't clean every time for now
+
+### Uncomment to have the build clean the kernel every time
 # make mrproper
 
 #this arch nonsense is obnoxious.

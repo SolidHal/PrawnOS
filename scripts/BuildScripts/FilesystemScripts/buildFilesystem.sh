@@ -108,7 +108,6 @@ cleanup() {
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
 
-
   #delete the base file, we didn't complete our work
   rm -rf $BASE
   echo "FILESYSTEM BUILD FAILED"

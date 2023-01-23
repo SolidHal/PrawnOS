@@ -56,10 +56,6 @@ PRAWNOS_KERNEL_VER := 1
 PRAWNOS_KERNEL_IMAGE_DEBVER := 1
 PRAWNOS_KERNEL_HEADERS_DEBVER := 1
 
-## TODO handle ARM64-rk3588-server differently for now
-## eventually combine the kernel build with the main ARM64 build
-## or properly package it seperately
-
 ## ARM64_RK3588_SERVER KERNEL VERSIONS
 else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
 KVER := 5.19.5
