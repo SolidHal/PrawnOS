@@ -242,6 +242,7 @@ install() {
     # final setup:
     dmesg -D
     welcome
+    setup_time $INSTALL_MOUNT
     setup_users $INSTALL_MOUNT
     setup_hostname $INSTALL_MOUNT
     dmesg -E
@@ -468,6 +469,30 @@ setup_users() {
         done
         $CHROOT_PREFIX usermod -a -G sudo,netdev,input,video,bluetooth "$username"
     fi
+}
+
+setup_time() {
+    echo "-----Enter a timezone in the format 'America/Chicago':-----"
+    read -r timezone
+    until $CHROOT_PREFIX timedatectl set-timezone "$timezone"
+    do
+        echo "-----Enter a timezone in the format 'America/Chicago':-----"
+        read -r timezone
+    done
+
+
+    echo "-----Enter the date in format 'YYYY-MM-DD':-----"
+    read -r udate
+    echo "-----Enter the time in format 'hh:mm:ss':-----"
+    read -r utime
+    until $CHROOT_PREFIX timedatectl set-time "$udate" "$utime"
+    do
+        echo "-----Enter the date in format 'YYYY-MM-DD':-----"
+        read -r udate
+        echo "-----Enter the time in format 'hh:mm:ss':-----"
+        read -r utime
+    done
+
 }
 
 reboot_prompt() {
