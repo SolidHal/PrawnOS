@@ -21,6 +21,7 @@ Now that we can boot into a rootfs, there are many things to do:
 - full disk encryption
   - initramfs support
   - hardware key support
+- backup with borg backup
 
 ### Hardware support
 - sata
@@ -122,18 +123,20 @@ Number  Start   End     Size    File system  Name        Flags
 TODO: rewrite install script, make it automatable
 
 ```
-
 sudo bash
 
 TARGET=/dev/mmcblk0
 BOOT_DEVICE=/dev/mmcblk2
 ROOT_PARTITION=/dev/mmcblk0p3
 
-mkdir -p /tmproot
-mkdir -p /tmpboot
+TMPBOOT=/tmpboot
+TMPROOT=/tmproot
 
-umount /tmpboot || true
-umount /tmproot || true
+mkdir -p $TMPROOT
+mkdir -p $TMPBOOT
+
+umount $TMPBOOT || true
+umount $TMPROOT || true
 
 parted --script $TARGET mklabel gpt
 # make a 4MB uboot partition
@@ -154,10 +157,9 @@ dd if=/dev/zero of=${TARGET}p1 bs=512 count=8192
 dd if=${BOOT_DEVICE}p1 of=${TARGET}p1
 
 # copy over the boot partition, update extlinux.conf entry
-mount ${TARGET}p2 /tmpboot
-cp -a /boot/* /tmpboot
-sed -i 's/DEV=sdcard/DEV=emmc/g' /tmpboot/extlinux/extlinux.conf
-umount ${TARGET}p2
+mount ${TARGET}p2 $TMPBOOT
+cp -a /boot/* $TMPBOOT
+sed -i 's/DEV=sdcard/DEV=emmc/g' ${TMPBOOT}/extlinux/extlinux.conf
 
 #START CRYPTO
 
@@ -172,12 +174,18 @@ cryptsetup luksOpen $ROOT_PARTITION luksroot
 ROOT_PARTITION=/dev/mapper/luksroot
 
 #generate initrd host keys
-ssh-keygen -q -t ed25519 -f /boot/ssh/ssh_host_ed25519_key -C "" -N ""
+mkdir -p ${TMPBOOT}/ssh
+ssh-keygen -q -t ed25519 -f ${TMPBOOT}/ssh/ssh_host_ed25519_key -C "" -N ""
 #TODO discourage use weak crypto keys
-ssh-keygen -q -t rsa -f /boot/ssh/ssh_host_rsa_key -C "" -N ""
+#ssh-keygen -q -t rsa -f ${TMPBOOT}/ssh/ssh_host_rsa_key -C "" -N ""
 
 #TODO user must provide authorized_keys file, or pubkey to make sure they can
 #unlock the initramfs
+# must put the authorized keys file in boot/ssh/ on the emmc aka $TMPBOOT/ssh
+# just copy it from home dir for now
+cp /home/prawn/authorized_keys ${TMPBOOT}/ssh/authorized_keys
+chmod 600 ${TMPBOOT}/ssh/authorized_keys
+umount ${TARGET}p2
 
 #END CRYPTO
 
@@ -187,13 +195,13 @@ dd if=/dev/zero of=${ROOT_PARTITION} bs=512 count=1k
 mkfs.ext4 -q -L emmcrootfs ${ROOT_PARTITION}
 
 # copy over the rootfs partition, update fstab
-mount ${ROOT_PARTITION} /tmproot
+mount ${ROOT_PARTITION} $TMPROOT
 echo Syncing live root filesystem with new root filesystem, this will take about 4 minutes...
-rsync -ah --info=progress2 --info=name0 --numeric-ids -x / /tmproot
+rsync -ah --info=progress2 --info=name0 --numeric-ids -x / $TMPROOT
 
 # update fstab
-sed -i 's/PARTLABEL=sdrootfs/PARTLABEL=emmcrootfs/g' /tmproot/etc/fstab
-sed -i 's/PARTLABEL=sdboot/PARTLABEL=emmcboot/g' /tmproot/etc/fstab
+sed -i 's/PARTLABEL=sdrootfs/PARTLABEL=emmcrootfs/g' ${TMPROOT}/etc/fstab
+sed -i 's/PARTLABEL=sdboot/PARTLABEL=emmcboot/g' ${TMPROOT}/etc/fstab
 
 umount ${ROOT_PARTITION}
 echo Running fsck
@@ -208,7 +216,6 @@ then
 fi
 ```
 
-TODO: initramfs has different mac addr than os??
 
 # storage setup script
 
@@ -278,54 +285,49 @@ https://gist.github.com/MaxXor/ba1665f47d56c24018a943bb114640d7
 # cryptosetup options choices
 
 ```
-sudo cryptsetup benchmark
-# Tests are approximate using memory only (no storage IO).
-PBKDF2-sha1       557160 iterations per second for 256-bit key
-PBKDF2-sha256    1030035 iterations per second for 256-bit key
-PBKDF2-sha512     418092 iterations per second for 256-bit key
-PBKDF2-ripemd160  280968 iterations per second for 256-bit key
-PBKDF2-whirlpool  129262 iterations per second for 256-bit key
-argon2i       4 iterations, 544612 memory, 4 parallel threads (CPUs) for 256-bit key (requested 2000 ms time)
-argon2id      4 iterations, 563665 memory, 4 parallel threads (CPUs) for 256-bit key (requested 2000 ms time)
+    # Tests are approximate using memory only (no storage IO).
+PBKDF2-sha1       566185 iterations per second for 256-bit key
+PBKDF2-sha256    1040253 iterations per second for 256-bit key
+PBKDF2-sha512     420102 iterations per second for 256-bit key
+PBKDF2-ripemd160  284013 iterations per second for 256-bit key
+PBKDF2-whirlpool  127750 iterations per second for 256-bit key
+argon2i       4 iterations, 531695 memory, 4 parallel threads (CPUs) for 256-bit key (requested 2000 ms time)
+argon2id      4 iterations, 560031 memory, 4 parallel threads (CPUs) for 256-bit key (requested 2000 ms time)
 #     Algorithm |       Key |      Encryption |      Decryption
-        aes-cbc        128b       448.7 MiB/s       784.6 MiB/s
-    serpent-cbc        128b               N/A               N/A
-    twofish-cbc        128b        50.9 MiB/s        52.3 MiB/s
-        aes-cbc        256b       365.4 MiB/s       657.3 MiB/s
-    serpent-cbc        256b               N/A               N/A
-    twofish-cbc        256b        50.9 MiB/s        52.3 MiB/s
-        aes-xts        256b       640.6 MiB/s       640.8 MiB/s
-    serpent-xts        256b               N/A               N/A
-    twofish-xts        256b        51.4 MiB/s        51.5 MiB/s
-        aes-xts        512b       561.2 MiB/s       561.2 MiB/s
-    serpent-xts        512b               N/A               N/A
-    twofish-xts        512b        51.4 MiB/s        51.5 MiB/s
+        aes-cbc        128b       447.6 MiB/s       781.1 MiB/s
+    serpent-cbc        128b        31.7 MiB/s        35.3 MiB/s
+    twofish-cbc        128b        51.0 MiB/s        52.3 MiB/s
+        aes-cbc        256b       364.8 MiB/s       654.4 MiB/s
+    serpent-cbc        256b        31.7 MiB/s        35.3 MiB/s
+    twofish-cbc        256b        51.1 MiB/s        52.2 MiB/s
+        aes-xts        256b       639.4 MiB/s       638.9 MiB/s
+    serpent-xts        256b        31.7 MiB/s        35.0 MiB/s
+    twofish-xts        256b        51.3 MiB/s        51.4 MiB/s
+        aes-xts        512b       560.0 MiB/s       559.8 MiB/s
+    serpent-xts        512b        31.8 MiB/s        35.0 MiB/s
+    twofish-xts        512b        51.4 MiB/s        51.4 MiB/s
 ```
+
+picking aes-xts with 512b key due to speed/security
 
 # Encrypted storage setup
+## Now actually encrypt
+
 ```
-
-# create key file
-#TODO Don't actually do this, only for testing
-# TODO instead of using a key file, can we create a temporary password/fido key file to use for decrytion of all drives?
-KEYFILE=/home/prawn/cryptkey
-dd bs=64 count=1 if=/dev/urandom of=$KEYFILE iflag=fullblock
-chmod 600 $KEYFILE
-
 DRIVE1=/dev/sda
 DRIVE2=/dev/sdb
 DRIVE3=/dev/sdc
 DRIVE4=/dev/sdd
 
-TODO: test key size 512 vs 256 in full raid
 # encrypt the devices
-sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE1 $KEYFILE
-sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE2 $KEYFILE
-sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE3 $KEYFILE
-sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE4 $KEYFILE
+sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE1
+sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE2
+sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE3
+sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE4
 
 
 # backup the luks headers
+#TODO provide suggestions for header storage
 DRIVE1_HEADER=/home/prawn/$(basename ${DRIVE1}).header.bak
 DRIVE2_HEADER=/home/prawn/$(basename ${DRIVE2}).header.bak
 DRIVE3_HEADER=/home/prawn/$(basename ${DRIVE3}).header.bak
@@ -343,14 +345,119 @@ DRIVE2_DM=$(basename ${DRIVE2})_dm
 DRIVE3_DM=$(basename ${DRIVE3})_dm
 DRIVE4_DM=$(basename ${DRIVE4})_dm
 
-sudo cryptsetup open --key-file=$KEYFILE --type luks $DRIVE1 $DRIVE1_DM
-sudo cryptsetup open --key-file=$KEYFILE --type luks $DRIVE2 $DRIVE2_DM
-sudo cryptsetup open --key-file=$KEYFILE --type luks $DRIVE3 $DRIVE3_DM
-sudo cryptsetup open --key-file=$KEYFILE --type luks $DRIVE4 $DRIVE4_DM
+sudo cryptsetup open --type luks $DRIVE1 $DRIVE1_DM
+sudo cryptsetup open --type luks $DRIVE2 $DRIVE2_DM
+sudo cryptsetup open --type luks $DRIVE3 $DRIVE3_DM
+sudo cryptsetup open --type luks $DRIVE4 $DRIVE4_DM
 
 # Create the btrfs raid fs
-#TODO add btrfs-progs package to base server image
 sudo mkfs.btrfs -m raid10 -d raid10 /dev/mapper/${DRIVE1_DM} /dev/mapper/${DRIVE2_DM} /dev/mapper/${DRIVE3_DM} /dev/mapper/${DRIVE4_DM}
+
+# mount the btrfs fs
+sudo mkdir -p /mnt/data
+sudo mount -t btrfs -o defaults,noatime /dev/mapper/${DRIVE1_DM} /mnt/data
+
+#TODO now install the btrfs scan systemd service
+```
+
+## Recover on device failure
+
+mount degraded
+if `${DRIVE1_DM}` is the missing device, use any of `${DRIVE#_DM}`
+```
+mount -t btrfs -o defaults,noatime,degraded /dev/mapper/${DRIVE1_DM} /mnt/data
+```
+
+locate the device id of the missing disk
+```
+btrfs device usage /mnt/data
+```
+
+ex output:
+```
+/dev/mapper/data1, ID: 1
+   Device size:             7.28TiB
+   Device slack:              0.00B
+   Data,RAID1:              5.46TiB
+   Metadata,RAID1:          7.00GiB
+   System,RAID1:           32.00MiB
+   Unallocated:             1.81TiB
+
+missing, ID: 2
+   Device size:             7.28TiB
+   Device slack:              0.00B
+   Data,RAID1:              5.46TiB
+   Metadata,RAID1:          7.00GiB
+   System,RAID1:           32.00MiB
+   Unallocated:             1.81TiB
+```
+
+so for this example, missing device is ID 2
+
+```
+MISSING_ID=2
+```
+
+setup encryption on the new device
+```
+DRIVE#=/dev/<new-device>
+sudo cryptsetup --verify-passphrase --cipher aes-xts-plain64 --hash sha512 --key-size 512 --iter-time 5000 luksFormat $DRIVE# $KEYFILE
+```
+
+backup the new header
+```
+DRIVE#_HEADER=/home/prawn/$(basename ${DRIVE#}).header.bak
+sudo cryptsetup luksHeaderBackup --header-backup-file $DRIVE#_HEADER $DRIVE#
+```
+
+decrypt the device
+```
+DRIVE#_DM=$(basename ${DRIVE#})_dm
+sudo cryptsetup open --key-file=$KEYFILE --type luks $DRIVE# $DRIVE#_DM
+```
+
+start btrfs replace
+```
+btrfs replace start $MISSING_ID /dev/mapper/${DRIVE#_DM} /mnt/data
+```
+
+check replace status
+```
+btrfs replace status /mnt/data
+```
+
+
+## btrfs maintence task
+
+`/etc/systemd/system/btrfs-scrub.timer`
+
+```
+[Unit]
+Description=Monthly scrub btrfs filesystem, verify block checksums
+Documentation=man:btrfs-scrub
+
+[Timer]
+# first saturday each month
+OnCalendar=Sat *-*-1..7 3:00:00
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target
+```
+
+`/etc/systemd/system/btrfs-scrub.service`
+
+```
+[Unit]
+Description=Scrub btrfs filesystem, verify block checksums
+Documentation=man:btrfs-scrub
+
+[Service]
+Type=simple
+ExecStart=/bin/btrfs scrub start -Bd /mnt/data
+KillSignal=SIGINT
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle
 ```
 
 
@@ -380,7 +487,11 @@ sysboot mmc 0:2 any 0x00500000 /extlinux/extlinux.conf
 if tamper check fails, lock the storage drives
 if state is bad enough, possibly lock the root drive as well?
 
-# sata errors during mkfs.btrfs
+# sata errors
+can recreate issue seen on mdadm/btrfs raid by doing
+```
+sudo dcfldd if=/dev/urandom of=/dev/sda1 of=/dev/sdb1 count=100000
+```
 
 ```
 [  235.174523] ata1.01: failed to read SCR 1 (Emask=0x40)
@@ -402,121 +513,170 @@ if state is bad enough, possibly lock the root drive as well?
 [  235.182205] ata1.00: cmd 61/40:48:e0:88:00/00:00:00:00:00/40 tag 9 ncq dma 32768 out
 [  235.182205]          res 40/00:01:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
 [  235.183552] ata1.00: status: { DRDY }
-[  235.183910] ata1.00: failed command: WRITE FPDMA QUEUED
-[  235.184377] ata1.00: cmd 61/20:50:00:a8:00/00:00:00:00:00/40 tag 10 ncq dma 16384 out
-[  235.184377]          res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.185730] ata1.00: status: { DRDY }
-[  235.186063] ata1.00: failed command: READ FPDMA QUEUED
-[  235.186522] ata1.00: cmd 60/08:68:00:90:00/00:00:00:00:00/40 tag 13 ncq dma 4096 in
-[  235.186522]          res 40/00:01:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.187880] ata1.00: status: { DRDY }
-[  235.188215] ata1.01: exception Emask 0x100 SAct 0x80000000 SErr 0x0 action 0x6 frozen
-[  235.188915] ata1.01: failed command: READ FPDMA QUEUED
-[  235.189374] ata1.01: cmd 60/08:f8:48:fc:ff/00:00:74:05:00/40 tag 31 ncq dma 4096 in
-[  235.189374]          res 40/00:01:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.190733] ata1.01: status: { DRDY }
-[  235.191067] ata1.02: exception Emask 0x100 SAct 0x20 SErr 0x0 action 0x6 frozen
-[  235.191719] ata1.02: failed command: READ FPDMA QUEUED
-[  235.192177] ata1.02: cmd 60/08:28:00:82:00/00:00:00:00:00/40 tag 5 ncq dma 4096 in
-[  235.192177]          res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.193505] ata1.02: status: { DRDY }
-[  235.193862] ata1.03: exception Emask 0x100 SAct 0x960000 SErr 0x0 action 0x6 frozen
-[  235.194555] ata1.03: failed command: READ FPDMA QUEUED
-[  235.195015] ata1.03: cmd 60/10:88:28:80:00/00:00:00:00:00/40 tag 17 ncq dma 8192 in
-[  235.195015]          res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.196351] ata1.03: status: { DRDY }
-[  235.196685] ata1.03: failed command: READ FPDMA QUEUED
-[  235.197161] ata1.03: cmd 60/30:90:48:80:00/00:00:00:00:00/40 tag 18 ncq dma 24576 in
-[  235.197161]          res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.198507] ata1.03: status: { DRDY }
-[  235.198841] ata1.03: failed command: READ FPDMA QUEUED
-[  235.199320] ata1.03: cmd 60/78:a0:88:80:00/00:00:00:00:00/40 tag 20 ncq dma 61440 in
-[  235.199320]          res 40/00:01:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.200687] ata1.03: status: { DRDY }
-[  235.201022] ata1.03: failed command: READ FPDMA QUEUED
-[  235.201480] ata1.03: cmd 60/f8:b8:08:81:00/00:00:00:00:00/40 tag 23 ncq dma 126976 in
-[  235.201480]          res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
-[  235.202832] ata1.03: status: { DRDY }
-[  236.467263] ata1.15: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
-[  236.544363] ata1.00: hard resetting link
-[  236.858018] ahci fe210000.sata: FBS is disabled
-[  237.017292] ahci fe210000.sata: FBS is enabled
-[  237.018843] ata1.00: SATA link up 6.0 Gbps (SStatus 133 SControl 330)
-[  237.019541] ata1.01: hard resetting link
-[  237.334618] ahci fe210000.sata: FBS is disabled
-[  237.493948] ahci fe210000.sata: FBS is enabled
-[  237.494830] ata1.01: SATA link up 6.0 Gbps (SStatus 133 SControl 330)
-[  237.495454] ata1.02: hard resetting link
-[  237.808308] ahci fe210000.sata: FBS is disabled
-[  237.967288] ahci fe210000.sata: FBS is enabled
-[  237.968265] ata1.02: SATA link up 6.0 Gbps (SStatus 133 SControl 330)
-[  237.968890] ata1.03: hard resetting link
-[  238.281699] ahci fe210000.sata: FBS is disabled
-[  238.440541] ahci fe210000.sata: FBS is enabled
-[  238.441428] ata1.03: SATA link up 6.0 Gbps (SStatus 133 SControl 330)
-[  238.751671] ahci fe210000.sata: FBS is disabled
-[  238.910621] ahci fe210000.sata: FBS is enabled
-[  238.911520] ata1.04: SATA link up 6.0 Gbps (SStatus 133 SControl 330)
-[  239.221995] ata1.05: SATA link down (SStatus 0 SControl 330)
-[  239.535313] ata1.06: SATA link down (SStatus 0 SControl 330)
-[  239.852640] ata1.07: SATA link down (SStatus 0 SControl 330)
-[  240.168850] ata1.08: SATA link down (SStatus 0 SControl 330)
-[  240.485690] ata1.09: SATA link down (SStatus 0 SControl 330)
-[  240.801974] ata1.10: SATA link down (SStatus 0 SControl 330)
-[  241.118926] ata1.11: SATA link down (SStatus 0 SControl 330)
-[  241.435384] ata1.12: SATA link down (SStatus 0 SControl 330)
-[  241.752367] ata1.13: SATA link down (SStatus 0 SControl 330)
-[  242.065420] ata1.14: SATA link down (SStatus 0 SControl 330)
-[  242.069930] ata1.00: configured for UDMA/133
-[  242.091660] ata1.01: configured for UDMA/133
-[  242.100799] ata1.02: configured for UDMA/133
-[  242.104943] ata1.03: configured for UDMA/133
-[  242.106985] ata1.04: configured for UDMA/133
-[  242.107535] ata1.02: device reported invalid CHS sector 0
-[  242.108037] ata1.00: device reported invalid CHS sector 0
-[  242.108533] ata1.03: device reported invalid CHS sector 0
-[  242.109038] ata1.03: device reported invalid CHS sector 0
-[  242.109638] ata1.03: device reported invalid CHS sector 0
-[  242.110164] sd 0:2:0:0: [sdc] tag#5 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.111091] sd 0:2:0:0: [sdc] tag#5 Sense Key : 0x5 [current]
-[  242.111617] sd 0:2:0:0: [sdc] tag#5 ASC=0x21 ASCQ=0x4
-[  242.112084] sd 0:2:0:0: [sdc] tag#5 CDB: opcode=0x88 88 00 00 00 00 00 00 00 82 00 00 00 00 08 00 00
-[  242.112891] I/O error, dev sdc, sector 33280 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 0
-[  242.113772] sd 0:0:0:0: [sda] tag#13 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.114638] sd 0:0:0:0: [sda] tag#13 Sense Key : 0x5 [current]
-[  242.115170] sd 0:0:0:0: [sda] tag#13 ASC=0x21 ASCQ=0x4
-[  242.115641] sd 0:0:0:0: [sda] tag#13 CDB: opcode=0x88 88 00 00 00 00 00 00 00 90 00 00 00 00 08 00 00
-[  242.116454] I/O error, dev sda, sector 36864 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 0
-[  242.117316] sd 0:3:0:0: [sdd] tag#17 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.118180] sd 0:3:0:0: [sdd] tag#17 Sense Key : 0x5 [current]
-[  242.118712] sd 0:3:0:0: [sdd] tag#17 ASC=0x21 ASCQ=0x4
-[  242.119183] sd 0:3:0:0: [sdd] tag#17 CDB: opcode=0x88 88 00 00 00 00 00 00 00 80 28 00 00 00 10 00 00
-[  242.119997] I/O error, dev sdd, sector 32808 op 0x0:(READ) flags 0x80700 phys_seg 2 prio class 0
-[  242.120842] sd 0:3:0:0: [sdd] tag#18 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.121707] sd 0:3:0:0: [sdd] tag#18 Sense Key : 0x5 [current]
-[  242.122238] sd 0:3:0:0: [sdd] tag#18 ASC=0x21 ASCQ=0x4
-[  242.122709] sd 0:3:0:0: [sdd] tag#18 CDB: opcode=0x88 88 00 00 00 00 00 00 00 80 48 00 00 00 30 00 00
-[  242.123521] I/O error, dev sdd, sector 32840 op 0x0:(READ) flags 0x80700 phys_seg 6 prio class 0
-[  242.124362] sd 0:3:0:0: [sdd] tag#20 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.125227] sd 0:3:0:0: [sdd] tag#20 Sense Key : 0x5 [current]
-[  242.125758] sd 0:3:0:0: [sdd] tag#20 ASC=0x21 ASCQ=0x4
-[  242.126229] sd 0:3:0:0: [sdd] tag#20 CDB: opcode=0x88 88 00 00 00 00 00 00 00 80 88 00 00 00 78 00 00
-[  242.127042] I/O error, dev sdd, sector 32904 op 0x0:(READ) flags 0x80700 phys_seg 5 prio class 0
-[  242.127882] sd 0:3:0:0: [sdd] tag#23 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.128746] sd 0:3:0:0: [sdd] tag#23 Sense Key : 0x5 [current]
-[  242.129277] sd 0:3:0:0: [sdd] tag#23 ASC=0x21 ASCQ=0x4
-[  242.129748] sd 0:3:0:0: [sdd] tag#23 CDB: opcode=0x88 88 00 00 00 00 00 00 00 81 08 00 00 00 f8 00 00
-[  242.130590] I/O error, dev sdd, sector 33032 op 0x0:(READ) flags 0x80700 phys_seg 14 prio class 0
-[  242.131423] sd 0:1:0:0: [sdb] tag#31 UNKNOWN(0x2003) Result: hostbyte=0x00 driverbyte=DRIVER_OK cmd_age=37s
-[  242.132287] sd 0:1:0:0: [sdb] tag#31 Sense Key : 0x5 [current]
-[  242.132818] sd 0:1:0:0: [sdb] tag#31 ASC=0x21 ASCQ=0x4
-[  242.133290] sd 0:1:0:0: [sdb] tag#31 CDB: opcode=0x88 88 00 00 00 00 05 74 ff fc 48 00 00 00 08 00 00
-[  242.134130] I/O error, dev sdb, sector 23437769800 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 0
-[  242.134978] ata1: EH complete
-[  242.690748] BTRFS: device fsid aad3c285-7360-4bc0-9837-3b41218cb8db devid 1 transid 5 /dev/mapper/sda_dm scanned by mkfs.btrfs (1153)
-[  242.692327] BTRFS: device fsid aad3c285-7360-4bc0-9837-3b41218cb8db devid 2 transid 5 /dev/mapper/sdb_dm scanned by mkfs.btrfs (1153)
-[  242.693807] BTRFS: device fsid aad3c285-7360-4bc0-9837-3b41218cb8db devid 3 transid 5 /dev/mapper/sdc_dm scanned by mkfs.btrfs (1153)
-[  242.695350] BTRFS: device fsid aad3c285-7360-4bc0-9837-3b41218cb8db devid 4 transid 5 /dev/mapper/sdd_dm scanned by mkfs.btrfs (1153)```
+......
+```
 
-whats up with these
-Incompat features:  extref, skinny-metadata
+What isn't to blame:
+- ncq, tried libata.force=noncq
+
+to try:
+- 2 drives instead of 4
+  - same issue
+  - observe same issue with mode "single"
+- 1 drive
+  - can't recreate issue, even when mkfs.btrfs only targets 1 disk while multiple are installed in system
+- 2 drives without backplane
+  - same issue
+  - observe same issue with mode "single"
+
+- different sata cables
+  - same issue
+- pcie sata card
+- look at sata patches in kernel tree
+- what if we don't use luks?
+  - sudo mkfs.btrfs -f -m single -d single /dev/sda /dev/sdb
+- recreate with mdadm?
+  - recreated issue 
+- simpler recreation
+  - recreated by writing a random 2GB file to 2 drives
+  - sudo dcfldd if=/dev/urandom of=/dev/sda1 of=/dev/sdb1 count=100000
+    - froze at
+      45568 blocks (1424Mb) written.
+      and started throwing the kernel errors
+
+
+
+There is one patch on the ata driver, which reads:
+
+```
+    ATA: ahci_platform: enable FBS for RK3588
+
+    Because the CAP parameters of AHCI are incorrect, FBS cannot
+    be started automatically and needs to be configured manually.
+    This configuration can improve the read-write performance
+    when connecting multiple SATA hard disks through the PM chip.
+
+    Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
+    Change-Id: I66ff92dce1711e3d189801c8caa3219217a50dda
+```
+PM is the port multiplier
+
+this page has a good overview of port multipliers, and FBS https://www.synopsys.com/designware-ip/technical-bulletin/port-multipliers.html
+seems if we don't have fbs enabled, cbs is used instead, which is slower.
+
+our boards uses sata0 behind the port multiplier
+```
+/* sata pm */
+&combphy0_ps {
+	status = "okay";
+};
+
+&sata0 {
+	status = "okay";
+};
+
+&vcc_sata_pwr_en{
+	status = "okay";
+	gpio = <&pca9555 PCA_IO1_2 GPIO_ACTIVE_HIGH>;  //PCA_IO 12
+};
+```
+
+```
+	sata0: sata@fe210000 {
+		compatible = "rockchip,rk-ahci", "snps,dwc-ahci";
+		reg = <0 0xfe210000 0 0x1000>;
+		clocks = <&cru ACLK_SATA0>, <&cru CLK_PMALIVE0>,
+			 <&cru CLK_RXOOB0>, <&cru CLK_PIPEPHY0_REF>,
+			 <&cru CLK_PIPEPHY0_PIPE_ASIC_G>;
+		clock-names = "sata", "pmalive", "rxoob", "ref", "asic";
+		interrupts = <GIC_SPI 273 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "hostc";
+		phys = <&combphy0_ps PHY_TYPE_SATA>;
+		phy-names = "sata-phy";
+		ports-implemented = <0x1>;
+		status = "disabled";
+	};
+```
+
+
+```
+prawn@PrawnOS:~$ sudo dmesg | rg "sata"
+[    0.786092] ahci fe210000.sata: Looking up ahci-supply from device tree
+[    0.786100] ahci fe210000.sata: Looking up ahci-supply property in node /sata@fe210000 failed
+[    0.786114] ahci fe210000.sata: supply ahci not found, using dummy regulator
+[    0.786786] ahci fe210000.sata: Looking up phy-supply from device tree
+[    0.786791] ahci fe210000.sata: Looking up phy-supply property in node /sata@fe210000 failed
+[    0.786799] ahci fe210000.sata: supply phy not found, using dummy regulator
+[    0.787529] ahci fe210000.sata: Looking up target-supply from device tree
+[    0.787535] ahci fe210000.sata: Looking up target-supply property in node /sata@fe210000 failed
+[    0.787543] ahci fe210000.sata: supply target not found, using dummy regulator
+[    0.788251] ahci fe210000.sata: forcing port_map 0x0 -> 0x1
+[    0.788756] ahci fe210000.sata: AHCI 0001.0300 32 slots 1 ports 6 Gbps 0x1 impl platform mode
+[    0.789503] ahci fe210000.sata: flags: ncq sntf pm led clo only pmp fbs pio slum part ccc apst
+[    0.790272] ahci fe210000.sata: port 0 can do FBS, forcing FBSCP
+[    1.551145] vcc_sata_pwr_en: no parameters, enabled
+[    1.551338] reg-fixed-voltage vcc-sata-pwr-en-regulator: vcc_sata_pwr_en supplying 0uV
+[    7.252448] ahci fe210000.sata: FBS is enabled
+[    7.888629] ahci fe210000.sata: FBS is disabled
+[   11.560592] ahci fe210000.sata: FBS is enabled
+[   12.192102] ahci fe210000.sata: FBS is disabled
+[   12.350579] ahci fe210000.sata: FBS is enabled
+```
+
+### Solved
+FBS was to blame
+
+#TODO
+- document btrfs drive failure recovery
+- add ssd cache support?
+- add maintence systemd service/timer for btrfs scrubbing
+- finalize the install script, and the storage setup script
+
+
+
+### Using fido2 keys with luks
+add stuff for fido2 luks
+backports.list
+```
+deb http://deb.debian.org/debian bullseye-backports main
+```
+```
+apt -t bullseye-backports install systemd
+```
+
+so we can use this to enroll a device:
+```
+sudo systemd-cryptenroll --fido2-with-client-pin=yes --fido2-with-user-presence=yes --fido2-device=auto /dev/sda
+```
+
+and this to decrypt a device
+
+```
+sudo /usr/lib/systemd/systemd-cryptsetup attach sda_dm /dev/sda - fido2-device=auto
+```
+
+TODO
+- but we have to set the pin using another fido2 too, like pynitrokey/nitropy (maybe theres a better, more general tool to use here?)
+- also, decrypting seems to give up if there are multiple fido2 keys enrolled, which isn't great.
+  this might be fixed in a newer version of systemd?
+
+options:
+- figure out how to enroll and use 2 fido2 keys, even if usage is annoying
+  - also have recovery key
+  - recovery key format: large random string (stored securely) + memorized, unrecorded portion
+- only use one fido2 key, and instead have only the recovery key as backup
+
+
+
+### Install server software
+
+```
+sudo apt install samba
+```
+
+can't get docker from debian, because of this warning:
+```
+Using docker.io on non-amd64 hosts is not supported at this time. Please be careful when using it on anything besides amd64. 
+```
+instead follow https://docs.docker.com/engine/install/debian/#prerequisites
+
