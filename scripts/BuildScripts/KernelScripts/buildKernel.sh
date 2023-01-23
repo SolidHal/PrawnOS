@@ -21,6 +21,10 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
+
 if [ -z "$1" ]; then
     echo "No kernel version supplied"
     exit 1
@@ -48,9 +52,6 @@ INITRAMFS=$4
 TARGET=$5
 KERNEL_CONFIG=$6
 
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
-
 #this is the same as the kernel partition size
 MAX_KERNEL_SIZE=$(expr 65536 \* 512)
 
@@ -62,20 +63,20 @@ cd $BUILD_DIR
 #this arch nonsense is obnoxious.
 # armhf is just "arm" to the kernel and vbutil,
 # arm64 is what the kernel uses, but aarch64 is what vbutil uses
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     CROSS_COMPILER=arm-none-eabi-
     # kernel doesn't differentiate between arm and armhf
     KERNEL_ARCH=arm
     VBUTIL_ARCH=$KERNEL_ARCH
     IMAGE=zImage
     BOOTLOADER=coreboot
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     KERNEL_ARCH=$ARCH_ARM64
     VBUTIL_ARCH=aarch64
     IMAGE=Image
     BOOTLOADER=coreboot
-elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     KERNEL_ARCH=$ARCH_ARM64
     IMAGE=Image

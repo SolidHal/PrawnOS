@@ -1,6 +1,7 @@
 ifndef BUILD_COMMON_MK
 BUILD_COMMON_MK := 1
 
+
 ### PRAWNOS TARGET ARCHS
 PRAWNOS_ARMHF := armhf
 PRAWNOS_ARM64 := arm64
@@ -9,10 +10,13 @@ PRAWNOS_ARM64_RK3588_SERVER := arm64-rk3588-server
 # validate that target is set to something we support
 ifeq ($(TARGET),$(PRAWNOS_ARMHF))
 $(info TARGET is $(PRAWNOS_ARMHF))
+TARGET_ARCH=armhf
 else ifeq ($(TARGET),$(PRAWNOS_ARM64))
 $(info TARGET is $(PRAWNOS_ARM64))
+TARGET_ARCH=arm64
 else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
 $(info TARGET is $(PRAWNOS_ARM64_RK3588_SERVER))
+TARGET_ARCH=arm64
 else
 $(info TARGET is invalid)
 $(info Must specify a TARGET. Valid TARGETS are)

@@ -18,6 +18,8 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
 
 #Ensure Sudo
 if [[ $EUID -ne 0 ]]; then
@@ -71,21 +73,17 @@ KERNEL_PACKAGE_PATH=$5
 KERNEL_PACKAGE_NAME=$6
 KERNEL_PACKAGE_DEB=$7
 
-
-
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
 #this arch nonsense is obnoxious.
 # armhf is just "arm" to the kernel and vbutil,
 # arm64 is what the kernel uses, but aarch64 is what vbutil uses
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     # kernel doesn't differentiate between arm and armhf
     KERNEL_ARCH=arm
     BOOTLOADER=coreboot
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     KERNEL_ARCH=$ARCH_ARM64
     BOOTLOADER=coreboot
-elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     KERNEL_ARCH=$ARCH_ARM64
     BOOTLOADER=uboot
 else

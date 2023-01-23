@@ -22,6 +22,9 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
+
 if [ -z "$1" ]
 then
     echo "No resources directory"
@@ -48,19 +51,16 @@ BUILD_DIR=$2
 TARGET=$3
 CONFIG=$4
 
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
-
 cd $BUILD_DIR
 
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     CROSS_COMPILER=arm-none-eabi-
     # kernel doesn't differentiate between arm and armhf
     ARCH=arm
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     ARCH=$ARCH_ARM64
-elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     ARCH=$ARCH_ARM64
 else

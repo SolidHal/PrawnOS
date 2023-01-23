@@ -19,6 +19,9 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
+
 #Ensure Sudo
 if [[ $EUID -ne 0 ]]; then
     echo "Please run this script with sudo, or as root:"
@@ -70,15 +73,13 @@ BOOTLOADER_PACKAGE_PATH=$4
 BOOTLOADER_PACKAGE_NAME=$5
 BOOTLOADER_PACKAGE_DEB=$6
 
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     echo "armhf does not have a supported bootloader"
     exit 1
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     echo "arm64 does not have a supported bootloader"
     exit 1
-elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     BOOTLOADER=uboot
 else
     echo "no valid target arch specified"

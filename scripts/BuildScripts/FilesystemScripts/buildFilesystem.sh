@@ -22,6 +22,8 @@ set -e
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
 
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
 
 #Ensure Sudo
 if [[ $EUID -ne 0 ]]; then
@@ -62,7 +64,7 @@ then
 fi
 if [ -z "$7" ]
 then
-    echo "No TARGET arch supplied"
+    echo "No TARGET supplied"
     exit 1
 fi
 if [ -z "$8" ]
@@ -77,13 +79,14 @@ BASE=$3
 PRAWNOS_ROOT=$4
 PRAWNOS_SHARED_SCRIPTS=$5
 PRAWNOS_FILESYSTEM_RESOURCES=$6
-TARGET_ARCH=$7
+TARGET=$7
 PRAWNOS_BUILD=$8
 
-
-PRAWNOS_ARMHF="armhf"
-PRAWNOS_ARM64="arm64"
-PRAWNOS_ARM64_RK3588_SERVER="arm64-rk3588-server"
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+    TARGET_ARCH=$ARCH_ARM64
+else
+    TARGET_ARCH=$TARGET
+fi
 
 outmnt=$(mktemp -d -p "$(pwd)")
 
@@ -215,10 +218,6 @@ else
 fi
 
 
-if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
-    TARGET_ARCH="arm64"
-fi
-
 # use default debootstrap mirror if none is specified
 if [ "$PRAWNOS_DEBOOTSTRAP_MIRROR" == "" ]
 then
@@ -341,12 +340,12 @@ prepare_laptop_packages() {
     chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
     chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
     chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
-    if [ $TARGET_ARCH = "armhf" ]
+    if [ $TARGET_ARCH = $ARCH_ARMHF ]
     then
         chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
     fi
 
-    if [ $TARGET_ARCH = "arm64" ]
+    if [ $TARGET_ARCH = $ARCH_ARM64 ]
     then
         chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
     fi

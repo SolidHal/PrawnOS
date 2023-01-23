@@ -49,9 +49,9 @@ OUT_DIR=$3
 TARGET=$4
 
 
-
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
+PRAWNOS_ARMHF="armhf"
+PRAWNOS_ARM64="arm64"
+PRAWNOS_ARM64_RK3588_SERVER="arm64-rk3588-server"
 
 outmnt=$(mktemp -d -p "$(pwd)")
 outdev=$(losetup -f)
@@ -114,7 +114,7 @@ trap cleanup INT TERM EXIT
 
 losetup -P $outdev $BASE
 #mount the root filesystem
-if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     mount -o noatime ${outdev}p3 $outmnt
 else
     mount -o noatime ${outdev}p2 $outmnt
@@ -138,7 +138,7 @@ mkdir $initramfs_src/lib
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
 
-if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     # network and ssh specific dirs
     mkdir $initramfs_src/etc/ssh
     mkdir -p $initramfs_src/usr/sbin
@@ -156,11 +156,11 @@ chroot $outmnt /bin/bash -c "chroot_get_libs $initramfs_src_direct $initramfs_bi
 #have to add libgcc, libnss manually since ldd doesn't see it as a requirement :/
 armhf_libs=arm-linux-gnueabihf
 arm64_libs=aarch64-linux-gnu
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     LIBS_DIR=$armhf_libs
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     LIBS_DIR=$arm64_libs
-elif [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     LIBS_DIR=$arm64_libs
 else
     echo "Cannot build initramfs: no valid target arch specified"
@@ -168,7 +168,7 @@ else
 fi
 cp $outmnt/lib/$LIBS_DIR/libgcc_s.so.1 $initramfs_src/lib/$LIBS_DIR/
 
-if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     cp -a $outmnt/lib/$LIBS_DIR/libnss* $initramfs_src/lib/$LIBS_DIR/
 
     # add the console setup scripts
@@ -194,7 +194,7 @@ ln -s busybox bin/sh
 ln -s busybox bin/switch_root
 ln -s busybox bin/umount
 
-if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     ln -s busybox bin/udhcpc
 fi
 popd
@@ -206,7 +206,7 @@ echo 'root:x:0:0::/root:/bin/sh' > $initramfs_src/etc/passwd
 mkdir -p -m 0700 $initramfs_src/root
 
 # only support ssh in initramfs on server images
-if [ "$TARGET" == "${ARCH_ARM64}-rk3588-server" ]; then
+if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     # minimal sshd server requires
     # - sshd binary, and the libs ldd mentions
     # - libnss*, otherwise it will always fail finding the privilege separation user
