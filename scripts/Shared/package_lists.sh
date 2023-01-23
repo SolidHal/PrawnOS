@@ -87,6 +87,8 @@ base_debs_download=(
     dkms
     eject
     firefox-esr
+    gvfs-backends
+    gvfs-fuse
     iw
     libegl-mesa0
     libegl1-mesa
