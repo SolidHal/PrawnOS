@@ -1,0 +1,12 @@
+Source: prawnos-uboot-image-arm64-rk3588-server
+Section: admin
+Priority: required
+Maintainer: Hal Emmerich <hal@halemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: prawnos-uboot-image-arm64-rk3588-server
+Architecture: arm64
+Depends: ${misc:Depends} coreutils
+Description: the PrawnOS u-boot image for the arm64 rk3588 server

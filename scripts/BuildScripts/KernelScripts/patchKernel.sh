@@ -3,6 +3,24 @@
 set -x
 set -e
 
+# This file is part of PrawnOS (https://www.prawnos.com)
+# Copyright (c) 2023 Eva Emmerich <hal@halemmerich.com>
+
+# PrawnOS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+
+# PrawnOS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
+
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
+
 if [ -z "$1" ]
 then
     echo "No kernel version supplied"
@@ -29,24 +47,19 @@ PATCHES=$2
 BUILD_DIR=$3
 TARGET=$4
 
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
-
 cd $BUILD_DIR
 make mrproper
 
 
-if [ "$TARGET" == "$ARCH_ARMHF" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     #Apply the usb and mmc patches
     for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
     for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
-elif [ "$TARGET" == "$ARCH_ARM64" ]; then
-    #echo skip for now
-    #for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
-    # for i in "$PATCHES"/cros-drm/*.patch; do echo $i; patch -p1 < $i; done
-    # for i in "$PATCHES"/alarm/*.patch; do echo $i; patch -p1 < $i; done
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
+    echo skip for now, we are just using a git repo for the source
 else
-    echo "no valid target arch specified"
+    echo "Cannot patch kernel: no valid target arch specified"
     exit 1
 fi

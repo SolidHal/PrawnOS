@@ -21,6 +21,9 @@ set -e
 # You should have received a copy of the GNU General Public License
 # along with PrawnOS.  If not, see <https://www.gnu.org/licenses/>.
 
+PRAWNOS_ROOT=$(git rev-parse --show-toplevel)
+source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
+
 if [ -z "$1" ]; then
     echo "No kernel version supplied"
     exit 1
@@ -56,9 +59,6 @@ cd $BUILD_DIR
 
 sudo apt install libzstd-dev libelf-dev systemtap-sdt-dev libssl-dev libslang2-dev libperl-dev python-dev liblzma-dev libcap-dev libnuma-dev libbabeltrace-dev libbabeltrace-ctf-dev flex bison libiberty-dev binutils-dev libunwind-dev libdw-dev
 
-ARCH_ARMHF=armhf
-ARCH_ARM64=arm64
-
 #this arch nonsense is obnoxious.
 # armhf is just "arm" to the kernel
 # arm64 is just arm64
@@ -70,7 +70,7 @@ elif [ "$TARGET" == "$ARCH_ARM64" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     KERNEL_ARCH=$ARCH_ARM64
 else
-    echo "no valid target arch specified"
+    echo "Cannot build perf: no valid target arch specified"
     exit 1
 fi
 

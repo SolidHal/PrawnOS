@@ -35,11 +35,12 @@ base_debs_install=(
     busybox-static
     bzip2
     ca-certificates
-    cgpt
     cryptsetup
+    dpkg
     e2fsprogs-l10n
     gdisk
     git
+    htop
     ifupdown
     inetutils-ping
     iproute2
@@ -47,43 +48,53 @@ base_debs_install=(
     iw
     kmod
     kpartx
-    laptop-detect
     less
     libatm1
     libgpg-error-l10n
-    libinput-tools
     libnss-systemd
     libpam-cap nftables
     lshw
     nano
     net-tools
     netcat-openbsd
-    network-manager
     parted
     pciutils
     psmisc
+    ripgrep
     rsync
+    sudo
+    sysfsutils
     traceroute
     udev
     usbutils
     uuid-runtime
     vim
+    xz-utils
+)
+
+laptop_base_debs_install=(
+    cgpt
+    laptop-detect
+    libinput-tools
+    network-manager
     vboot-utils
     xdotool
-    xz-utils
+)
+
+server_base_debs_install=(
+    btrfs-progs
+    openssh-server
 )
 
 # blueman can be moved to xfce only once gnome-bluetooth in settings works properly
 base_debs_download=(
     acpi-support
-    alsa-utils
     anacron
     avahi-daemon
     blueman
     bluetooth
     crda
     dbus-user-session
-    dpkg
     dkms
     eject
     firefox-esr
@@ -100,8 +111,6 @@ base_debs_download=(
     librsvg2-common
     libutempter0
     libwayland-egl1-mesa
-    sudo
-    sysfsutils
     tasksel
     vlc
     xdg-utils

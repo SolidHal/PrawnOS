@@ -1,0 +1,22 @@
+# FIXME: currently just builds it, eventually, should use qemu to try to run
+# the image (potentially as a separate action)
+name: build-image-arm64-rk3588-server
+
+on: [push, pull_request]
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v2
+      - name: build image
+        run: sudo dpkg -i ./tests/resources/qemu-user-static_5.1+dfsg-4+b1_amd64.deb && 
+             docker run --mount type=bind,source=$PWD,target=/PrawnOS
+             --privileged -v/dev:/dev debian:bullseye
+             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" arm64-rk3588-server Shiba
+      - name: publish image
+        uses: actions/upload-artifact@v2
+        with:
+          name: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"
+          path: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"

@@ -1,8 +1,10 @@
 ifndef KERNEL_MK
 KERNEL_MK := 1
+
 ifndef PRAWNOS_ROOT
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 endif
+
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 include $(PRAWNOS_ROOT)/initramfs/makefile
 
@@ -85,10 +87,16 @@ kernel_config: $(KERNEL_PATCHED)
 .PHONY: clean_kernel
 clean_kernel:
 	rm -rf $(PRAWNOS_KERNEL_BUILD)
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
+
+.PHONY: clean_kernel_image_package
+clean_kernel_image_package:
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
 
 .PHONY: clean_ath9k
 clean_ath9k:
 	rm -rf $(PRAWNOS_ATH9K_BUILD)
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
 
 ### DEVELOPER RULES
 
@@ -140,6 +148,11 @@ $(KERNEL_TAR_SIGNATURE): | $(PRAWNOS_BUILD_SOURCES)
 	wget $(WGET_OPTS) $(KERNEL_URL)/$(KERNEL_TAR_SIGNATURE_BASENAME) -O $(KERNEL_TAR_SIGNATURE)
 
 $(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE)
+## TODO: just use the git repo for arm64-rk3588 for now
+  ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+	git clone https://github.com/SolidHal/rk3588-kernel-libre $(PRAWNOS_BUILD)/linux-$(KVER)
+	touch $(KERNEL_EXTRACTED)
+  else
 	gpg --import $(KERNEL_PUBKEY)
 	case $(BLOBBY_BUILD) in \
 		0) \
@@ -158,6 +171,7 @@ $(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE)
 			exit 1 \
 			;; \
 	esac
+  endif
 
 $(KERNEL_TAR): | $(PRAWNOS_BUILD_LOGS) $(PRAWNOS_BUILD_SOURCES)
 	wget $(WGET_OPTS) $(KERNEL_URL)/$(KERNEL_BASENAME) -O $(KERNEL_TAR)
@@ -180,7 +194,9 @@ $(KERNEL_ATH9K_INSTALLED): $(KERNEL_PATCHED) $(ATH9K_BUILT) | $(KERNEL_ATH9K_FIR
 	cp $(ATH9K_7010_FW) $(KERNEL_ATH9K_FIRMWARES)/
 
 $(PRAWNOS_KERNEL_BUILT): $(KERNEL_ATH9K_INSTALLED) $(PRAWNOS_INITRAMFS_IMAGE)
+# rebuilding the kernel means we also need to rebuild the kernel package
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
 	rm -rf $(KERNEL_BUILD_LOG)
 	$(PRAWNOS_KERNEL_SCRIPTS_BUILD) $(KVER) $(KERNEL_RESOURCES) $(PRAWNOS_KERNEL_BUILD) $(PRAWNOS_INITRAMFS_IMAGE) $(TARGET) $(KERNEL_CONFIG) 2>&1 | tee $(KERNEL_BUILD_LOG)
 
-endif
+endif ## KERNEL_MK
