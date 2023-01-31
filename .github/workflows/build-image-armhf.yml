@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: build image
         run: sudo dpkg -i ./tests/resources/qemu-user-static_5.1+dfsg-4+b1_amd64.deb && 
              docker run --mount type=bind,source=$PWD,target=/PrawnOS
