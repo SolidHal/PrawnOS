@@ -29,6 +29,8 @@ IMAGE_GIT="${IMG}-git-${GITHUB_SHA}.img"
 
 cd "$(dirname "$0")/.."
 
+git config --global --add safe.directory $(pwd)
+
 # Get dependencies
 apt-get update
 
