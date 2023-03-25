@@ -81,6 +81,11 @@ elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     KERNEL_ARCH=$ARCH_ARM64
     IMAGE=Image
     BOOTLOADER=uboot
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    KERNEL_ARCH=$ARCH_ARM64
+    IMAGE=Image
+    BOOTLOADER=uboot
 else
     echo "Cannot build kernel: no valid target arch specified"
     exit 1
@@ -123,6 +128,7 @@ if [ "$BOOTLOADER" == "coreboot" ]; then
 elif [ "$BOOTLOADER" == "uboot" ]; then
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH $IMAGE
     make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j.dtb
+    make -j $(($(nproc) +1))  CROSS_COMPILE=$CROSS_COMPILER ARCH=$KERNEL_ARCH rockchip/rk3588-firefly-itx-3588j-dual-mipi101-M101014-BE45-A1.dtb
 
     # vmlinux.kpart is the build complete flag to stay consistent with the other platforms
     # though it is unused for uboot

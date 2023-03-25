@@ -59,6 +59,8 @@ elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     echo skip for now, we are just using a git repo for the source
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
+    echo skip for now, we are just using a git repo for the source
 else
     echo "Cannot patch kernel: no valid target arch specified"
     exit 1

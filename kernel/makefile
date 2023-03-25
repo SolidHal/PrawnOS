@@ -152,6 +152,9 @@ $(KERNEL_EXTRACTED): $(KERNEL_TAR) $(KERNEL_TAR_SIGNATURE)
   ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
 	git clone https://github.com/SolidHal/rk3588-kernel-libre $(PRAWNOS_BUILD)/linux-$(KVER)
 	touch $(KERNEL_EXTRACTED)
+  else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588))
+	git clone https://github.com/SolidHal/rk3588-kernel-libre $(PRAWNOS_BUILD)/linux-$(KVER)
+	touch $(KERNEL_EXTRACTED)
   else
 	gpg --import $(KERNEL_PUBKEY)
 	case $(BLOBBY_BUILD) in \

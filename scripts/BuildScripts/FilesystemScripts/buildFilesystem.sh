@@ -82,7 +82,7 @@ PRAWNOS_FILESYSTEM_RESOURCES=$6
 TARGET=$7
 PRAWNOS_BUILD=$8
 
-if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ] || [ "$TARGET" == "$PRAWNOS_ARM64_RK3588" ]; then
     TARGET_ARCH=$ARCH_ARM64
 else
     TARGET_ARCH=$TARGET
@@ -210,8 +210,11 @@ create_image_uboot() {
 if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
     # server image is ~1.5GB
     create_image_uboot $BASE $outdev 50M 30 $outmnt
+elif [ "$TARGET" == "$PRAWNOS_ARM64_RK3588" ]; then
+    # 3GB
+    create_image_uboot $BASE $outdev 50M 60 $outmnt
 else
-    # create a 2.5GB image with the Chrome OS partition layout
+    # create a 3GB image with the Chrome OS partition layout
     # Bumped to keep both Gnome and Xfce
     #TODO: change back to 40 (2GB)
     create_image $BASE $outdev 50M 60 $outmnt
@@ -304,8 +307,8 @@ chroot $outmnt apt update
 apt_install $PRAWNOS_BUILD $outmnt true ${base_debs_install[@]}
 
 #add the live-boot fstab
-if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ]; then
-    cp -f $build_resources/external_fstab_server $outmnt/etc/fstab
+if [ "$TARGET" == "$PRAWNOS_ARM64_RK3588_SERVER" ] || [ "$TARGET" == "$PRAWNOS_ARM64_RK3588" ]; then
+    cp -f $build_resources/external_fstab_rk3588 $outmnt/etc/fstab
     chmod 644 $outmnt/etc/fstab
 else
     cp -f $build_resources/external_fstab $outmnt/etc/fstab

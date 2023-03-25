@@ -52,6 +52,7 @@ TARGET=$4
 PRAWNOS_ARMHF="armhf"
 PRAWNOS_ARM64="arm64"
 PRAWNOS_ARM64_RK3588_SERVER="arm64-rk3588-server"
+PRAWNOS_ARM64_RK3588="arm64-rk3588"
 
 outmnt=$(mktemp -d -p "$(pwd)")
 outdev=$(losetup -f)
@@ -116,6 +117,8 @@ losetup -P $outdev $BASE
 #mount the root filesystem
 if [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     mount -o noatime ${outdev}p3 $outmnt
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
+    mount -o noatime ${outdev}p3 $outmnt
 else
     mount -o noatime ${outdev}p2 $outmnt
 fi
@@ -161,6 +164,8 @@ if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
 elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     LIBS_DIR=$arm64_libs
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
+    LIBS_DIR=$arm64_libs
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
     LIBS_DIR=$arm64_libs
 else
     echo "Cannot build initramfs: no valid target arch specified"

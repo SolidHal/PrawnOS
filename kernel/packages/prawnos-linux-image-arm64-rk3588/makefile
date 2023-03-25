@@ -3,14 +3,14 @@
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
-ifneq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
-$(error Cant build arm64 rk3588 server kernel package with non arm64 rk3588 server target)
+ifneq ($(TARGET),$(PRAWNOS_ARM64_RK3588))
+$(error Cant build arm64 rk3588 kernel package with non arm64 rk3588 target)
 endif
 
 #package specific vars
 DEB_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_DEB_VER)
 PRAWNOS_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_PRAWNOS_VER)
-PACKAGE := prawnos-linux-image-arm64-rk3588-server
+PACKAGE := prawnos-linux-image-arm64-rk3588
 PACKAGE_ARCH := arm64
 
 #uses the full debian version for the package name
@@ -39,7 +39,7 @@ $(PACKAGE_NAME_ORIG_TAR):
 	rm -f $(PACKAGE)_*-*.orig.tar.gz
 	mkdir $(ORIG)
 	cp $(PRAWNOS_KERNEL_RK3588_BUILT) $(ORIG)/Image
-	cp $(PRAWNOS_KERNEL_DTB_RK3588_FIREFLY_SERVER_BUILT) $(ORIG)/kernel.dtb
+	cp $(PRAWNOS_KERNEL_DTB_RK3588_FIREFLY_BUILT) $(ORIG)/kernel.dtb
 	cp $(PRAWNOS_INITRAMFS_IMAGE) $(ORIG)/initrd
 	cp $(PRAWNOS_KERNEL_RESOURCES)/extlinux.conf $(ORIG)/extlinux.conf
 	tar -czf $(PACKAGE_NAME_ORIG_TAR) -C $(ORIG)/ .

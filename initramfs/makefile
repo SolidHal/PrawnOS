@@ -1,5 +1,6 @@
 ifndef INITRAMFS_MK
 INITRAMFS_MK := 1
+
 ifndef PRAWNOS_ROOT
 PRAWNOS_ROOT := $(shell git rev-parse --show-toplevel)
 endif
@@ -8,6 +9,8 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 INITRAMFS_BUILD_LOG := $(PRAWNOS_BUILD_LOGS)/initramfs-log.txt
 
 ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources/$(TARGET)
+else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588))
 INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources/$(TARGET)
 else
 INITRAMFS_RESOURCES := $(PRAWNOS_INITRAMFS)/resources
@@ -20,6 +23,10 @@ initramfs: $(PRAWNOS_INITRAMFS_IMAGE)
 clean_initramfs:
 	rm -f $(PRAWNOS_INITRAMFS_IMAGE)
 ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588_SERVER))
+# on uboot platforms, the initramfs is part of the kernel package
+# so only the kernel package must be rebuilt
+	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean
+else ifeq ($(TARGET),$(PRAWNOS_ARM64_RK3588))
 # on uboot platforms, the initramfs is part of the kernel package
 # so only the kernel package must be rebuilt
 	$(MAKE) -C $(PRAWNOS_KERNEL_PACKAGE_IMAGE) clean

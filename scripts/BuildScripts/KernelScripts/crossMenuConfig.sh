@@ -63,6 +63,9 @@ elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     CROSS_COMPILER=aarch64-linux-gnu-
     ARCH=$ARCH_ARM64
+elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
 else
     echo "Cannot run cross make menuconfig: no valid target arch specified"
 fi
