@@ -10,3 +10,6 @@ Package: prawnos-linux-image-arm64-rk3588-server
 Architecture: arm64
 Depends: ${misc:Depends} coreutils
 Description: the PrawnOS linux kernel distribution. Made up of linux-libre, ath9k firmware, PrawnOS initramfs, and varying numbers of patches
+Provides: linux-image-arm64, linux-image-rt-arm64, linux-image-cloud-arm64, firmware-linux-free
+Conflicts: linux-image-arm64, linux-image-rt-arm64, linux-image-cloud-arm64, firmware-linux-free
+Replaces: linux-image-arm64, linux-image-rt-arm64, linux-image-cloud-arm64, firmware-linux-free

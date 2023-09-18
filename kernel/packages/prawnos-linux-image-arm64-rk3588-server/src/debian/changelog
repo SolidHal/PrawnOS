@@ -1,3 +1,9 @@
+prawnos-linux-image-arm64-rk3588-server (5.19.5-1-2) stable; urgency=medium
+
+  * release 5.19.5-1-2
+
+ -- Hal Emmerich <hal@halemmerich.com>  Mon, 18 Sep 2023 07:15:45 -0700
+
 prawnos-linux-image-arm64-rk3588-server (5.19.5-1-1) stable; urgency=medium
 
   * Initial packaged release.
