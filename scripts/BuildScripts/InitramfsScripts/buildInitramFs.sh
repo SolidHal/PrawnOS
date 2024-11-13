@@ -137,6 +137,13 @@ mkdir $initramfs_src/run
 mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 
+# dev, proc, and sysfs are special. we mount them at runtime
+mkdir -m 0755 $initramfs_src/dev
+mkdir -m 0755 $initramfs_src/proc
+mkdir -m 0755 $initramfs_src/sys
+
+# the only dev we must create is the console. everything else we can get from the devtmpfs mount
+mknod $initramfs_src/dev/console c 5 1
 
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
@@ -194,8 +201,10 @@ pushd $(pwd)
 cd $initramfs_src
 # setup busybox links
 ln -s busybox bin/cat
+ln -s busybox bin/grep
 ln -s busybox bin/mount
 ln -s busybox bin/sh
+ln -s busybox bin/sleep
 ln -s busybox bin/switch_root
 ln -s busybox bin/umount
 
