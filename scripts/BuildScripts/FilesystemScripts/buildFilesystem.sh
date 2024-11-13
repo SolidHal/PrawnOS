@@ -374,7 +374,10 @@ fi
 
 #Cleanup to reduce install size
 chroot $outmnt apt-get autoremove --purge
-chroot $outmnt apt-get clean
+
+# KEEPING THIS HERE AS A WARNING
+# we cant do this as it wipes the downloaded apt archive, meaning no packages are available for offline install
+# chroot $outmnt apt-get clean
 
 
 #Setup console font size
