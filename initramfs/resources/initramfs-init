@@ -125,13 +125,12 @@ if blkid ${ROOT_DEV}2 | grep -q crypto_LUKS; then
 else
     # mount the unencrypted root filesystem
     [ -d "/newroot" ] || mkdir -p /newroot
-    mount ${ROOT_DEV}2 /newroot
+    mount ${ROOT_DEV}2 /newroot || rescue_shell
 fi
 
-# /dev/pts may not be mounted
-umount /dev/pts || true
-umount /sys
 umount /proc
+umount /sys
+umount /dev
 
 #switch to the new rootfs
 exec switch_root /newroot /sbin/init
