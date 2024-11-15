@@ -142,8 +142,13 @@ mkdir -m 0755 $initramfs_src/dev
 mkdir -m 0755 $initramfs_src/proc
 mkdir -m 0755 $initramfs_src/sys
 
-# the only dev we must create is the console. everything else we can get from the devtmpfs mount
+# create the bare minimum dev files. everything else we can get from the devtmpfs mount
+mknod $initramfs_src/dev/null c 1 3
+mknod $initramfs_src/dev/tty c 5 0
 mknod $initramfs_src/dev/console c 5 1
+mknod $initramfs_src/dev/urandom c 1 9
+mknod $initramfs_src/dev/random c 1 8
+mknod $initramfs_src/dev/zero c 1 5
 
 #install the few tools we need, and the supporting libs
 initramfs_binaries='/bin/busybox /sbin/cryptsetup /sbin/blkid'
@@ -270,7 +275,12 @@ cd $initramfs_src
 # store for other parts of the build process
 find . -print0 | cpio --null --create --verbose --format=newc | gzip --best > $OUT_DIR/PrawnOS-initramfs.cpio.gz
 
-# cleanup
+# do a non-error cleanup
 cd $OUT_DIR
 rm -rf $initramfs_src
 
+umount -l $outmnt > /dev/null 2>&1
+rmdir $outmnt > /dev/null 2>&1
+losetup -d $outdev > /dev/null 2>&1
+echo "DONE!"
+trap - INT TERM EXIT
