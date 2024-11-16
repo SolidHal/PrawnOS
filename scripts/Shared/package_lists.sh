@@ -78,7 +78,6 @@ laptop_base_debs_install=(
     libinput-tools
     network-manager
     vboot-utils
-    xdotool
 )
 
 server_base_debs_install=(
@@ -114,6 +113,7 @@ base_debs_download=(
     tasksel
     vlc
     xdg-utils
+    xdotool
     xorg
     xserver-xorg-input-libinput
     xterm
@@ -137,16 +137,6 @@ xfce_debs_download=(
     xfce4-goodies
     xfce4-power-manager
     xfce4-terminal
-)
-
-lxqt_debs_download=(
-    lightdm
-    lxqt
-    mousepad
-    network-manager-gnome
-    network-manager-openvpn
-    network-manager-openvpn-gnome
-    pavucontrol-qt
 )
 
 gnome_debs_download=(
@@ -195,7 +185,6 @@ prawnos_gnome_debs_prebuilt_download=(
 # packages built by prawnos, to be installed when running InstallPrawnOS
 prawnos_base_debs_prebuilt_download=(
     prawnos-general-config
-    lagrange-gemini-browser
 )
 
 # packages built by prawnos, to be installed at build time
@@ -203,24 +192,6 @@ prawnos_base_debs_prebuilt_install=(
     font-source-code-pro
     flashmap
     mosys
-)
-
-# these are only required when the debian mesa version is too old for us
-prawnos_mesa_prebuilt_install=(
-    libgbm1=20.2.1-100
-    libgl1-mesa-dri=20.2.1-100
-    libegl1-mesa=20.2.1-100
-    libegl-mesa0=20.2.1-100
-    libglapi-mesa=20.2.1-100
-    libgl1-mesa-glx=20.2.1-100
-    libgles2-mesa=20.2.1-100
-    libglx-mesa0=20.2.1-100
-    libosmesa6=20.2.1-100
-    libwayland-egl1-mesa=20.2.1-100
-    mesa-opencl-icd=20.2.1-100
-    mesa-va-drivers=20.2.1-100
-    mesa-vdpau-drivers=20.2.1-100
-    mesa-vulkan-drivers=20.2.1-100
 )
 
 # packages built by prawnos, to be installed when running InstallPrawnOS
