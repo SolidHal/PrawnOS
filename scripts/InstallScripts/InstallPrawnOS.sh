@@ -309,10 +309,6 @@ partition_device() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
     kernel_size=65536
-    #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
-    #writing zeros to the first 50M tends to clean up anything weird left around
-    dd if=/dev/zero of=$EXTERNAL_TARGET bs=50M count=1
-    sync
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET
     #make the base gpt partition map
