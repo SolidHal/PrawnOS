@@ -20,7 +20,7 @@ Supports the following Devices:
 Build Debian filesystem with:
 * No blobs, anywhere. 
 * Sources from only main, not contrib or non-free which keeps Debian libre.
-* Currently PrawnOS supports xfce and gnome as choices for desktop enviroment.
+* Currently PrawnOS supports gnome for desktop environment
 * full root filesystem encryption
 * mesa with support for panfrost for graphics acceleration 
 * functional sound, touchpad, keyboard mappings
@@ -206,7 +206,7 @@ If you are curious how the initramfs, and root partition encryption work on Praw
 If you run in to any problems please open an issue. 
 _If you install to the internal emmc this will show a bunch of scary red warnings that are a result of the emmc (internal storage) having a few unwritable (bad) blocks at the beginning of the device and the kernel message level being set low for debugging. They don't effect anything long-term. All C201s have these bad blocks at the beginning of the emmc_
 
-After the partitioning and the filesystem copy is complete, it will prompt you to install either the xfce4 or the lxqt desktop environment, sound, trackpad, and Xorg configurations
+After the partitioning and the filesystem copy is complete, it will prompt you to install the gnome desktop environment as well as sound, trackpad, and Xorg configurations
 It will also prompt you to make a new user that automatically gets sudo privileges.
 
 After reboot, remove the external media you had booted from originally. If you installed to the internal emmc press `control+d`, if you installed to an external device press `control+u`
@@ -229,7 +229,7 @@ Choose `Expand` at the prompt
 
 If you run in to any problems please open an issue. 
 
-Now you can choose to install the packages, which are either the xfce4 or the lxqt desktop enviroment, sound, trackpad, and Xorg configurations.
+Now you can choose to install the packages, which are the gnome desktop enviroment as well as sound, trackpad, and Xorg configurations.
 It will also prompt you to make a new user that automatically gets sudo privileges.
 
 If you choose in install the packages, when installation is complete it will reboot.
@@ -242,7 +242,7 @@ Say no at the prompt to install packages and a desktop environment.
 Congratulations: you are done! Welcome to PrawnOS. You should probably change the root password and make a user, but I'm not your boss or anything so I'll leave that to you. 
 
 #### Connecting to WiFi in a basic environment
-If have a basic environment without xfce or lxqt you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
+If have a basic environment without a desktop environment you can connect to WiFi using `nmtui` and it's menus to connect; or issue the following nmcli commands:
 ```
 nmcli device wifi list
 nmcli --ask device wifi connect "Network_name" # The --ask will prompt you for the password so it doesn't remain in your shell history 

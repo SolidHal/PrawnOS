@@ -85,7 +85,7 @@ server_base_debs_install=(
     openssh-server
 )
 
-# blueman can be moved to xfce only once gnome-bluetooth in settings works properly
+# blueman can be removed once gnome-bluetooth in settings works properly
 base_debs_download=(
     acpi-support
     anacron
@@ -119,25 +119,6 @@ base_debs_download=(
     xterm
 )
 
-xfce_debs_download=(
-    accountsservice
-    dbus-user-session
-    dconf-cli
-    dconf-editor
-    lightdm
-    mousepad
-    network-manager-gnome
-    network-manager-openvpn
-    network-manager-openvpn-gnome
-    numix-gtk-theme
-    papirus-icon-theme
-    plank
-    system-config-printer
-    xfce4
-    xfce4-goodies
-    xfce4-power-manager
-    xfce4-terminal
-)
 
 gnome_debs_download=(
     dbus-user-session
@@ -166,14 +147,6 @@ gnome_debs_download=(
     network-manager-openvpn-gnome
     pavucontrol-qt
     seahorse
-)
-
-# packages built by prawnos, to be installed when running InstallPrawnOS
-# and choosing xfce
-prawnos_xfce_debs_prebuilt_download=(
-    xsecurelock
-    prawnos-xfce-config
-    libinput-gestures
 )
 
 # packages built by prawnos, to be installed when running InstallPrawnOS

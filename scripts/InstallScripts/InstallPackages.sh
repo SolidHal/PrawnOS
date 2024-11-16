@@ -61,14 +61,15 @@ set_time() {
 cat $RESOURCES/ascii-icon.txt
 echo ""
 
-while true; do
-    read -r -p "Install (X)fce4, or (G)nome, if unsure choose (X)fce: " XL
-    case $XL in
-        [Gg]* ) DE=gnome; break;;
-        [Xx]* ) DE=xfce; break;;
-        * ) echo "Please answer (X)fce4, (G)nome";;
-    esac
-done
+# while true; do
+#     read -r -p "Install (X)fce4, or (G)nome, if unsure choose (X)fce: " XL
+#     case $XL in
+#         [Gg]* ) DE=gnome; break;;
+#         [Xx]* ) DE=xfce; break;;
+#         * ) echo "Please answer (X)fce4, (G)nome";;
+#     esac
+# done
+DE=gnome
 
 #Set the timezone and time
 dpkg-reconfigure tzdata
@@ -112,20 +113,6 @@ then
   apt remove -y iio-sensor-proxy
 
 
-fi
-
-if [ "$DE" = "xfce" ]
-then
-  apt install -y ${xfce_debs_download[@]}
-  apt install -y ${prawnos_xfce_debs_prebuilt_download[@]}
-
-  # remove light-locker, as it is broken on this machine. See issue https://github.com/SolidHal/PrawnOS/issues/56#issuecomment-504681175
-  apt remove -y light-locker
-  apt purge -y light-locker
-
-  #Install packages not in an apt repo
-  # TODO: likely drop this in favor of just using the upstream
-  # dpkg -i $DIR/xfce-themes/*
 fi
 
 apt clean -y && apt autoremove --purge -y

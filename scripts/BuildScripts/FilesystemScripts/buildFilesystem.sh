@@ -338,9 +338,6 @@ prepare_laptop_packages() {
     apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
     #DEs
-    # Download the xfce packages to be installed by InstallPackages.sh:
-    apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
-
     #Download the gnome packages to be installed by InstallPackages.sh:
     apt_install $PRAWNOS_BUILD $outmnt false ${gnome_debs_download[@]}
 
@@ -357,7 +354,6 @@ prepare_laptop_packages() {
     cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
     chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
     chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
-    chroot $outmnt apt install -y -d ${prawnos_xfce_debs_prebuilt_download[@]}
     chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
     if [ $TARGET_ARCH = $ARCH_ARMHF ]
     then
