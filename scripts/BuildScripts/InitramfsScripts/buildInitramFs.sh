@@ -138,9 +138,9 @@ mkdir $initramfs_src/run/cryptsetup
 mkdir $initramfs_src/lib
 
 # dev, proc, and sysfs are special. we mount them at runtime
-mkdir -m 0755 $initramfs_src/dev
-mkdir -m 0755 $initramfs_src/proc
-mkdir -m 0755 $initramfs_src/sys
+mkdir $initramfs_src/dev
+mkdir $initramfs_src/proc
+mkdir $initramfs_src/sys
 
 # create the bare minimum dev files. everything else we can get from the devtmpfs mount
 mknod $initramfs_src/dev/null c 1 3
