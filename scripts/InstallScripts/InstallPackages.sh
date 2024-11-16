@@ -98,7 +98,7 @@ fi
 
 # remove some packages that we don't actually want.
 #TODO: determine what packages recommends are bringing these in
-apt remove -y gnome-software lilyterm
+apt remove -y gnome-software
 
 ## DE SPECIFIC
 if [ "$DE" = "gnome" ]
