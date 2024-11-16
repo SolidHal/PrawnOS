@@ -264,13 +264,14 @@ cp $build_resources_apt/sources.list $outmnt/etc/apt/sources.list
 #cp $build_resources_apt/prawnos.list $outmnt/etc/apt/sources.list.d/
 sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
 #sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/prawnos.list
-if [ "$DEBIAN_SUITE" != "sid" ]
-then
-    # Install sid (unstable) as an additional source for bleeding edge packages.
-    cp $build_resources_apt/sid.list $outmnt/etc/apt/sources.list.d/
-    #setup apt pinning
-    cp $build_resources_apt/sid.pref $outmnt/etc/apt/preferences.d/
-fi
+
+# if [ "$DEBIAN_SUITE" != "sid" ]
+# then
+#     # Install sid (unstable) as an additional source for bleeding edge packages.
+#     cp $build_resources_apt/sid.list $outmnt/etc/apt/sources.list.d/
+#     #setup apt pinning
+#     cp $build_resources_apt/sid.pref $outmnt/etc/apt/preferences.d/
+# fi
 
 
 install_dir=$outmnt/etc/prawnos/install
