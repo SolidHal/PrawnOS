@@ -161,6 +161,11 @@ apt_install() {
 }
 
 #layout the partitons and write filesystem information
+# $1 is the target image file
+# $2 is the loop device mapped to the target image file
+# $3 is the block size to use when creating the image
+# $4 is the number of blocks to use when creating the image file
+# $% is the root partition mount location
 create_image() {
   dd if=/dev/zero of=$1 bs=$3 count=$4 conv=sparse
   parted --script $1 mklabel gpt
@@ -287,22 +292,33 @@ ln -s $install_dir_direct/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
 
 #Bring in the deb.prawnos.com gpg keyring
 chroot $outmnt apt-key add /etc/prawnos/install/resources/deb.prawnos.com.gpg.key
-chroot $outmnt apt update
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
 chroot $outmnt locale-gen
 
-#Copy in the apt cache
-cp "$PRAWNOS_BUILD/chroot-apt-cache/"* "$outmnt/var/cache/apt/archives/" || true
-
-echo IMAGE SIZE
+echo IMAGE SIZE POST DEBOOTSTRAP
 df -h $outmnt
+
+# Setup the local apt cache repo
+# this reduces repeat build time significantly by caching the debs we download/install
+rm -rf $outmnt/chroot-apt-cache
+mkdir $outmnt/chroot-apt-cache
+mount --bind $PRAWNOS_BUILD/chroot-apt-cache/ $outmnt/chroot-apt-cache
+rm -f $outmnt/chroot-apt-cache/Packages
+chroot $outmnt bash -c "apt-ftparchive packages /chroot-apt-cache > /chroot-apt-cache/Packages"
+# # put it at the top of sources.list so it gets used over the remote repos
+echo "deb [trusted=yes] file:/chroot-apt-cache/ ./" > $outmnt/etc/apt/sources.list.new
+cat $outmnt/etc/apt/sources.list >> $outmnt/etc/apt/sources.list.new
+rm $outmnt/etc/apt/sources.list
+mv $outmnt/etc/apt/sources.list.new $outmnt/etc/apt/sources.list
+
 
 #Make apt retry on download failure
 chroot $outmnt echo "APT::Acquire::Retries \"3\";" > /etc/apt/apt.conf.d/80-retries
 
 #Install the base packages
+# now that we have setup apt, update before we start installing packages
 chroot $outmnt apt update
 apt_install $PRAWNOS_BUILD $outmnt true ${base_debs_install[@]}
 
@@ -322,7 +338,7 @@ prepare_laptop_packages() {
     apt_install $PRAWNOS_BUILD $outmnt false ${base_debs_download[@]}
 
     #DEs
-    #Download the xfce packages to be installed by InstallPackages.sh:
+    # Download the xfce packages to be installed by InstallPackages.sh:
     apt_install $PRAWNOS_BUILD $outmnt false ${xfce_debs_download[@]}
 
     #Download the gnome packages to be installed by InstallPackages.sh:
@@ -379,6 +395,14 @@ chroot $outmnt apt-get autoremove --purge
 # we cant do this as it wipes the downloaded apt archive, meaning no packages are available for offline install
 # chroot $outmnt apt-get clean
 
+
+#Copy out the apt archive cache so it can be used as a local apt repo in future builds
+# this reduces build time significantly by caching the debs we download
+# this must come after all other apt calls
+umount $outmnt/chroot-apt-cache
+rm -r $outmnt/chroot-apt-cache
+cp $outmnt/var/cache/apt/archives/*.deb $PRAWNOS_BUILD/chroot-apt-cache/
+sed -e '/chroot-apt-cache/ s/^#*/#/' -i $outmnt/etc/apt/sources.list
 
 #Setup console font size
 cp -f $build_resources/console-font.sh $outmnt/etc/profile.d/console-font.sh
