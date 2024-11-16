@@ -81,24 +81,20 @@ echo ROOT_PARTUUID: ${ROOT_PARTUUID}
 
 BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
 echo BLKID: ${BLKID}
-if [ -z "$BLKID" ]
-then
-  echo BLKID wasnt found yet, give the kernel a moment...
-  sleep 1
-  BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-
-  if [ -z "$BLKID" ]
-  then
-    echo BLKID still not found, give the kernel one more moment...
+count=0
+if [ -z "$BLKID" ]; then
+  while true; do
+    echo BLKID wasnt found yet, give the kernel a moment...
     sleep 1
     BLKID=$(/sbin/blkid | grep $ROOT_PARTUUID )
-
-    if [ -z "$BLKID" ]
-    then
-      echo FAILED TO FIND BLKID AFTER 2 SECONDS, PLEASE OPEN AN ISSUE WITH A SCREENSHOT OF THIS ERROR
-      rescue_shell
+    if [ -n "$BLKID" ]; then
+      break;
     fi
-  fi
+    if [ "${count}" -ge 30 ]; then
+       echo FAILED TO FIND BLKID AFTER 30 SECONDS, PLEASE OPEN AN ISSUE WITH A SCREENSHOT OF THIS ERROR
+       rescue_shell
+    fi
+  done
 fi
 
 echo BLKID: ${BLKID}
@@ -128,9 +124,10 @@ else
     mount ${ROOT_DEV}2 /newroot || rescue_shell
 fi
 
-umount /proc
-umount /sys
-umount /dev
+# move dev,proc,sys to the new root
+mount -n -o move /dev /newroot/dev
+mount -n -o move /proc /newroot/proc
+mount -n -o move /sys /newroot/sys
 
 #switch to the new rootfs
 exec switch_root /newroot /sbin/init
