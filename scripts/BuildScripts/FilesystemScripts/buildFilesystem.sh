@@ -369,12 +369,6 @@ prepare_laptop_packages() {
         chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
     fi
 
-    ## PrawnOS mesa packages
-    # PrawnOS only has specific mesa packages when the debian upstream versions are too old.
-    # commented out until we need it again
-
-    # chroot $outmnt apt install -y -d ${prawnos_mesa_prebuilt_install[@]}
-
 }
 
 prepare_server_packages() {
