@@ -186,9 +186,9 @@ install() {
     #only use the emmc_partition function for "special cases", aka veyron devices
     if $(is_device_veyron) && $TARGET_EMMC
     then
-        emmc_partition
+        partition_eveyron_emmc
     else
-        external_partition $TARGET_NO_P
+        partition_device $TARGET_NO_P
     fi
 
     KERNEL_PARTITION=${TARGET}1
@@ -197,7 +197,9 @@ install() {
 
     echo Writing kernel to partition $KERNEL_PARTITION
     dd if=/dev/zero of=$KERNEL_PARTITION bs=512 count=65536
+    sync
     dd if=${BOOT_DEVICE}1 of=$KERNEL_PARTITION
+    sync
 
     #Handle full disk encryption
     echo "Would you like to setup full disk encrytion using LUKs/DmCrypt?"
@@ -264,8 +266,9 @@ install() {
     reboot_prompt
 }
 
-#Setup partition map on internal emmc
-emmc_partition() {
+#Setup partition map on internal veyron emmc
+# the veyron emmc is a bit weird
+partition_veyron_emmc() {
     #disable dmesg, writing the partition map tries to write the the first gpt table, which is unmodifiable
     dmesg -D
     echo Writing partition map to internal emmc
@@ -302,11 +305,14 @@ emmc_partition() {
 }
 
 #Setup partition map for external bootable device, aka usb or sd card
-external_partition() {
+partition_device() {
     EXTERNAL_TARGET=$1
     kernel_start=8192
     kernel_size=65536
     #wipe the partition map, cgpt doesn't like anything weird in the primary or backup partition maps
+    #writing zeros to the first 50M tends to clean up anything weird left around
+    dd if=/dev/zero of=$EXTERNAL_TARGET bs=50M count=1
+    sync
     sgdisk -Z $EXTERNAL_TARGET
     partprobe $EXTERNAL_TARGET
     #make the base gpt partition map
@@ -321,6 +327,7 @@ external_partition() {
     sgdisk -t 2:0700 $EXTERNAL_TARGET
     #Name it "properly" - Probably not required, but looks nice
     sgdisk -c 2:Root $EXTERNAL_TARGET
+    sync
     #Reload the partition mapping
     partprobe $EXTERNAL_TARGET
 }
