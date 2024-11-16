@@ -40,6 +40,24 @@ get_device() {
 # Import the package lists
 source $SCRIPTS/package_lists.sh
 
+
+set_time() {
+    echo "-----Enter the date in format 'YYYY-MM-DD':-----"
+    read -r udate
+    echo "-----Enter the time in format 'hh:mm:ss':-----"
+    read -r utime
+    # cant use timedatectl here since we are targeting the chroot
+    until $CHROOT_PREFIX hwclock --set --date "$udate $utime"
+    do
+        echo "-----Enter the date in format 'YYYY-MM-DD':-----"
+        read -r udate
+        echo "-----Enter the time in format 'hh:mm:ss':-----"
+        read -r utime
+    done
+
+}
+
+
 cat $RESOURCES/ascii-icon.txt
 echo ""
 
@@ -52,8 +70,9 @@ while true; do
     esac
 done
 
-#Set the timezone
+#Set the timezone and time
 dpkg-reconfigure tzdata
+set_time
 
 ## GENERAL CONFIG
 #Install shared packages
