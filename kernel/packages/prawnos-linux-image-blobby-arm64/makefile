@@ -7,10 +7,14 @@ ifneq ($(TARGET),$(PRAWNOS_ARM64))
 $(error Cant build arm64 kernel package with non arm64 target)
 endif
 
+ifneq ($(KERNEL_TYPE),$(PRAWNOS_HYBRID_KERNEL))
+$(error Cant build arm64 hybrid kernel package with KERNEL_TYPE not set to hybrid-kernel)
+endif
+
 #package specific vars
 DEB_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_DEB_VER)
 PRAWNOS_VERSION := $(PRAWNOS_KERNEL_IMAGE_CAT_PRAWNOS_VER)
-PACKAGE := prawnos-linux-image-arm64
+PACKAGE := prawnos-linux-image-blobby-arm64
 PACKAGE_ARCH := arm64
 
 #uses the full debian version for the package name

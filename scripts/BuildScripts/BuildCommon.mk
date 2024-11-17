@@ -33,6 +33,35 @@ endif
 
 export $(TARGET)
 
+
+### PRAWNOS KERNEL TYPES
+PRAWNOS_LIBRE_KERNEL := libre
+PRAWNOS_HYBRID_KERNEL := hybrid
+PRAWNOS_BLOBBY_KERNEL := blobby
+
+# hybrid kernel is Blobby wifi and bluetooth in an otherwise libre kernel
+# As ATH9k devices and 2.4GHZ wifi become less commonly available, and no new wifi adapters with fully open
+# source firmware and drivers have become available, its hard to stick to using blob-free wifi
+# Let users compromise by re-adding blobby wifi to their otherwise blob-free kernel
+
+# validate that KERNEL_TYPE is set to something we support
+ifeq ($(KERNEL_TYPE),$(PRAWNOS_LIBRE_KERNEL))
+$(info KERNEL_TYPE is $(PRAWNOS_LIBRE_KERNEL))
+else ifeq ($(KERNEL_TYPE),$(PRAWNOS_HYBRID_KERNEL))
+$(info KERNEL_TYPE is $(PRAWNOS_HYBRID_KERNEL))
+else ifeq ($(KERNEL_TYPE),$(PRAWNOS_BLOBBY_KERNEL))
+$(info KERNEL_TYPE is $(PRAWNOS_BLOBBY_KERNEL))
+else
+$(info KERNEL_TYPE is invalid)
+$(info Must specify a KERNEL_TYPE. Valid KERNEL_TYPEs are)
+$(info KERNEL_TYPE=libre (The fully deblobbed linux kernel))
+$(info KERNEL_TYPE=hybrid (The deblobbed linux kenrel, but with blobs for wifi re-added))
+$(info KERNEL_TYPE=blobby (The normal linux kenrel, with all of its usual blobs))
+$(error Set a valid KERNEL_TYPE)
+endif
+
+export $(KERNEL_TYPE)
+
 #Place all shared make vars below
 #=========================================================================================
 ### GLOBALS
@@ -170,6 +199,7 @@ PRAWNOS_FILESYSTEM_SCRIPTS_BUILD := $(PRAWNOS_FILESYSTEM_SCRIPTS)/buildFilesyste
 PRAWNOS_KERNEL_SCRIPTS := $(PRAWNOS_BUILD_SCRIPTS)/KernelScripts
 PRAWNOS_KERNEL_SCRIPTS_BUILD := $(PRAWNOS_KERNEL_SCRIPTS)/buildKernel.sh
 PRAWNOS_KERNEL_SCRIPTS_MENUCONFIG := $(PRAWNOS_KERNEL_SCRIPTS)/crossMenuConfig.sh
+PRAWNOS_KERNEL_SCRIPTS_GENERATE_CONFIG := $(PRAWNOS_KERNEL_SCRIPTS)/generateConfig.sh
 PRAWNOS_KERNEL_SCRIPTS_PATCH := $(PRAWNOS_KERNEL_SCRIPTS)/patchKernel.sh
 PRAWNOS_KERNEL_SCRIPTS_PERF := $(PRAWNOS_KERNEL_SCRIPTS)/buildPerf.sh
 PRAWNOS_KERNEL_SCRIPTS_BUILD_ATH9K := $(PRAWNOS_KERNEL_SCRIPTS)/buildAth9k.sh
@@ -232,10 +262,10 @@ PRAWNOS_KERNEL_RESOURCES_SHARED := $(PRAWNOS_KERNEL)/resources/shared
 
 ### KERNEL TARGETED (paths partially defined by $TARGET)
 PRAWNOS_KERNEL_RESOURCES := $(PRAWNOS_KERNEL)/resources/$(TARGET)
-PRAWNOS_KERNEL_BUILD := $(PRAWNOS_BUILD)/linux-$(KVER)
+PRAWNOS_KERNEL_BUILD := $(PRAWNOS_BUILD)/linux-$(KVER)-$(KERNEL_TYPE)-$(TARGET)
 PRAWNOS_KERNEL_BUILT := $(PRAWNOS_KERNEL_BUILD)/vmlinux.kpart
-PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-image-$(TARGET)
-PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-headers-$(TARGET)
+PRAWNOS_KERNEL_PACKAGE_IMAGE := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-image-$(KERNEL_TYPE)-$(TARGET)
+PRAWNOS_KERNEL_PACKAGE_HEADERS := $(PRAWNOS_KERNEL_PACKAGES)/prawnos-linux-headers-$(KERNEL_TYPE)-$(TARGET)
 
 #### KERNEL TARGETS FOR RK3588 WITH UBOOT BOOTLOADER
 PRAWNOS_BOOTLOADER_BUILD := $(PRAWNOS_BUILD)/bootloader

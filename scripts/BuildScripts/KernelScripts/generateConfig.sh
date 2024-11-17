@@ -3,8 +3,11 @@
 set -x
 set -e
 
+#Runs merge config with the proper enviroment vars for cross compiling arm 
+
+
 # This file is part of PrawnOS (https://www.prawnos.com)
-# Copyright (c) 2023 Eva Emmerich <hal@halemmerich.com>
+# Copyright (c) 2024 Eva Emmerich <eva@evaemmerich.com>
 
 # PrawnOS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
@@ -23,46 +26,57 @@ source ${PRAWNOS_ROOT}/scripts/BuildScripts/BuildCommon.sh
 
 if [ -z "$1" ]
 then
-    echo "No kernel version supplied"
+    echo "No resources directory"
     exit 1
 fi
 if [ -z "$2" ]
 then
-    echo "No patches directory"
+    echo "No build directory supplied"
     exit 1
 fi
 if [ -z "$3" ]
 then
-    echo "No build directory supplied"
+    echo "No TARGET supplied"
     exit 1
 fi
 if [ -z "$4" ]
 then
-    echo "No target arch supplied"
+    echo "No base config supplied"
+    exit 1
+fi
+if [ -z "$5" ]
+then
+    echo "No config fragment supplied"
     exit 1
 fi
 
-KVER=$1
-PATCHES=$2
-BUILD_DIR=$3
-TARGET=$4
+
+RESOURCES=$1
+BUILD_DIR=$2
+TARGET=$3
+CONFIG=$4
+CONFIG_FRAGMENT=$5
 
 cd $BUILD_DIR
-make mrproper
-
 
 if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
-    #Apply the usb and mmc patches
-    for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
-    for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
+    CROSS_COMPILER=arm-none-eabi-
+    # kernel doesn't differentiate between arm and armhf
+    ARCH=arm
 elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
-    # for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
-    echo skip for now, no patches
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
-    echo skip for now, we are just using a git repo for the source
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
-    echo skip for now, we are just using a git repo for the source
+    CROSS_COMPILER=aarch64-linux-gnu-
+    ARCH=$ARCH_ARM64
 else
-    echo "Cannot patch kernel: no valid target arch specified"
-    exit 1
+    echo "Cannot run cross make menuconfig: no valid target arch specified"
 fi
+
+cp $CONFIG .config
+cp $CONFIG_FRAGMENT .config.fragment
+ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILER ./scripts/kconfig/merge_config.sh .config .config.fragment
+cp .config $CONFIG

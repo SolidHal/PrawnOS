@@ -1,0 +1,35 @@
+prawnos-linux-image-libre-arm64 (6.6.60-1-1) testing; urgency=medium
+
+  * release 6.6.60-1-1
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Mon, 11 Nov 2024 12:39:22 -0800
+
+prawnos-linux-image-libre-arm64 (5.15.6-1-1) testing; urgency=medium
+
+  * release 5.15.6-1-1
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Tue, 07 Dec 2021 21:16:48 -0800
+
+prawnos-linux-image-libre-arm64 (5.10.1-1-2) testing; urgency=medium
+
+  * release 5.10.1-1-2
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Sat, 19 Dec 2020 09:31:15 -0800
+
+prawnos-linux-image-libre-arm64 (5.10.1-1-1) testing; urgency=medium
+
+  * release 5.10.1-1-1
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Tue, 15 Dec 2020 19:13:29 -0800
+
+prawnos-linux-image-libre-arm64 (5.9.12-1-1) testing; urgency=medium
+
+  * release 5.9.12-1-1
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Fri, 04 Dec 2020 18:19:30 -0800
+
+prawnos-linux-image-libre-arm64 (5.7.10-1-1) stable; urgency=medium
+
+  * Initial packaged release.
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Mon, 3 Aug 2020 22:29:42 -0700

@@ -1,0 +1,13 @@
+Source: prawnos-linux-image-hybrid-arm64
+Section: kernel
+Priority: optional
+Maintainer: Eva Emmerich <eva@evaemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: prawnos-linux-image-hybrid-arm64
+Architecture: arm64
+Depends: ${misc:Depends} coreutils
+Conflicts: prawnos-linux-image-libre-arm64, prawnos-linux-image-blobby-arm64
+Description: the PrawnOS linux kernel distribution. Made up of linux-libre with blobby wifi firmware, ath9k firmware, PrawnOS initramfs, and varying numbers of patches

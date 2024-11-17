@@ -1,2 +1,2 @@
-prawnos-linux-image-arm64* boot
+prawnos-linux-image-blobby-arm64* boot
 FlashKernelPartition.sh etc/prawnos/kernel

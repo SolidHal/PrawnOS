@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+# the kernel file version doesn't include the debian package version, so we have to do some sed magic to drop it
+DEBVERSION=$(dpkg-query --show --showformat='${Version}' prawnos-linux-image-arm64)
+VERSION=$(sed 's/\(.*\)-.*/\1/' <<< ${DEBVERSION})
+
+KERNEL_IMAGE="/boot/prawnos-linux-image-blobby-arm64_${VERSION}"
+
+set -e
+
+case "$1" in
+    configure)
+        /etc/prawnos/kernel/FlashKernelPartition.sh $KERNEL_IMAGE
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Do nothing
+        ;;
+    *)
+        echo "Unrecognized postinst argument '$1'"
+        ;;
+esac

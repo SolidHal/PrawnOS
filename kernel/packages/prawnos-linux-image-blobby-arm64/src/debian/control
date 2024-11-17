@@ -1,0 +1,13 @@
+Source: prawnos-linux-image-blobby-arm64
+Section: kernel
+Priority: optional
+Maintainer: Eva Emmerich <eva@evaemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: prawnos-linux-image-blobby-arm64
+Architecture: arm64
+Depends: ${misc:Depends} coreutils
+Conflicts: prawnos-linux-image-libre-arm64, prawnos-linux-image-blobby-arm64
+Description: the PrawnOS linux kernel distribution. Made up of normal aka blobby linux, PrawnOS initramfs, and varying numbers of patches

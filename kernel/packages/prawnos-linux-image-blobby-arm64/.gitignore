@@ -24,4 +24,4 @@ debhelper-build-stamp
 *.orig.tar.gz
 
 #kernel image specific ignores
-prawnos-linux-image-arm64_*.debian.tar.xz
+prawnos-linux-image-blobby-arm64_*.debian.tar.xz

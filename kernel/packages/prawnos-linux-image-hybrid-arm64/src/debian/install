@@ -1,0 +1,2 @@
+prawnos-linux-image-hybrid-arm64* boot
+FlashKernelPartition.sh etc/prawnos/kernel

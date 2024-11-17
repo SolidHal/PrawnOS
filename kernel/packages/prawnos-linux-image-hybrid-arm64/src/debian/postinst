@@ -5,7 +5,7 @@
 DEBVERSION=$(dpkg-query --show --showformat='${Version}' prawnos-linux-image-arm64)
 VERSION=$(sed 's/\(.*\)-.*/\1/' <<< ${DEBVERSION})
 
-KERNEL_IMAGE="/boot/prawnos-linux-image-arm64_${VERSION}"
+KERNEL_IMAGE="/boot/prawnos-linux-image-hybrid-arm64_${VERSION}"
 
 set -e
 
