@@ -55,6 +55,7 @@ set_time() {
         read -r utime
     done
 
+    echo "set the time and date to $udate $utime"
 }
 
 
@@ -78,23 +79,25 @@ set_time
 ## GENERAL CONFIG
 #Install shared packages
 DEBIAN_FRONTEND=noninteractive apt install -y ${base_debs_download[@]}
-DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
+#TODO fix the prebuilts for bookworm
+# DEBIAN_FRONTEND=noninteractive apt install -y ${prawnos_base_debs_prebuilt_download[@]}
 
-DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config
+# DEBIAN_FRONTEND=noninteractive apt install -y prawnos-general-config
 
 ## DEVICE SPECIFIC CONFIG
 #Copy in acpi, pulse audio, trackpad settings, funtion key settings
 device_model=$(get_device)
 
-if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
-then
-    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-veyron-config
-fi
+#TODO fix the prebuilts for bookworm
+# if [[ $device_model == $device_veyron_speedy ]] || [[ $device_model == $device_veyron_minnie ]]
+# then
+#     DEBIAN_FRONTEND=noninteractive apt install -y prawnos-veyron-config
+# fi
 
-if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
-then
-    DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
-fi
+# if [[ $device_model == $device_gru_kevin ]] || [[ $device_model == $device_gru_bob ]]
+# then
+#     DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
+# fi
 
 
 # remove some packages that we don't actually want.
@@ -106,7 +109,8 @@ if [ "$DE" = "gnome" ]
 then
 
   apt install -y ${gnome_debs_download[@]}
-  apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
+  #TODO fix the prebuilts for bookworm
+  # apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
 
   #TODO: debug why rotation is flipped
   # work around issue #234

@@ -353,18 +353,19 @@ prepare_laptop_packages() {
 
     #Copy the built prawnos debs over to the image, and update apts cache
     cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
-    chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
-    chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
-    chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
-    if [ $TARGET_ARCH = $ARCH_ARMHF ]
-    then
-        chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
-    fi
+    #TODO fix the prebuilts for bookworm
+    # chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
+    # chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
+    # chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
+    # if [ $TARGET_ARCH = $ARCH_ARMHF ]
+    # then
+    #     chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
+    # fi
 
-    if [ $TARGET_ARCH = $ARCH_ARM64 ]
-    then
-        chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
-    fi
+    # if [ $TARGET_ARCH = $ARCH_ARM64 ]
+    # then
+    #     chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
+    # fi
 
 }
 

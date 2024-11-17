@@ -4,3 +4,4 @@ PrawnOS-Shiba-*
 .*.swp
 tmp.*
 __pycache__/
+wget-log*

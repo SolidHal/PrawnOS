@@ -211,7 +211,7 @@ install() {
             # Since iteration count is based on cpu power, and the rk3288 isn't as fast as a usual
             # desktop cpu, manually supply -i 15000 for security at the cost of a slightly slower unlock
             dmesg -n 2
-            echo "Enter the password you would like to use to unlock the encrypted root partition at boot"
+            echo "Enter the password you would like to use to unlock the encrypted root partition at boot. This will take a moment after you enter a password."
             cryptsetup -q -y -s 512 luksFormat -i 15000 $ROOT_PARTITION || exit 1
             echo "Now unlock the newly created encrypted root partition so we can mount it and install the filesystem"
             cryptsetup luksOpen $ROOT_PARTITION luksroot || exit 1

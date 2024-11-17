@@ -48,6 +48,7 @@ base_debs_install=(
     iw
     kmod
     kpartx
+    kbd
     less
     libatm1
     libgpg-error-l10n
@@ -92,7 +93,6 @@ base_debs_download=(
     avahi-daemon
     blueman
     bluetooth
-    crda
     dbus-user-session
     dkms
     eject
