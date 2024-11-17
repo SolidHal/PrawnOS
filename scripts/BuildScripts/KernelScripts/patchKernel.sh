@@ -56,7 +56,8 @@ if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     for i in "$PATCHES"/DTS/*.patch; do echo $i; patch -p1 < $i; done
     for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
 elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
-    for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
+    # for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
+    echo skip for now, we are just using a git repo for the source
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     echo skip for now, we are just using a git repo for the source
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
