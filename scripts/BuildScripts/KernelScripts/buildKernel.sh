@@ -53,6 +53,7 @@ TARGET=$5
 KERNEL_CONFIG=$6
 
 #this is the same as the kernel partition size
+#the kernel is limited to 32MB as long as we need compatibility with depthcharge
 MAX_KERNEL_SIZE=$(expr 65536 \* 512)
 
 cd $BUILD_DIR

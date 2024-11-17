@@ -64,7 +64,7 @@ then
 fi
 
 #A hacky way to ensure the loops are properly unmounted and the temp files are properly deleted.
-#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build 
+#Without this, a reboot is sometimes required to properly clean the loop devices and ensure a clean build
 cleanup() {
     set +e
 
