@@ -1,0 +1,84 @@
+From 6e211310b714a3b759c9c94b2cf6f4e37384e503 Mon Sep 17 00:00:00 2001
+From: Eva Emmerich <eva@evaemmerich.com>
+Date: Wed, 20 Nov 2024 19:21:56 -0800
+Subject: [PATCH] rk3399-gru-sound: dont try to probe cdn-dp
+
+in a libre kernel, we don't have the cdn-dp firmware, so it always fails
+to init
+because rk3399-gru-sound depends on cdn-dp coming up, rk3399-gru-sound
+then fails
+so drop the requirement
+this fixes sound on gru-kevin using the libre kernel
+---
+ rk3399_gru_sound.c | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
+
+diff --git a/rk3399_gru_sound.c b/rk3399_gru_sound.c
+index 0f704d2..cc163ad 100644
+--- a/sound/soc/rockchip/rk3399_gru_sound.c
++++ b/sound/soc/rockchip/rk3399_gru_sound.c
+@@ -296,7 +296,6 @@ static struct snd_soc_card rockchip_sound_card = {
+ };
+ 
+ enum {
+-	DAILINK_CDNDP,
+ 	DAILINK_DA7219,
+ 	DAILINK_DMIC,
+ 	DAILINK_MAX98357A,
+@@ -335,14 +334,6 @@ SND_SOC_DAILINK_DEFS(rt5514_dsp,
+ 	DAILINK_COMP_ARRAY(COMP_EMPTY()));
+ 
+ static const struct snd_soc_dai_link rockchip_dais[] = {
+-	[DAILINK_CDNDP] = {
+-		.name = "DP",
+-		.stream_name = "DP PCM",
+-		.init = rockchip_sound_cdndp_init,
+-		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
+-			SND_SOC_DAIFMT_CBS_CFS,
+-		SND_SOC_DAILINK_REG(cdndp),
+-	},
+ 	[DAILINK_DA7219] = {
+ 		.name = "DA7219",
+ 		.stream_name = "DA7219 PCM",
+@@ -423,10 +414,6 @@ struct rockchip_sound_route {
+ };
+ 
+ static const struct rockchip_sound_route rockchip_routes[] = {
+-	[DAILINK_CDNDP] = {
+-		.routes = rockchip_sound_cdndp_routes,
+-		.num_routes = ARRAY_SIZE(rockchip_sound_cdndp_routes),
+-	},
+ 	[DAILINK_DA7219] = {
+ 		.routes = rockchip_sound_da7219_routes,
+ 		.num_routes = ARRAY_SIZE(rockchip_sound_da7219_routes),
+@@ -452,9 +439,6 @@ struct dailink_match_data {
+ };
+ 
+ static const struct dailink_match_data dailink_match[] = {
+-	[DAILINK_CDNDP] = {
+-		.compatible = "rockchip,rk3399-cdn-dp",
+-	},
+ 	[DAILINK_DA7219] = {
+ 		.compatible = "dlg,da7219",
+ 	},
+@@ -540,9 +524,6 @@ static int rockchip_sound_of_parse_dais(struct device *dev,
+ 			continue;
+ 
+ 		switch (index) {
+-		case DAILINK_CDNDP:
+-			np_cpu = np_cpu1;
+-			break;
+ 		case DAILINK_RT5514_DSP:
+ 			np_cpu = np_codec;
+ 			break;
+@@ -585,6 +566,7 @@ static int rockchip_sound_probe(struct platform_device *pdev)
+ 	struct snd_soc_card *card = &rockchip_sound_card;
+ 	int ret;
+ 
++
+ 	ret = rockchip_sound_of_parse_dais(&pdev->dev, card);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "Failed to parse dais: %d\n", ret);
+-- 
+2.39.5
+

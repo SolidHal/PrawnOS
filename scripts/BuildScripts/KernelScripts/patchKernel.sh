@@ -41,11 +41,17 @@ then
     echo "No target arch supplied"
     exit 1
 fi
+if [ -z "$5" ]
+then
+    echo "No kernel type supplied"
+    exit 1
+fi
 
 KVER=$1
 PATCHES=$2
 BUILD_DIR=$3
 TARGET=$4
+TYPE=$5
 
 cd $BUILD_DIR
 make mrproper
@@ -57,7 +63,10 @@ if [ "$TARGET" == "$PRAWNOS_ARMHF" ]; then
     for i in "$PATCHES"/kernel/*.patch; do echo $i; patch -p1 < $i; done
 elif [ "$TARGET" == "$PRAWNOS_ARM64" ]; then
     # for i in "$PATCHES"/drm/*.patch; do echo $i; patch -p1 < $i; done
-    echo skip for now, no patches
+    if [ "$TYPEl" != "$PRAWNOS_BLOBBY_KERNEL" ]; then
+        # the sound patch does not apply to blobby kernel since it has the firmware
+        for i in "$PATCHES"/sound/0001-rk3399-gru-sound-dont-try-to-probe-cdn-dp.patch; do echo $i; patch -p1 < $i; done
+    fi
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588_SERVER}" ]; then
     echo skip for now, we are just using a git repo for the source
 elif [ "$TARGET" == "${PRAWNOS_ARM64_RK3588}" ]; then
