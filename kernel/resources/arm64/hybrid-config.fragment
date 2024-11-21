@@ -7,4 +7,4 @@ CONFIG_MWIFIEX_PCIE=y
 # CONFIG_MWIFIEX_USB is not set
 # CONFIG_MWL8K is not set
 # CONFIG_PWRSEQ_SD8787 is not set
-CONFIG_EXTRA_FIRMWARE="htc_9271.fw mrvl/pcieusb8997_combo_v4.bin"
+CONFIG_EXTRA_FIRMWARE="regulatory.db regulatory.db.p7s htc_9271.fw mrvl/pcieusb8997_combo_v4.bin"

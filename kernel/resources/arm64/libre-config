@@ -1574,7 +1574,7 @@ CONFIG_PREVENT_FIRMWARE_BUILD=y
 # Firmware loader
 #
 CONFIG_FW_LOADER=y
-CONFIG_EXTRA_FIRMWARE="htc_9271.fw"
+CONFIG_EXTRA_FIRMWARE="regulatory.db regulatory.db.p7s htc_9271.fw"
 CONFIG_EXTRA_FIRMWARE_DIR="./prawnos-firmwares"
 # CONFIG_FW_LOADER_USER_HELPER is not set
 # CONFIG_FW_LOADER_COMPRESS is not set
