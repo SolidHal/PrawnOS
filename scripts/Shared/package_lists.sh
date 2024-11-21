@@ -32,6 +32,7 @@ base_debs_install=(
     alsa-utils
     apt-utils
     bash-completion
+    btrfs-progs
     busybox-static
     bzip2
     ca-certificates

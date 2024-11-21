@@ -92,7 +92,7 @@ get_sd_devname() {
 main() {
     echo "---------------------------------------------------------------------------------------------------------------------"
     echo "PrawnOS Install or Expand Script"
-    echo "Installation sets up the internal emmc partitions, root encryption, and copies the filesystem from the"
+    echo "Installation sets up the partition map, filesystem type, root encryption, and copies the filesystem from the"
     echo "current boot device to the target device. The target device cannot be the current boot device"
     echo
     echo "Expansion simply targets the booted device, and expands the filesystem to fill the entire thing instead of just 2GB."
@@ -158,6 +158,19 @@ install() {
         exit
     fi
 
+
+    dmesg -D
+    echo "Use [e]xt4 or [b]trfs for the filesystem?"
+    echo "if you are unsure, choose ext4"
+    while true; do
+        read -r -p "[e]xt4, or [b]trfs?: " EB
+        case $EB in
+            [Ee]* ) FSTYPE=ext4; FSARGS="-b 1024"; break;;
+            [Bb]* ) FSTYPE=btrfs; FSARGS=""; break;;
+            * ) echo "Please answer E or B";;
+        esac
+    done
+    dmesg -E
 
     #Now on to the installation, basically copy InstallToInternal.sh
     while true; do
@@ -228,10 +241,10 @@ install() {
         esac
     done
 
-    echo Creating ext4 filesystem on root partition
+    echo Creating $FSTYPE filesystem on root partition
     # zero out the start to avoid mkfs asking if we really want to overwrite
     dd if=/dev/zero of=${ROOT_PARTITION} bs=512 count=1k
-    mkfs.ext4 -b 1024 $ROOT_PARTITION
+    mkfs -t $FSTYPE $FSARGS $ROOT_PARTITION
     INSTALL_MOUNT=/mnt/install_mount
     mkdir -p $INSTALL_MOUNT/
     mount $ROOT_PARTITION $INSTALL_MOUNT/
@@ -239,7 +252,7 @@ install() {
     rsync -ah --info=progress2 --info=name0 --numeric-ids -x / $INSTALL_MOUNT/
     #Remove the live-fstab and install a base fstab
     rm $INSTALL_MOUNT/etc/fstab
-    echo "${ROOT_PARTITION} / ext4 defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
+    echo "${ROOT_PARTITION} / ${FSTYPE} defaults,noatime 0 1" > $INSTALL_MOUNT/etc/fstab
 
     install_packages $INSTALL_MOUNT
 
@@ -252,8 +265,18 @@ install() {
 
     umount $ROOT_PARTITION
 
-    echo Running fsck
-    e2fsck -p -f $ROOT_PARTITION
+    if [[ $FSTYPE == "ext4" ]]
+    then
+        echo Running fsck
+        e2fsck -p -f $ROOT_PARTITION
+    fi
+
+    if [[ $FSTYPE == "btrfs" ]]
+    then
+        echo Running btrfs-check
+        btrfs-check --progress $ROOT_PARTITION
+    fi
+
     if [[ $CRYPTO == "true" ]]
     then
         # unmount and close encrypted storage
