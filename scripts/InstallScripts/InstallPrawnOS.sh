@@ -273,8 +273,8 @@ install() {
 
     if [[ $FSTYPE == "btrfs" ]]
     then
-        echo Running btrfs-check
-        btrfs-check --progress $ROOT_PARTITION
+        echo Running btrfsck
+        btrfsck --progress $ROOT_PARTITION
     fi
 
     if [[ $CRYPTO == "true" ]]
