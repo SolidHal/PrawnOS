@@ -312,6 +312,19 @@ rm $outmnt/etc/apt/sources.list
 mv $outmnt/etc/apt/sources.list.new $outmnt/etc/apt/sources.list
 
 
+# Setup the local apt repo in the chroot
+# this is how we are able to install the locally build packages using apt
+rm -rf $install_dir/resources/prawnos-local-apt-repo
+mkdir $install_dir/resources/prawnos-local-apt-repo
+cp $PRAWNOS_BUILD/prawnos-local-apt-repo/*.deb $install_dir/resources/prawnos-local-apt-repo/
+rm -f $install_dir/resources/prawnos-local-apt-repo/Packages
+chroot $outmnt bash -c "apt-ftparchive packages ${install_dir_direct}/resources/prawnos-local-apt-repo > ${install_dir_direct}/resources/prawnos-local-apt-repo/Packages"
+# put it at the top of sources.list so it gets used over the remote repos and the cache repo
+echo "deb [trusted=yes] file:${install_dir_direct}/resources/prawnos-local-apt-repo/ ./" > $outmnt/etc/apt/sources.list.new
+cat $outmnt/etc/apt/sources.list >> $outmnt/etc/apt/sources.list.new
+rm $outmnt/etc/apt/sources.list
+mv $outmnt/etc/apt/sources.list.new $outmnt/etc/apt/sources.list
+
 #Make apt retry on download failure
 chroot $outmnt echo "APT::Acquire::Retries \"3\";" > /etc/apt/apt.conf.d/80-retries
 

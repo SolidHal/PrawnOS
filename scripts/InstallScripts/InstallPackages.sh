@@ -58,6 +58,12 @@ set_time() {
     echo "set the time and date to $udate $utime"
 }
 
+clean_up_local_apt_repo() {
+    echo "removing the local apt repo"
+    sed -e '/prawnos-local-apt-repo/ s/^#*/#/' -i /etc/apt/sources.list
+    rm -rf $RESOURCES/prawnos-local-apt-repo
+}
+
 
 cat $RESOURCES/ascii-icon.txt
 echo ""
@@ -109,8 +115,7 @@ if [ "$DE" = "gnome" ]
 then
 
   apt install -y ${gnome_debs_download[@]}
-  #TODO fix the prebuilts for bookworm
-  # apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
+  apt install -y ${prawnos_gnome_debs_prebuilt_download[@]}
 
   #TODO: debug why rotation is flipped
   # work around issue #234
@@ -118,6 +123,8 @@ then
 
 
 fi
+
+clean_up_local_apt_repo
 
 apt clean -y && apt autoremove --purge -y
 
