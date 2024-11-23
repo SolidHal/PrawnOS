@@ -439,7 +439,8 @@ setup_hostname() {
     #this works fine in the expansion use as TARGET_MOUNT is simply empty
 
     while true; do
-        read -r -p "Would you like to set a custom hostname (default: PrawnOS)? [y/n]" response
+        echo "PrawnOS is configured to *not* send the hostname of this device to routers. Routers see a blank hostname."
+        read -r -p "Would you like to set a custom hostname (default: prawnos)? [y/n]" response
         case $response in
             [Yy]*)
                 echo "-----Enter hostname:-----"
@@ -447,13 +448,17 @@ setup_hostname() {
                 # ensure no whitespace
                 case "$hostname" in *\ *) echo hostnames may not contain whitespace;;  *) break;; esac
                 ;;
-            [Nn]* ) hostname="PrawnOS"; break;;
+            [Nn]* ) hostname="prawnos"; break;;
             * ) echo "Please answer y or n";;
         esac
     done
 
     # Setup /etc/hostname and /etc/hosts:
-    echo -n "$hostname" > "$TARGET_MOUNT/etc/hostname"
+    rm "$TARGET_MOUNT/etc/hostname"
+    touch "$TARGET_MOUNT/etc/hostname"
+    echo -n "" > "$TARGET_MOUNT/etc/hostname"
+    rm "$TARGET_MOUNT/etc/hosts"
+    touch "$TARGET_MOUNT/etc/hosts"
     echo -n "127.0.0.1        $hostname" > "$TARGET_MOUNT/etc/hosts"
 }
 

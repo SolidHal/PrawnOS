@@ -254,7 +254,8 @@ else
 fi
 
 
-echo -n PrawnOS > $outmnt/etc/hostname
+echo -n "" > $outmnt/etc/hostname
+echo -n "127.0.0.1        prawnos" > $outmnt/etc/hostname
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
