@@ -1,0 +1,6 @@
+[device]
+wifi.scan-rand-mac-address=yes
+
+[connection]
+wifi.cloned-mac-address=random
+ethernet.cloned-mac-address=random

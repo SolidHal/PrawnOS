@@ -6,3 +6,4 @@ sysfs.conf /etc/prawnos/prawnos-general-config/etc/
 inputrc/.inputrc /etc/skel/
 firefox-esr/prawn-settings.js /usr/lib/firefox-esr/defaults/pref/
 firefox-esr/prawn.cfg /usr/lib/firefox-esr/
+network-manager/* /etc/NetworkManager/conf.d/

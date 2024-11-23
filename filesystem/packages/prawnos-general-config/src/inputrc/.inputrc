@@ -8,9 +8,9 @@ set show-all-if-ambiguous on
 set mark-symlinked-directories on
 
 # Show all autocomplete results at once
-set page-completions off
+set page-completions on
 
-# If there are more than 200 possible completions for a word, ask to show them all
+# If there are more than 100 possible completions for a word, ask to show them all
 set completion-query-items 100
 
 # Show extra file information when completing, like `ls -F` does
@@ -28,7 +28,6 @@ set skip-completed-text on
 set colored-stats On
 
 
-
 # This line sets the completions to be listed immediately instead of ringing 
 # the bell, when the completing word has more than one possible completion.
 set show-all-if-ambiguous On
@@ -37,7 +36,6 @@ set show-all-if-ambiguous On
 # when the completing word has more than one possible completion but no partial completion can be made.
 set show-all-if-unmodified On
 
-
-## enable Alt-arrows for word jumping
-"\e[1;3D": backward-word ### Alt left
-"\e[1;3C": forward-word ### Alt right
+## enable ctrl-arrows for word jumping
+"\e[1;5C": forward-word   # ctrl + right
+"\e[1;5D": backward-word  # ctrl + left 
