@@ -10,6 +10,7 @@ button-layout='appmenu:minimize,maximize,close'
 
 [org.gnome.desktop.background]
 picture-uri='file:///usr/share/images/desktop-base/default'
+picture-uri-dark='file:///usr/share/images/desktop-base/default'
 
 [org.gnome.desktop.screensaver]
 picture-uri='file:///usr/share/images/desktop-base/default'
