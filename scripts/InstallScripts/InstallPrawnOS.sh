@@ -439,6 +439,7 @@ setup_hostname() {
     #this works fine in the expansion use as TARGET_MOUNT is simply empty
 
     while true; do
+        echo ""
         echo "PrawnOS is configured to *not* send the hostname of this device to routers. Routers see a blank hostname."
         read -r -p "Would you like to set a custom hostname (default: prawnos)? [y/n]" response
         case $response in
