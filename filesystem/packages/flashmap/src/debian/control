@@ -1,8 +1,8 @@
 Source: flashmap
 Section: libs
 Priority: optional
-Maintainer: Hal Emmerich <hal@halemmerich.com>
-Uploaders: Hal Emmerich <hal@halemmerich.com>
+Maintainer: Eva Emmerich <eva@evaemmerich.com>
+Uploaders: Eva Emmerich <eva@evaemmerich.com>
 Build-Depends: debhelper (>= 10),
                clang,
                uuid-dev,

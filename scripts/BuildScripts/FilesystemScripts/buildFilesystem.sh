@@ -262,10 +262,9 @@ echo -n "127.0.0.1        prawnos" > $outmnt/etc/hostname
 #We replace hosts with a valid entry at the end of the build
 cp /etc/hosts $outmnt/etc/
 cp $build_resources_apt/sources.list $outmnt/etc/apt/sources.list
-#cp $build_resources_apt/prawnos.list $outmnt/etc/apt/sources.list.d/
 sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
-#sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/prawnos.list
 
+# only enable sid if we really need it
 # if [ "$DEBIAN_SUITE" != "sid" ]
 # then
 #     # Install sid (unstable) as an additional source for bleeding edge packages.
@@ -291,9 +290,6 @@ cp $build_resources_apt/deb.prawnos.com.gpg.key $install_dir/resources/
 cp scripts/InstallScripts/* $install_dir/scripts/
 cp $PRAWNOS_SHARED_SCRIPTS/package_lists.sh $install_dir/scripts/
 ln -s $install_dir_direct/scripts/InstallPrawnOS.sh $outmnt/bin/InstallPrawnOS
-
-#Bring in the deb.prawnos.com gpg keyring
-chroot $outmnt apt-key add /etc/prawnos/install/resources/deb.prawnos.com.gpg.key
 
 #Setup the locale
 cp $build_resources/locale.gen $outmnt/etc/locale.gen
@@ -348,25 +344,25 @@ prepare_laptop_packages() {
     # if required
     # this gets tricky when we build some of the dependencies. To avoid issues
     # first, manually cache the deb
-    # apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from deb.prawnos.com, which we dont want
+    # apt install ./local-package.deb alone doesn't work because apt will resort to downloading it from repos if they are available, which we dont want
     # copy into /var/cache/apt/archives to place it in the cache
     #next call apt install -d on the ./filename or on the package name and apt will recognize it already has the package cached, so will only cache the dependencies
 
     #Copy the built prawnos debs over to the image, and update apts cache
     cd $PRAWNOS_ROOT && make filesystem_packages_install  TARGET=$TARGET_ARCH INSTALL_TARGET=$outmnt/var/cache/apt/archives/
-    #TODO fix the prebuilts for bookworm
-    # chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
-    # chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
-    # chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
-    # if [ $TARGET_ARCH = $ARCH_ARMHF ]
-    # then
-    #     chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
-    # fi
 
-    # if [ $TARGET_ARCH = $ARCH_ARM64 ]
-    # then
-    #     chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
-    # fi
+    chroot $outmnt apt install -y ${prawnos_base_debs_prebuilt_install[@]}
+    chroot $outmnt apt install -y -d ${prawnos_base_debs_prebuilt_download[@]}
+    chroot $outmnt apt install -y -d ${prawnos_gnome_debs_prebuilt_download[@]}
+    if [ $TARGET_ARCH = $ARCH_ARMHF ]
+    then
+        chroot $outmnt apt install -y -d ${prawnos_armhf_debs_prebuilt_download[@]}
+    fi
+
+    if [ $TARGET_ARCH = $ARCH_ARM64 ]
+    then
+        chroot $outmnt apt install -y -d ${prawnos_arm64_debs_prebuilt_download[@]}
+    fi
 
 }
 

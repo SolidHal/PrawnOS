@@ -1,17 +1,23 @@
+prawnos-gnome-config (1.3) testing; urgency=medium
+
+  * upgrade to bookworm
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Fri, 22 Nov 2024 15:12:07 -0500
+
 prawnos-gnome-config (1.2) testing; urgency=medium
 
   * Set reasonable suspend settings
 
- -- Hal Emmerich <hal@halemmerich.com>  Fri, 11 Dec 2020 17:12:07 -0500
+ -- Eva Emmerich <eva@evaemmerich.com>  Fri, 11 Dec 2020 17:12:07 -0500
 
 prawnos-gnome-config (1.1) testing; urgency=medium
 
   * Remove all but applications from the search function by default
 
- -- Hal Emmerich <hal@halemmerich.com>  Thu, 10 Dec 2020 15:12:07 -0500
+ -- Eva Emmerich <eva@evaemmerich.com>  Thu, 10 Dec 2020 15:12:07 -0500
 
 prawnos-gnome-config (1.0) testing; urgency=medium
 
   * Initial release.
 
- -- Hal Emmerich <hal@halemmerich.com>  Sat, 28 Nov 2020 15:12:07 -0500
+ -- Eva Emmerich <eva@evaemmerich.com>  Sat, 28 Nov 2020 15:12:07 -0500

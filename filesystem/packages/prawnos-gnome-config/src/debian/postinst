@@ -22,18 +22,10 @@ divert_and_link() {
 PKG=prawnos-gnome-config
 DIR=/etc/prawnos
 
-
-# divert and symlink our files to their final locations. This prevents other packages from overwriting our changes. 
-if [ "$1" = configure ] ; then
-
-    TARGET_PATH=/etc/gdm3/
-    f=greeter.dconf-defaults
-    divert_and_link $DIR $PKG $TARGET_PATH $f
-
-fi
+# nothing to divert
 
 # need to do this since we provided a new greeter.dconf
-dpkg-reconfigure gdm3
+dconf update
 
 # need to do this since we added a new schema file
 glib-compile-schemas /usr/share/glib-2.0/schemas/

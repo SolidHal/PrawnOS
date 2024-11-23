@@ -83,7 +83,6 @@ laptop_base_debs_install=(
 )
 
 server_base_debs_install=(
-    btrfs-progs
     openssh-server
 )
 
@@ -92,7 +91,6 @@ base_debs_download=(
     acpi-support
     anacron
     avahi-daemon
-    blueman
     bluetooth
     dbus-user-session
     dkms
@@ -117,7 +115,6 @@ base_debs_download=(
     xdotool
     xorg
     xserver-xorg-input-libinput
-    xterm
 )
 
 
@@ -163,7 +160,6 @@ prawnos_base_debs_prebuilt_download=(
 
 # packages built by prawnos, to be installed at build time
 prawnos_base_debs_prebuilt_install=(
-    font-source-code-pro
     flashmap
     mosys
 )

@@ -33,6 +33,10 @@ clean:
 	rm -rf *.diff.gz
 	rm -rf *.debian.tar.xz
 	rm -rf *.buildinfo
+	rm -rf src/debian/.debhelper/
+	rm -rf src/debian/$(PACKAGE_NAME)
+	rm -rf src/debian/debhelper-build-stamp
+	rm -rf src/debian/files
 
 install:
 	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)

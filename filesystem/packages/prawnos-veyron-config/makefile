@@ -5,7 +5,8 @@ include $(PRAWNOS_ROOT)/scripts/BuildScripts/BuildCommon.mk
 
 #package specific vars
 VERSION := $(shell cd src/; dpkg-parsechangelog --show-field Version)
-PACKAGE_NAME := prawnos-veyron-config_$(VERSION)
+PACKAGE := prawnos-veyron-config
+PACKAGE_NAME := $(PACKAGE)_$(VERSION)
 PACKAGE_NAME_DEB := $(PACKAGE_NAME)_all.deb
 CHANGES_NAME = $(PACKAGE_NAME)_*.changes
 
@@ -39,6 +40,11 @@ clean:
 	rm -rf *.buildinfo
 	rm -rf *.tar.gz
 	rm -rf *.dsc
+	rm -rf src/debian/.debhelper/
+	rm -rf src/debian/$(PACKAGE)
+	rm -rf src/debian/debhelper-build-stamp
+	rm -rf src/debian/files
+	rm -rf src/debian/*.substvars
 
 install:
 	$(PRAWNOS_PACKAGE_SCRIPTS_INSTALL) $(PACKAGE_NAME_DEB) $(INSTALL_TARGET)

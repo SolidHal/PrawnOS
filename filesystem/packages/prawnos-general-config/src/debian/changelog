@@ -2,7 +2,7 @@ prawnos-general-config (1.1) stable; urgency=medium
 
   * cleanup firefox config, add mac address randomization to network manager
 
- -- Eva Emmerich <eva@evaemmerich.com>  Sat, 28 Nov 2020 15:12:07 -0500
+ -- Eva Emmerich <eva@evaemmerich.com>  Fri, 22 Nov 2024 15:12:07 -0500
 
 prawnos-general-config (1.0) stable; urgency=medium
 

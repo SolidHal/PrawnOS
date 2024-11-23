@@ -22,13 +22,5 @@ undivert_and_unlink() {
 PKG=prawnos-gnome-config
 DIR=/etc/prawnos
 
-# un-divert and un-symlink our files to their final locations. This undoes what postinst did
-if [ "$1" = remove ] ; then
-    TARGET_PATH=/etc/gdm3/
-    f=greeter.dconf-defaults
-    undivert_and_unlink $DIR $PKG $TARGET_PATH $f
 
-fi
-
-# need to do this since we provided a new greeter.dconf
-dpkg-reconfigure gdm3
+# nothing to do

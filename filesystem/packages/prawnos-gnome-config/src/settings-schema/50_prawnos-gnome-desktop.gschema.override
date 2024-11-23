@@ -2,18 +2,11 @@
 # swapping the / for .
 
 [org.gnome.desktop.interface]
-gtk-im-module='ibus'
-gtk-theme='Materia-compact'
-monospace-font-name='Source Code Pro Medium 11'
-show-battery-percentage=true
-
-[org.gnome.desktop.peripherals.touchpad]
-natural-scroll=false
-tap-to-click=true
-two-finger-scrolling-enabled=true
+clock-format='12h'
+color-scheme=prefer-dark
 
 [org.gnome.desktop.wm.preferences]
-button-layout='close,minimize,maximize:appmenu'
+button-layout='appmenu:minimize,maximize,close'
 
 [org.gnome.desktop.background]
 picture-uri='file:///usr/share/images/desktop-base/default'
@@ -21,13 +14,11 @@ picture-uri='file:///usr/share/images/desktop-base/default'
 [org.gnome.desktop.screensaver]
 picture-uri='file:///usr/share/images/desktop-base/default'
 
-[org.gnome.desktop.search-providers]
-disabled=['org.gnome.Nautilus.desktop', 'org.gnome.clocks.desktop', 'org.gnome.seahorse.Application.desktop', 'org.gnome.Terminal.desktop']
-sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gnome.Nautilus.desktop']
-
-[org.gnome.desktop.session]
-idle-delay=uint32 0
+[org.gnome.desktop.notifications]
+show-in-lock-screen=false
 
 [org.gnome.settings-daemon.plugins.power]
-sleep-inactive-ac-timeout=1800
-sleep-inactive-battery-timeout=1800
+power-button-action='nothing'
+
+[org.gnome.desktop.media-handling]
+autorun-never=true
