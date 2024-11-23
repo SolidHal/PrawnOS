@@ -20,6 +20,7 @@
 
 
 debootstrap_debs_install=(
+    apt-transport-https
     build-essential
     ca-certificates
     gnupg
@@ -110,6 +111,7 @@ base_debs_download=(
     libutempter0
     libwayland-egl1-mesa
     tasksel
+    tor
     vlc
     xdg-utils
     xdotool

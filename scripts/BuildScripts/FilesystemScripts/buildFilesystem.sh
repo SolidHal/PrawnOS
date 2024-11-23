@@ -255,7 +255,6 @@ fi
 
 
 echo -n "" > $outmnt/etc/hostname
-echo -n "127.0.0.1        prawnos" > $outmnt/etc/hostname
 
 #Setup the chroot for apt
 #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
@@ -272,6 +271,13 @@ sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list
 #     #setup apt pinning
 #     cp $build_resources_apt/sid.pref $outmnt/etc/apt/preferences.d/
 # fi
+
+# add the tor repo
+cp $build_resources_apt/tor.list $outmnt/etc/apt/sources.list.d/
+sed -i -e "s/suite/$DEBIAN_SUITE/g" $outmnt/etc/apt/sources.list.d/tor.list
+cp $build_resources_apt/tor.pref $outmnt/etc/apt/preferences.d/
+cp $build_resources_apt/deb.torproject.org-keyring.gpg $outmnt/usr/share/keyrings/deb.torproject.org-keyring.gpg
+
 
 
 install_dir=$outmnt/etc/prawnos/install
@@ -411,7 +417,7 @@ cp -f $build_resources/console-font.sh $outmnt/etc/profile.d/console-font.sh
 
 #Cleanup hosts
 rm -rf $outmnt/etc/hosts #This is what https://wiki.debian.org/EmDebian/CrossDebootstrap suggests
-echo -n "127.0.0.1        PrawnOS" > $outmnt/etc/hosts
+echo -n "127.0.0.1        prawnos" > $outmnt/etc/hosts
 
 #Cleanup apt retry
 chroot $outmnt rm -f /etc/apt/apt.conf.d/80-retries
