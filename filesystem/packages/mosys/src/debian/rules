@@ -14,3 +14,6 @@ export CC=clang
 
 override_dh_auto_configure:
 	dh_auto_configure -- -Darch=arm
+
+override_dh_auto_build:
+	dh_auto_build -- -j 6
