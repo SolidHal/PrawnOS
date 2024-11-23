@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 # build the supplied package using pbuilder
 # satisfies build dependencies if necessary
