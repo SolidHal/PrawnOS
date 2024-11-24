@@ -36,7 +36,6 @@ base_debs_install=(
     btrfs-progs
     busybox-static
     bzip2
-    ca-certificates
     cryptsetup
     dpkg
     e2fsprogs-l10n
@@ -73,6 +72,7 @@ base_debs_install=(
     uuid-runtime
     vim
     xz-utils
+    zutty
 )
 
 laptop_base_debs_install=(
