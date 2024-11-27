@@ -140,7 +140,7 @@ install() {
         then
             if [ -e /dev/sdb ]; then
                 TARGET=/dev/sdb
-            elif [ -e /dev/sdc ];
+            elif [ -e /dev/sdc ]; then
                 TARGET=/dev/sdc
             else
                 echo "unable to find a target usb device to install to, please ensure one is plugged in and is available at /dev/sdb or /dev/sdc"
