@@ -117,7 +117,7 @@ main() {
 }
 
 #Now to pick the install target: internal, sd, or usb
-#if target is usb, and boot device is usb, target is sdb
+#if target is usb, and boot device is usb, target is sdb or sdc
 #and whether to enable crypto
 install() {
     dmesg -D
@@ -138,7 +138,14 @@ install() {
     then
         if [[ $BOOT_DEVICE_NO_P == "/dev/sda" ]]
         then
-            TARGET=/dev/sdb
+            if [ -e /dev/sdb ]; then
+                TARGET=/dev/sdb
+            elif [ -e /dev/sdc ];
+                TARGET=/dev/sdc
+            else
+                echo "unable to find a target usb device to install to, please ensure one is plugged in and is available at /dev/sdb or /dev/sdc"
+                exit 1
+            fi
         else
             TARGET=/dev/sda
         fi
