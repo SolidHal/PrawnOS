@@ -138,14 +138,19 @@ install() {
     then
         if [[ $BOOT_DEVICE_NO_P == "/dev/sda" ]]
         then
-            if [ -e /dev/sdb ]; then
-                TARGET=/dev/sdb
-            elif [ -e /dev/sdc ]; then
-                TARGET=/dev/sdc
-            else
-                echo "unable to find a target usb device to install to, please ensure one is plugged in and is available at /dev/sdb or /dev/sdc"
-                exit 1
-            fi
+            dmesg -D
+            while true; do
+                echo "Please select the usb device you'd like to install to"
+                # ignore devices with 0B storage size, and ignore our currently booted usb device (sda)
+                lsblk --noheadings --nodeps | rg "sd" | rg --invert-match "0B" | rg --invert-match "sda"
+                read -r -p "Please enter the device to install to in the form 'sdc'" USER_TARG
+                if [ -e /dev/$USER_TARG ]; then
+                    TARGET=/dev/$USER_TARG
+                else
+                    echo "/dev/${USER_TARG} does not exist, please try again"
+                fi
+            done
+            dmesg -E
         else
             TARGET=/dev/sda
         fi
