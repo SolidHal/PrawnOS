@@ -16,7 +16,7 @@ jobs:
              --privileged -v/dev:/dev debian:bullseye
              /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" arm64-rk3588-server Shiba
       - name: publish image
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"
           path: "PrawnOS-Shiba-arm64-git-${{ github.sha }}.img.xz"
