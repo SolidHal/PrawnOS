@@ -143,9 +143,10 @@ install() {
                 echo "Please select the usb device you'd like to install to"
                 # ignore devices with 0B storage size, and ignore our currently booted usb device (sda)
                 lsblk --noheadings --nodeps | rg "sd" | rg --invert-match "0B" | rg --invert-match "sda"
-                read -r -p "Please enter the device to install to in the form 'sdc'" USER_TARG
+                read -r -p "Please enter the device to install to in the form 'sdc': " USER_TARG
                 if [ -e /dev/$USER_TARG ]; then
                     TARGET=/dev/$USER_TARG
+                    break
                 else
                     echo "/dev/${USER_TARG} does not exist, please try again"
                 fi
