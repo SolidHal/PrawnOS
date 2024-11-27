@@ -1,20 +1,21 @@
 # FIXME: currently just builds it, eventually, should use qemu to try to run
 # the image (potentially as a separate action)
-name: build-image-arm64-rk3588-server
+name: build-image-arm64-hybrid
 
 on: [push, pull_request]
 jobs:
   build:
     name: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout project
         uses: actions/checkout@v3
       - name: build image
-        run: sudo dpkg -i ./tests/resources/qemu-user-static_5.1+dfsg-4+b1_amd64.deb &&
+        # must install qemu-user-static in the host
+        run: sudo apt update && sudo apt install qemu-user-static &&
              docker run --mount type=bind,source=$PWD,target=/PrawnOS
-             --privileged -v/dev:/dev debian:bullseye
-             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" arm64-rk3588-server Shiba
+             --privileged -v/dev:/dev debian:bookworm
+             /bin/bash /PrawnOS/tests/build-image.sh "$GITHUB_SHA" arm64 hybrid Shiba
       - name: publish image
         uses: actions/upload-artifact@v4
         with:

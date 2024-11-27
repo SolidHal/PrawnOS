@@ -21,9 +21,10 @@ set -x
 
 GITHUB_SHA="$1"
 TEST_TARGET="$2"
-RELEASE_VERSION="$3"
+TEST_KERNEL_TYPE="$3"
+RELEASE_VERSION="$4"
 
-IMG="PrawnOS-${RELEASE_VERSION}-${TEST_TARGET}"
+IMG="PrawnOS-${RELEASE_VERSION}-${TEST_TARGET}-${TEST_KERNEL_TYPE}"
 IMAGE="${IMG}.img"
 IMAGE_GIT="${IMG}-git-${GITHUB_SHA}.img"
 
@@ -39,11 +40,11 @@ apt install -y make git
 
 git config --global --add safe.directory $(pwd)
 
-make install_dependencies_yes TARGET=$TEST_TARGET
+make install_dependencies_yes TARGET=$TEST_TARGET KERNEL_TYPE=$TEST_KERNEL_TYPE
 
 # Note: there's an error for /proc/modules, but at least building the image works fine:
 # libkmod: ERROR ../libkmod/libkmod-module.c:1657 kmod_module_new_from_loaded: could not open /proc/modules: No such file or directory
-make image TARGET=$TEST_TARGET
+make image TARGET=$TEST_TARGET KERNEL_TYPE=$TEST_KERNEL_TYPE
 
 # rename the image to include git sha:
 mv $IMAGE $IMAGE_GIT
