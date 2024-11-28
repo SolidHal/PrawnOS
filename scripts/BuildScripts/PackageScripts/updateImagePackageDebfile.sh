@@ -31,22 +31,10 @@ then
     echo "No deb version supplied"
     exit 1
 fi
-if [ -z "$3" ]
-then
-    echo "No prawnos version supplied"
-    exit 1
-fi
-if [ -z "$4" ]
-then
-    echo "No prawnos image package path supplied"
-    exit 1
-fi
 
 
 DEBSRC=$1
 DEBVER=$2
-PRAWNOSDEBVER=$3
-PACKAGEPATH=$4
 
 cd $DEBSRC
 # check the supplied kver against the current kver
