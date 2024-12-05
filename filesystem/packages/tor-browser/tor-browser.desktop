@@ -1,0 +1,14 @@
+# the tor browser bundle cannot run from anywhere owned by root, as it needs to modify its files at runtime
+# to get around this problem, this file makes a copy of the tor browser bundle and puts it in the users ~/.local/share if it does not already exist
+# it then launches the browser
+# if the user already has the browser bundle, it just launches the browser
+# 
+[Desktop Entry]
+Type=Application
+Name=Tor Browser Setup
+GenericName=Web Browser
+Comment=Tor Browser  is +1 for privacy and −1 for mass surveillance
+Categories=Network;WebBrowser;Security;
+Exec=sh -c "if [ -e ~/.local/share/torbrowser_14.0.3-prawnos1 ]; then ~/.local/share/torbrowser_14.0.3-prawnos1/Browser/start-tor-browser  --detach; else rm -rf ~/.local/share/torbrowser_*; cp -a /sbin/tor-browser-bundle/ ~/.local/share/torbrowser_14.0.3-prawnos1/; chown $USER:$USER -R ~/.local/share/torbrowser_14.0.3-prawnos1; ~/.local/share/torbrowser_14.0.3-prawnos1/Browser/start-tor-browser  --detach; fi;"
+Icon=web-browser
+StartupWMClass=Tor Browser

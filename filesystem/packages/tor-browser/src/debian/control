@@ -1,0 +1,13 @@
+Source: tor-browser
+Section: utilities
+Priority: optional
+Maintainer: Eva Emmerich <eva@evaemmerich.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.5.0
+
+
+Package: tor-browser
+Architecture: arm64
+Depends: ${misc:Depends}
+Conflicts:
+Description: the tor browser built for arm64 linux environments as part of prawnos

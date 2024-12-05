@@ -1,0 +1,5 @@
+tor-browser (14.0.3-prawnos1) stable; urgency=medium
+
+  * built from https://gitlab.com/prawnos/tor-browser-build
+
+ -- Eva Emmerich <eva@evaemmerich.com>  Wed, 04 Dec 2024 12:39:22 -0800

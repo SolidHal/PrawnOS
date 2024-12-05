@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    configure)
+        # Do nothing
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Do nothing
+        ;;
+    *)
+        echo "Unrecognized postinst argument '$1'"
+        ;;
+esac
