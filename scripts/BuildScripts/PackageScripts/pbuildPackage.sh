@@ -75,8 +75,13 @@ PACKAGE_DIR=$PWD
 PACKAGE_LOCAL_BUILD_DEPS=$7
 
 DEBUILD_OPTS=""
+# num_proc=$(nproc)
+# # for some reason some builds like to segfault randomly when we use to many jobs?
+# num_jobs="1"
+# DEBUILD_OPTS="--debbuildopts -j${num_jobs}"
+
 if [[ $PDEBUILD_ORIGINAL_SOURCE == "true" ]]; then
-	DEBUILD_OPTS="--debbuildopts -sa"
+	  DEBUILD_OPTS="--debbuildopts -sa ${DEBUILD_OPTS}"
 fi
 
 
