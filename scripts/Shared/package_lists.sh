@@ -176,6 +176,7 @@ prawnos_armhf_debs_prebuilt_download=(
 # on arm64 devices
 prawnos_arm64_debs_prebuilt_download=(
     prawnos-gru-config
+    tor-browser
 )
 
 # ====================================== END Package Lists =======================================
