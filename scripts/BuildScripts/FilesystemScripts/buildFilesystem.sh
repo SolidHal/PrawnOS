@@ -111,6 +111,9 @@ cleanup() {
   rmdir $outmnt > /dev/null 2>&1
   losetup -d $outdev > /dev/null 2>&1
 
+  # try to unmount the chroot apt cache
+  umount $outmnt/chroot-apt-cache > /dev/null 2>&1
+
   #delete the base file, we didn't complete our work
   rm -rf $BASE
   echo "FILESYSTEM BUILD FAILED"
@@ -324,7 +327,7 @@ rm -rf $install_dir/resources/prawnos-local-apt-repo
 mkdir $install_dir/resources/prawnos-local-apt-repo
 cp $PRAWNOS_BUILD/prawnos-local-apt-repo/*.deb $install_dir/resources/prawnos-local-apt-repo/
 rm -f $install_dir/resources/prawnos-local-apt-repo/Packages
-chroot $outmnt bash -c "apt-ftparchive packages ${install_dir_direct}/resources/prawnos-local-apt-repo > ${install_dir_direct}/resources/prawnos-local-apt-repo/Packages"
+chroot $outmnt bash -c "cd ${install_dir_direct}/resources/prawnos-local-apt-repo && apt-ftparchive packages . > ${install_dir_direct}/resources/prawnos-local-apt-repo/Packages"
 # put it at the top of sources.list so it gets used over the remote repos and the cache repo
 echo "deb [trusted=yes] file:${install_dir_direct}/resources/prawnos-local-apt-repo/ ./" > $outmnt/etc/apt/sources.list.new
 cat $outmnt/etc/apt/sources.list >> $outmnt/etc/apt/sources.list.new
