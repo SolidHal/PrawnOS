@@ -105,6 +105,11 @@ device_model=$(get_device)
 #     DEBIAN_FRONTEND=noninteractive apt install -y prawnos-gru-config
 # fi
 
+if [[ $(uname -m) == "aarch64" ]]
+then
+    # we only build tor for aarch64 aka arm64, sorry armhf
+    DEBIAN_FRONTEND=noninteractive apt install -y tor-browser
+fi
 
 # remove some packages that we don't actually want.
 #TODO: determine what packages recommends are bringing these in
@@ -123,6 +128,7 @@ then
 
 
 fi
+
 
 clean_up_local_apt_repo
 
