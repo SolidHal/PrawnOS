@@ -66,13 +66,14 @@ ask_set_time() {
         read -r -p "Is that correct? [Y/n]" time_prompt
         case $time_prompt in
             [Yy]* )
-                set_time
                 break
                 ;;
             [Nn]* )
+                set_time
                 break
                 ;;
             * ) echo "Please answer y or n";;
+	esac
     done
     dmesg -E
 }
