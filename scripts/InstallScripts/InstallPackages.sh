@@ -58,6 +58,25 @@ set_time() {
     echo "set the time and date to $udate $utime"
 }
 
+ask_set_time() {
+    dmesg -D
+    echo "The system thinks the time is:"
+    date
+    while true; do
+        read -r -p "Is that correct? [Y/n]" time_prompt
+        case $time_prompt in
+            [Yy]* )
+                set_time
+                break
+                ;;
+            [Nn]* )
+                break
+                ;;
+            * ) echo "Please answer y or n";;
+    done
+    dmesg -E
+}
+
 clean_up_local_apt_repo() {
     echo "removing the local apt repo"
     sed -e '/prawnos-local-apt-repo/ s/^#*/#/' -i /etc/apt/sources.list
@@ -80,7 +99,7 @@ DE=gnome
 
 #Set the timezone and time
 dpkg-reconfigure tzdata
-set_time
+ask_set_time
 
 ## GENERAL CONFIG
 #Install shared packages
